@@ -42,7 +42,7 @@
 					"JSXEmptyExpression",
 					"JSXSpreadChild"
 				],
-				"ignoreComments": false
+				"ignoreComments": true
 			}
 		]
 	},

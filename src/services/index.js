@@ -1,3 +1,11 @@
+const groups = require('./groups');
+const documents = require('./documents');
+const lessons = require('./lessons');
 
+module.exports = function setup() {
+	const app = this;
 
-module.exports = {};
+	app.configure(groups);
+	app.configure(documents);
+	app.configure(lessons);
+};

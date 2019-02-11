@@ -4,18 +4,43 @@ const configuration = require('@feathersjs/configuration');
 const favicon = require('serve-favicon');
 const path = require('path');
 const bodyParser = require('body-parser');
+const logger = require('winston');
+
+const hooks = require('./hooks/');
+const database = require('./database/');
+const services = require('./services/');
+const middleware = require('./middleware');
+
+const defaultHeaders = require('./middleware/defaultHeaders');
+const handleResponseType = require('./middleware/handleResponseType');
 
 const conf = configuration();
 
 const app = express(feathers())
-	.configure(conf);
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.configure(express.rest());
-app.use(express.errorHandler());
+	.configure(conf)
+	.use(express.json())
+	.use(express.urlencoded({ extended: true }))
+	.configure(express.rest(handleResponseType)) // todo "handleResponseType" test it, maybe no effect see express.json()
 
-app.use('/', express.static('public'));
-app.use(favicon(path.join('public', 'favicon.ico')));
+	.use('/', express.static('public'))
+	.use(favicon(path.join('public', 'favicon.ico')))
+
+	// .use(defaultHeaders) // todo test it, position,  if we need it?
+
+	.configure(database)
+	.configure(middleware)
+	.configure(services)
+	.hooks(hooks)
+	.use(express.errorHandler({
+		// force format html error to json
+		html: (error, req, res, next) => {
+			res.json(error);
+		},
+	}));
+/*
+app.on('unhandledRejection', (reason, p) => {
+	logger.info('Unhandled Rejection at: Promise ', p, ' reason: ', reason);
+});
+*/
 
 module.exports = app;
-// Start the server on port 3030

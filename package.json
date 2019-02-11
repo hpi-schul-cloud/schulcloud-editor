@@ -5,6 +5,7 @@
   "main": "src/",
   "scripts": {
     "start": "node src/",
+    "startd": "nodemon --inspect=4002 src/",
     "test": "mocha test/"
   },
   "repository": {
@@ -27,6 +28,7 @@
     "@feathersjs/feathers": "^3.3.1",
     "body-parser": "^1.18.3",
     "cors": "^2.8.5",
+    "feathers-mongoose": "^7.3.1",
     "mongoose": "^5.4.10",
     "serve-favicon": "^2.5.0",
     "winston": "^3.2.1"
