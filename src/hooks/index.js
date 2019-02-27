@@ -1,5 +1,16 @@
-const { GeneralError } = require('@feathersjs/errors');
+const { GeneralError, Forbidden } = require('@feathersjs/errors');
 const logger = require('winston');
+
+const addUserId = (context) => {
+	const userId = (context.params.headers || {}).authorization;
+	if (userId) {
+		// todo validate mongoose id
+		context.params.user = userId.toString();
+	} else {
+		throw new Forbidden('Can not resolve user information.');
+	}
+	return context;
+};
 
 /**
  * For errors without error code create server error with code 500.
@@ -23,7 +34,7 @@ const errorHandler = (ctx) => {
 };
 
 exports.before = {
-	all: [],
+	all: [addUserId],
 	find: [],
 	get: [],
 	create: [],
