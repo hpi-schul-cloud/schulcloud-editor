@@ -1,15 +1,7 @@
 /* eslint-disable no-param-reassign */
 const { BadRequest } = require('@feathersjs/errors');
 
-const restricted = (context) => {
-	context.params.query.users = context.params.user;
-	return context;
-};
-
-const restrictedToOwner = (context) => {
-	context.params.query.owner = context.params.user;
-	return context;
-};
+const { restricted } = require('../../../hooks/hooks');
 
 const created = (context) => {
 	const users = context.data.users || [];
@@ -33,12 +25,12 @@ const created = (context) => {
 
 exports.before = {
 	all: [],
-	find: [restricted],
-	get: [restricted],
+	find: [restricted('users')],
+	get: [restricted('users')],
 	create: [created],
-	update: [restrictedToOwner],
-	patch: [restrictedToOwner],
-	remove: [restrictedToOwner],
+	update: [restricted('owner')],
+	patch: [restricted('owner')],
+	remove: [restricted('owner')],
 };
 
 exports.after = {

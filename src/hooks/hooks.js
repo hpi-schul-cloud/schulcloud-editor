@@ -1,3 +1,4 @@
+/* eslint-disable no-param-reassign */
 const { BadRequest, NotFound } = require('@feathersjs/errors');
 
 const objectPathResolver = (context, path) => {
@@ -47,3 +48,24 @@ const exist = (path, keys, executer = throwNotFoundIfTrue) => (context) => {
 };
 
 exports.exist = exist;
+
+const restricted = (restricts = 'owner') => (context) => {
+	const { user } = context.params;
+	if (typeof restricts === 'string') {
+		context.params.query[restricts] = user;
+	} else if (Array.isArray(restricts)) {
+		if (!context.params.query.$or) {
+			context.params.query.$or = [];
+		}
+		restricts.forEach((key) => {
+			context.params.query.$or.push({ [key]: user });
+		});
+	}
+	return context;
+};
+
+module.exports = {
+	exist,
+	filter,
+	restricted,
+};

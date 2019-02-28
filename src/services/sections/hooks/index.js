@@ -1,4 +1,4 @@
-const { exist } = require('../../../hooks/helpers.js');
+const { exist } = require('../../../hooks/hooks.js');
 
 
 exports.before = {

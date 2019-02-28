@@ -1,5 +1,4 @@
-const { exist } = require('../../../hooks/helpers.js');
-
+const { restricted, exist } = require('../../../hooks/hooks');
 
 exports.before = {
 	all: [],
