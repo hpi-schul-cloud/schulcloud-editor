@@ -1,25 +1,17 @@
 /* eslint-disable no-param-reassign */
 const { BadRequest } = require('@feathersjs/errors');
 
-const { restricted, block } = require('../../../global/hooks');
+const { isArray, addIdIfNotExist } = require('../../../global/collection');
+const { restricted, block, forceUserToOwner } = require('../../../global/hooks');
 
-const created = (context) => {
+const addCurrentUser = (context) => {
 	const users = context.data.users || [];
-	const { user } = context.params;
 
-	if (!Array.isArray(users)) {
+	if (!isArray(users)) {
 		throw new BadRequest('The value data.users must be an Array.');
 	}
 
-	if (!users.includes(user)) {
-		users.push(user);
-	}
-
-	context.data = {
-		users,
-		owner: user,
-	};
-
+	context.data.users = addIdIfNotExist(users, context.params.user);
 	return context;
 };
 
@@ -27,7 +19,7 @@ exports.before = {
 	all: [],
 	find: [restricted('users')],
 	get: [restricted('users')],
-	create: [created],
+	create: [forceUserToOwner, addCurrentUser],
 	update: [block],
 	patch: [restricted('users')],
 	remove: [restricted('owner')],

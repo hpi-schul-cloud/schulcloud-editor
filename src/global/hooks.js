@@ -56,8 +56,24 @@ const restricted = (restricts = 'owner') => (context) => {
 	return context;
 };
 
-const block = (context) => {
+const block = () => {
 	throw new MethodNotAllowed();
+};
+
+const populate = paths => (context) => {
+	if (!context.params.query.$populate) {
+		context.params.query.$populate = [];
+	}
+	forceArray(paths).forEach((path) => {
+		context.params.query.$populate.push({ path });
+	});
+
+	return context;
+};
+
+const forceUserToOwner = (context) => {
+	context.data.owner = context.params.user;
+	return context;
 };
 
 module.exports = {
@@ -66,4 +82,6 @@ module.exports = {
 	restricted,
 	objectPathResolver,
 	block,
+	populate,
+	forceUserToOwner,
 };

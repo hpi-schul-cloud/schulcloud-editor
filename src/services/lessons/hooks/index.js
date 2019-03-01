@@ -1,7 +1,7 @@
-const { restricted, exist } = require('../../../global/hooks');
+const { restricted, populate } = require('../../../global/hooks');
 
 exports.before = {
-	all: [],
+	all: [restricted(['owner', 'users']), populate('steps.sections')],
 	find: [],
 	get: [],
 	create: [],

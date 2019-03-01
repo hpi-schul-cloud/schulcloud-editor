@@ -1,7 +1,7 @@
 /* eslint-disable no-confusing-arrow */
 /* eslint-disable no-param-reassign */
 const { Forbidden } = require('@feathersjs/errors');
-const { block } = require('../../../global/hooks');
+const { block, populate } = require('../../../global/hooks');
 const { isInGroup } = require('../../../global/collection');
 
 
@@ -11,11 +11,6 @@ const clearData = (context) => {
 
 const recoverData = (context) => {
 	console.log('todo recoverData');
-};
-
-const populateItems = (context) => {
-	context.params.query.$populate = 'items';
-	return context;
 };
 
 const ForEachRestricted = (context) => {
@@ -41,7 +36,7 @@ const ForEachRestricted = (context) => {
 
 
 exports.before = {
-	all: [populateItems],
+	all: [populate('items')],
 	find: [block],
 	get: [],
 	create: [],
