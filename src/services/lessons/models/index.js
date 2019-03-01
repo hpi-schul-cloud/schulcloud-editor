@@ -11,7 +11,7 @@ const stepSchema = new Schema({
 const lessonSchema = new Schema({
 	steps: [{ type: stepSchema }],
 	owner: { type: Schema.Types.ObjectId, ref: 'group', required: true },
-	students: { type: Schema.Types.ObjectId, ref: 'group', default: null },
+	users: { type: Schema.Types.ObjectId, ref: 'group', default: [] },
 }, {
 	timestamps: true,
 });

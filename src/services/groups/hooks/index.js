@@ -1,7 +1,7 @@
 /* eslint-disable no-param-reassign */
 const { BadRequest } = require('@feathersjs/errors');
 
-const { restricted } = require('../../../hooks/hooks');
+const { restricted, block } = require('../../../global/hooks');
 
 const created = (context) => {
 	const users = context.data.users || [];
@@ -28,8 +28,8 @@ exports.before = {
 	find: [restricted('users')],
 	get: [restricted('users')],
 	create: [created],
-	update: [restricted('owner')],
-	patch: [restricted('owner')],
+	update: [block],
+	patch: [restricted('users')],
 	remove: [restricted('owner')],
 };
 

@@ -6,7 +6,7 @@ const path = require('path');
 // const bodyParser = require('body-parser');
 // const logger = require('winston');
 
-const hooks = require('./hooks/');
+const hooks = require('./global/');
 const database = require('./database/');
 const services = require('./services/');
 // const middleware = require('./middleware'); // todo test if it is need
@@ -32,6 +32,10 @@ const app = express(feathers())
 	// .configure(middleware)
 	.use((req, res, next) => {
 		req.feathers.headers = req.headers;
+		console.log({	// later log the information
+			userId: req.headers.authorization,
+			url: req.url,
+		});
 		next();
 	})
 	.configure(services)

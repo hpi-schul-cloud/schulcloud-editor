@@ -1,4 +1,4 @@
-const { restricted, exist } = require('../../../hooks/hooks');
+const { restricted, exist } = require('../../../global/hooks');
 
 exports.before = {
 	all: [],

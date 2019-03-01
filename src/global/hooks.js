@@ -1,5 +1,6 @@
 /* eslint-disable no-param-reassign */
-const { BadRequest, NotFound } = require('@feathersjs/errors');
+const { NotFound, MethodNotAllowed } = require('@feathersjs/errors');
+const { isArray, forceArray } = require('./collection');
 
 const objectPathResolver = (context, path) => {
 	if (path === undefined) {
@@ -12,11 +13,6 @@ const objectPathResolver = (context, path) => {
 	}, context);
 };
 
-const forceArray = keys => Array.isArray(keys) ? keys : [keys];
-exports.forceArray = forceArray;
-
-exports.objectPathResolver = objectPathResolver;
-
 const filter = (path, keys) => (context) => {
 	console.log('todo: filter');
 	if (keys === undefined) {
@@ -26,8 +22,6 @@ const filter = (path, keys) => (context) => {
 	const copy = Object.assign({}, context);
 	return copy;
 };
-
-exports.filter = filter;
 
 const throwNotFoundIfTrue = (context, bool, path, keys) => {
 	if (bool === true) {
@@ -47,13 +41,11 @@ const exist = (path, keys, executer = throwNotFoundIfTrue) => (context) => {
 	return executer(context, isNotFound, path, keys);
 };
 
-exports.exist = exist;
-
 const restricted = (restricts = 'owner') => (context) => {
 	const { user } = context.params;
 	if (typeof restricts === 'string') {
 		context.params.query[restricts] = user;
-	} else if (Array.isArray(restricts)) {
+	} else if (isArray(restricts)) {
 		if (!context.params.query.$or) {
 			context.params.query.$or = [];
 		}
@@ -64,8 +56,14 @@ const restricted = (restricts = 'owner') => (context) => {
 	return context;
 };
 
+const block = (context) => {
+	throw new MethodNotAllowed();
+};
+
 module.exports = {
 	exist,
 	filter,
 	restricted,
+	objectPathResolver,
+	block,
 };
