@@ -20,8 +20,8 @@ const app = express(feathers())
 	.configure(conf)
 	.use(express.json())
 	.use(express.urlencoded({ extended: true }))
-
-	.configure(express.rest(handleResponseType)) // todo "handleResponseType" test it, maybe no effect see express.json()
+	// todo "handleResponseType" test it, maybe no effect see express.json()
+	.configure(express.rest(handleResponseType))
 
 	.use('/', express.static('public'))
 	.use(favicon(path.join('public', 'favicon.ico')))
@@ -35,6 +35,7 @@ const app = express(feathers())
 		console.log({	// later log the information
 			userId: req.headers.authorization,
 			url: req.url,
+			data: req.body,
 		});
 		next();
 	})
@@ -42,6 +43,7 @@ const app = express(feathers())
 	.hooks(hooks)
 	.use(express.errorHandler({
 		// force format html error to json
+		// eslint-disable-next-line no-unused-vars
 		html: (error, req, res, next) => {
 			res.json(error);
 		},

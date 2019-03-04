@@ -9,9 +9,9 @@ const stepSchema = new Schema({
 });
 
 const lessonSchema = new Schema({
-	steps: [{ type: stepSchema }],
+	steps: [{ type: stepSchema, default: [] }],
 	owner: { type: Schema.Types.ObjectId, ref: 'group', required: true },
-	users: { type: Schema.Types.ObjectId, ref: 'group', default: [] },
+	users: { type: Schema.Types.ObjectId, ref: 'group' },
 }, {
 	timestamps: true,
 });

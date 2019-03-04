@@ -56,6 +56,9 @@ const restricted = (restricts = 'owner') => (context) => {
 	return context;
 };
 
+// todo restricted to groups ..populate id?
+
+
 const block = () => {
 	throw new MethodNotAllowed();
 };
@@ -71,8 +74,21 @@ const populate = paths => (context) => {
 	return context;
 };
 
-const forceUserToOwner = (context) => {
+const forceOwner = (context) => {
 	context.data.owner = context.params.user;
+	return context;
+};
+
+/**
+ * This is a helper for developers to log informations.
+ */
+const log = (context) => {
+	const {
+		params, data, path, method, result,
+	} = context;
+	console.log({
+		params, data, path, method, result,
+	});
 	return context;
 };
 
@@ -83,5 +99,6 @@ module.exports = {
 	objectPathResolver,
 	block,
 	populate,
-	forceUserToOwner,
+	forceOwner,
+	log,
 };
