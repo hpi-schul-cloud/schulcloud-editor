@@ -4,25 +4,14 @@ const { Schema } = mongoose;
 
 const stepSchema = new Schema({
 	note: { type: String, default: '' },
-	documents: [{ type: Schema.Types.ObjectId, ref: 'document', required: true }],
+	visible: { type: Boolean, default: true },
+	sections: [{ type: Schema.Types.ObjectId, ref: 'section', required: true }],
 });
 
 const lessonSchema = new Schema({
-	steps: [{ type: stepSchema }],
+	steps: [{ type: stepSchema, default: [] }],
 	owner: { type: Schema.Types.ObjectId, ref: 'group', required: true },
-	students: { type: Schema.Types.ObjectId, ref: 'group', default: null },
-	state: {
-		type: Object,
-		get: (data) => {
-			try {
-				return JSON.parse(data);
-			} catch (err) {
-				return data;
-			}
-		},
-		set: data => JSON.stringify(data),
-		default: {},
-	},
+	users: { type: Schema.Types.ObjectId, ref: 'group' },
 }, {
 	timestamps: true,
 });

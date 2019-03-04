@@ -1,11 +1,12 @@
 {
   "name": "schulcloud-editor",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "MicroService for editor documents.",
   "main": "src/",
   "scripts": {
     "start": "node src/",
-    "startd": "nodemon --inspect=4002 src/",
+    "startd": "nodemon src/",
+	"debug": "nodemon --inspect=4002 src/",
     "test": "mocha test/"
   },
   "repository": {

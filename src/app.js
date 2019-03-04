@@ -3,15 +3,15 @@ const express = require('@feathersjs/express');
 const configuration = require('@feathersjs/configuration');
 const favicon = require('serve-favicon');
 const path = require('path');
-const bodyParser = require('body-parser');
-const logger = require('winston');
+// const bodyParser = require('body-parser');
+// const logger = require('winston');
 
-const hooks = require('./hooks/');
+const hooks = require('./global/');
 const database = require('./database/');
 const services = require('./services/');
-const middleware = require('./middleware');
+// const middleware = require('./middleware'); // todo test if it is need
 
-const defaultHeaders = require('./middleware/defaultHeaders');
+// const defaultHeaders = require('./middleware/defaultHeaders'); @deprecated
 const handleResponseType = require('./middleware/handleResponseType');
 
 const conf = configuration();
@@ -20,7 +20,8 @@ const app = express(feathers())
 	.configure(conf)
 	.use(express.json())
 	.use(express.urlencoded({ extended: true }))
-	.configure(express.rest(handleResponseType)) // todo "handleResponseType" test it, maybe no effect see express.json()
+	// todo "handleResponseType" test it, maybe no effect see express.json()
+	.configure(express.rest(handleResponseType))
 
 	.use('/', express.static('public'))
 	.use(favicon(path.join('public', 'favicon.ico')))
@@ -28,11 +29,21 @@ const app = express(feathers())
 	// .use(defaultHeaders) // todo test it, position,  if we need it?
 
 	.configure(database)
-	.configure(middleware)
+	// .configure(middleware)
+	.use((req, res, next) => {
+		req.feathers.headers = req.headers;
+		console.log({	// later log the information
+			userId: req.headers.authorization,
+			url: req.url,
+			data: req.body,
+		});
+		next();
+	})
 	.configure(services)
 	.hooks(hooks)
 	.use(express.errorHandler({
 		// force format html error to json
+		// eslint-disable-next-line no-unused-vars
 		html: (error, req, res, next) => {
 			res.json(error);
 		},
