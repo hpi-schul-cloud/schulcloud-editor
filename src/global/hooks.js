@@ -87,7 +87,7 @@ const log = (context) => {
 		params, data, path, method, result,
 	} = context;
 	console.log({
-		params, data, path, method, result,
+		params, data, path, method, result, query: params.query,
 	});
 	return context;
 };

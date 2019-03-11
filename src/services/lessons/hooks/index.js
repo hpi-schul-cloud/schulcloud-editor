@@ -1,9 +1,9 @@
 /* eslint-disable no-param-reassign */
-const { BadRequest } = require('@feathersjs/errors');
+const { BadRequest, Forbidden } = require('@feathersjs/errors');
 const {
-	restricted, populate, forceOwner, block, log,
+	forceOwner, block,
 } = require('../../../global/hooks');
-// const { forceArray } = require('../../../global/collection');
+const { includeId } = require('../../../global/collection');
 
 
 /**
@@ -36,24 +36,56 @@ const addNewGroups = async (context) => {
 	return context;
 };
 
+const isMemberOf = (groups, user) => {
+	const isMember = groups.some(group => includeId(group.users, user));
+	if (!isMember) {
+		throw new Forbidden('You are not a member of this lesson');
+	}
+};
+
+const restrictedAfter = (context) => {
+	const { user } = context.params;
+	if (context.result.data) {
+		const groups = [];
+		context.result.data.forEach((lesson) => {
+			groups.push(lesson.users);
+			groups.push(lesson.owner);
+		});
+		isMemberOf(groups, user);
+	} else {
+		const { users, owner } = context.result;
+		isMemberOf([users, owner], user);
+	}
+
+	return context;
+};
+
+const restrictedAfterOwner = (context) => {
+	const { user } = context.params;
+	if (!includeId(context.result.owner.users, user)) {
+		throw new Forbidden('You have not the access to do this.');
+	}
+	return context;
+};
+
 exports.before = {
-	all: [populate(['steps.sections', 'users', 'owners'])],
-	find: [restricted(['owner', 'users'])],
-	get: [restricted(['owner', 'users'])],
+	all: [],	// populate(['steps.sections', 'users', 'owner'])
+	find: [],
+	get: [],	// restricted(['owner', 'users'], 'users'),
 	create: [forceOwner, addNewGroups],
 	update: [block],
-	patch: [restricted('owner')],
-	remove: [restricted('owner')],
+	patch: [],
+	remove: [],
 };
 
 exports.after = {
 	all: [reduceToOwnSection],
-	find: [],
-	get: [],
+	find: [restrictedAfter],
+	get: [restrictedAfter],
 	create: [],
 	update: [],
-	patch: [],
-	remove: [],
+	patch: [restrictedAfterOwner],
+	remove: [restrictedAfterOwner],
 };
 
 exports.error = {

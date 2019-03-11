@@ -1,6 +1,8 @@
 const { GeneralError, Forbidden } = require('@feathersjs/errors');
 const logger = require('winston');
 
+const generalError = new GeneralError('server error');
+
 const addUserId = (context) => {
 	const userId = (context.params.headers || {}).authorization;
 	if (userId) {
@@ -20,17 +22,19 @@ const addUserId = (context) => {
 const errorHandler = (ctx) => {
 	if (ctx.error) {
 		if (!ctx.error.code) {
-			ctx.error = new GeneralError('server error');
+			ctx.error = generalError;
 		}
+
+		logger.warn(ctx.error);
+
 		if (process.env.NODE_ENV === 'production') {
-			logger.warn(ctx.error);
 			ctx.error.stack = null;
 			ctx.error.data = undefined;
 		}
 		return ctx;
 	}
 	logger.warn('Error with no error key is throw. Error logic can not handle it.');
-	throw new GeneralError('server error');
+	throw generalError;
 };
 
 exports.before = {

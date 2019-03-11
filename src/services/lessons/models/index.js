@@ -16,6 +16,17 @@ const lessonSchema = new Schema({
 	timestamps: true,
 });
 
+function autoPopulate(next) {
+	this.populate('steps.sections');
+	this.populate('owner');
+	this.populate('users');
+	next();
+}
+
+lessonSchema
+	.pre('findOne', autoPopulate)
+	.pre('find', autoPopulate);
+
 const lessonModel = mongoose.model('lesson', lessonSchema);
 
 module.exports = {
