@@ -66,7 +66,6 @@ const restrictedAfterOwner = (context) => {
 	return context;
 };
 
-
 const removeEmptySteps = async (context) => {
 	const id = context.result._id;
 	let changes = false;
