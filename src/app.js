@@ -33,6 +33,7 @@ const app = express(feathers())
 	.use((req, res, next) => {
 		req.feathers.headers = req.headers;
 		console.log({	// later log the information
+			timestamp: new Date(),
 			userId: req.headers.authorization,
 			url: req.url,
 			data: req.body,
