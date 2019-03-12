@@ -1,12 +1,12 @@
 const service = require('feathers-mongoose');
 
-const { lessonModel } = require('./models/');
+const { LessonModel } = require('./models/');
 const hooks = require('./hooks/');
 
 module.exports = function setup() {
 	const app = this;
 	const option = {
-		Model: lessonModel,
+		Model: LessonModel,
 		lean: true, // set to false if you want Mongoose documents returned
 		paginate: {
 			default: 50,

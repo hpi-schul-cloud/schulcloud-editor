@@ -20,31 +20,21 @@ const permissionGroupSchema = new Schema({
 });
 
 const sectionSchema = new Schema({
-	lesson: { type: Schema.Types.ObjectId, ref: 'lesson', default: null },
+	lesson: { type: Schema.Types.ObjectId, ref: 'lesson', required: true },
 	owner: { type: Schema.Types.ObjectId, ref: 'group', required: true },
-	parent: { type: Schema.Types.ObjectId, ref: 'group', default: null },
+	parent: { type: Schema.Types.ObjectId, ref: 'section', default: null },
 	permissions: [{ type: permissionGroupSchema }],
-	state: {
-		type: Object,
-	/*	get: (data) => {	// replace if we use Objects
-			try {
-				return JSON.parse(data);
-			} catch (err) {
-				return data;
-			}
-		},
-		set: data => JSON.stringify(data), */
-		default: {},
-	},
+	state: { type: Object, default: {} },
 	flag: { type: String, enum: ['isFromStudent', 'isTemplate'], default: 'isTemplate' },
 }, {
 	timestamps: true,
+	minimize: false,
 });
 
-const sectionModel = mongoose.model('section', sectionSchema);
+const SectionModel = mongoose.model('section', sectionSchema);
 
 module.exports = {
-	sectionModel,
+	SectionModel,
 	sectionSchema,
 	permissionGroupSchema,
 	permissionSchema,

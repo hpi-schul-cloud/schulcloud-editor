@@ -11,9 +11,9 @@ const groupSchema = new Schema({
 	timestamps: true,
 });
 
-const groupModel = mongoose.model('group', groupSchema);
+const GroupModel = mongoose.model('group', groupSchema);
 
 module.exports = {
-	groupModel,
+	GroupModel,
 	groupSchema,
 };

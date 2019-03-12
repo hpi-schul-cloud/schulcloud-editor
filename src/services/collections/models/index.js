@@ -12,9 +12,9 @@ const collectionSchema = new Schema({
 	timestamps: true,
 });
 
-const collectionModel = mongoose.model('collection', collectionSchema);
+const CollectionModel = mongoose.model('collection', collectionSchema);
 
 module.exports = {
-	collectionModel,
+	CollectionModel,
 	collectionSchema,
 };

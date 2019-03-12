@@ -1,12 +1,12 @@
 const service = require('feathers-mongoose');
 
-const { sectionModel } = require('./models/');
+const { SectionModel } = require('./models/');
 const hooks = require('./hooks/');
 
 module.exports = function setup() {
 	const app = this;
 	const option = {
-		Model: sectionModel,
+		Model: SectionModel,
 		lean: true,
 		paginate: {
 			default: 50,
