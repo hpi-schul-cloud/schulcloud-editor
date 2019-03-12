@@ -1,10 +1,8 @@
 /* eslint-disable no-param-reassign */
 const { BadRequest, Forbidden } = require('@feathersjs/errors');
-const {
-	forceOwner, block,
-} = require('../../../global/hooks');
+const { forceOwner, block } = require('../../../global/hooks');
 const { includeId } = require('../../../global/collection');
-
+const { LessonModel } = require('../../models');
 
 /**
  * Is enable later for more complex usecases if it needed.
@@ -13,7 +11,7 @@ const { includeId } = require('../../../global/collection');
 const reduceToOwnSection = (context) => {
 	context.result.steps = context.result.steps.map((step) => {
 		// eslint-disable-next-line prefer-destructuring
-		step.sections = step.sections[0];	// array to own element
+		step.sections = step.sections[0] || null;	// array to own element
 		return step;
 	});
 	return context;
@@ -68,6 +66,33 @@ const restrictedAfterOwner = (context) => {
 	return context;
 };
 
+
+const removeEmptySteps = async (context) => {
+	const id = context.result._id;
+	let changes = false;
+	// set emptys steps to undefined and detect changes.
+	let steps = context.result.steps.map((step) => {
+		if (step.sections === null || (step.sections || []).length <= 0) {
+			changes = true;
+			return undefined;
+		}
+		return step;
+	});
+	// If any changes is detected, then remove undefineds and update Lesson.
+	// The return value do not wait if update is finish.
+	if (changes === true) {
+		steps = steps.filter(step => step);
+		LessonModel.findByIdAndUpdate(id, { $set: { steps } }).exec((err) => {
+			if (err) {
+				throw new Error('Can not patch lesson steps', err);
+			}
+		});
+		context.result.steps = steps;
+	}
+
+	return context;
+};
+
 exports.before = {
 	all: [],	// populate(['steps.sections', 'users', 'owner'])
 	find: [],
@@ -84,7 +109,7 @@ exports.after = {
 	get: [restrictedAfter],
 	create: [],
 	update: [],
-	patch: [restrictedAfterOwner],
+	patch: [restrictedAfterOwner, removeEmptySteps],
 	remove: [restrictedAfterOwner],
 };
 
