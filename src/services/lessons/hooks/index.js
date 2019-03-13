@@ -2,7 +2,7 @@
 const { BadRequest, Forbidden } = require('@feathersjs/errors');
 const { forceOwner, block } = require('../../../global/hooks');
 const { includeId } = require('../../../global/collection');
-const { LessonModel } = require('../../models');
+const { LessonModel } = require('../models');
 
 /**
  * Is enable later for more complex usecases if it needed.
@@ -34,13 +34,19 @@ const addNewGroups = async (context) => {
 	return context;
 };
 
-const isMemberOf = (groups, user) => {
+const isMemberOf = (groups, user, err = false) => {
 	const isMember = groups.some(group => includeId(group.users, user));
-	if (!isMember) {
-		throw new Forbidden('You are not a member of this lesson');
+	if (!isMember && err === true) {
+		throw new Forbidden('You have no permission to access this lesson.');
 	}
+	return isMember;
 };
 
+const getLesson = id => LessonModel.findById(id).lean().exec();
+
+/**
+ * Can only save use in get and find operations.
+ */
 const restrictedAfter = (context) => {
 	const { user } = context.params;
 	if (context.result.data) {
@@ -49,20 +55,32 @@ const restrictedAfter = (context) => {
 			groups.push(lesson.users);
 			groups.push(lesson.owner);
 		});
-		isMemberOf(groups, user);
+		isMemberOf(groups, user, true);
 	} else {
 		const { users, owner } = context.result;
-		isMemberOf([users, owner], user);
+		isMemberOf([users, owner], user, true);
 	}
 
 	return context;
 };
 
-const restrictedAfterOwner = (context) => {
+/**
+ * If not visible remove steps for not owners
+ */
+const removeSteps = (context) => {
 	const { user } = context.params;
-	if (!includeId(context.result.owner.users, user)) {
-		throw new Forbidden('You have not the access to do this.');
+	const { owner, steps } = context.result;
+	const isMember = isMemberOf([owner], user);
+	if (isMember === false) {
+		context.result.steps = steps.filter(step => step.visible === true);
 	}
+	return context;
+};
+
+const restrictedOwner = async (context) => {
+	const { user } = context.params;
+	const { owner } = await getLesson(context.id);
+	isMemberOf([owner], user, true);
 	return context;
 };
 
@@ -98,18 +116,18 @@ exports.before = {
 	get: [],	// restricted(['owner', 'users'], 'users'),
 	create: [forceOwner, addNewGroups],
 	update: [block],
-	patch: [],
-	remove: [],
+	patch: [restrictedOwner],
+	remove: [restrictedOwner],
 };
 
 exports.after = {
 	all: [reduceToOwnSection],
 	find: [restrictedAfter],
-	get: [restrictedAfter],
+	get: [restrictedAfter, removeSteps],
 	create: [],
 	update: [],
-	patch: [restrictedAfterOwner, removeEmptySteps],
-	remove: [restrictedAfterOwner],
+	patch: [removeEmptySteps],
+	remove: [],
 };
 
 exports.error = {

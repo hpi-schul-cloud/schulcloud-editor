@@ -2,6 +2,11 @@
 const { getPermissions, patchPermissions } = require('../helpers/');
 const { sameId } = require('../../../global/collection');
 
+/**
+ * The getPermissions() function is save to use, it pass the params over section hooks.
+ * Also you must not add additional permission hooks, for this class.
+ * But be carfull if you remove getPermissions() in any method.
+ */
 class Permission {
 	constructor(options) {
 		this.options = options || {};

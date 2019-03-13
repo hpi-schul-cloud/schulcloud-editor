@@ -2,8 +2,6 @@
 const { GeneralError, Forbidden } = require('@feathersjs/errors');
 // const logger = require('winston');
 
-const generalError = new GeneralError('server error');
-
 const addUserId = (context) => {
 	const userId = (context.params.headers || {}).authorization;
 	if (userId) {
@@ -21,9 +19,11 @@ const addUserId = (context) => {
  * @param {context} ctx
  */
 const errorHandler = (ctx) => {
-	if (ctx.error) {
+	if (ctx.error) {	
+		if (ctx.error.hook) {
+			delete ctx.error.hook;
+		}
 		console.log(ctx.error);
-
 		if (!ctx.error.code) {
 			ctx.error = new GeneralError('server error', ctx.error);
 		}
