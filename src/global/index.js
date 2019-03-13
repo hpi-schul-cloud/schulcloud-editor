@@ -2,6 +2,8 @@
 const { GeneralError, Forbidden } = require('@feathersjs/errors');
 // const logger = require('winston');
 
+const generalError = new GeneralError('server error');
+
 const addUserId = (context) => {
 	const userId = (context.params.headers || {}).authorization;
 	if (userId) {
