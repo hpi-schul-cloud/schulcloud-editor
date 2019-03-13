@@ -8,15 +8,11 @@ const { Schema } = mongoose;
  * @param create Can edit a section structure. Example: teacher can create and edit new answers.
  * @example {read:false, write:true, create:true} will allow you create new answers AND edit this answers. Read is override by the higher permissions.
  */
-const permissionSchema = new Schema({
+const permissionGroupSchema = new Schema({
+	group: { type: Schema.Types.ObjectId, ref: 'group', required: true },
 	read: { type: Boolean, default: false },
 	write: { type: Boolean, default: false },
 	create: { type: Boolean, default: false },
-});
-
-const permissionGroupSchema = new Schema({
-	group: { type: Schema.Types.ObjectId, ref: 'group', required: true },
-	permission: { type: permissionSchema },
 });
 
 const sectionSchema = new Schema({
@@ -31,11 +27,11 @@ const sectionSchema = new Schema({
 	minimize: false,
 });
 
+
 const SectionModel = mongoose.model('section', sectionSchema);
 
 module.exports = {
 	SectionModel,
 	sectionSchema,
 	permissionGroupSchema,
-	permissionSchema,
 };

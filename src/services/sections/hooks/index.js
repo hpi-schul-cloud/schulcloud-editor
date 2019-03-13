@@ -10,7 +10,7 @@ const {
 	getLesson,
 	patchLesson,
 	removeSubSections,
-} = require('./helper');
+} = require('../helpers/');
 
 
 const fetchLessonData = async (context) => {

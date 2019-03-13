@@ -2,6 +2,9 @@ const service = require('feathers-mongoose');
 
 const { SectionModel } = require('./models/');
 const hooks = require('./hooks/');
+const permissionHooks = require('./hooks/permissionHooks');
+const { Permission } = require('./services');
+
 
 module.exports = function setup() {
 	const app = this;
@@ -16,4 +19,9 @@ module.exports = function setup() {
 	app.use('sections', service(option));
 	const sectionsService = app.service('sections');
 	sectionsService.hooks(hooks);
+
+	const permissionRoute = 'sections/:sectionId/permissions';
+	app.use(permissionRoute, new Permission());
+	const permissionsService = app.service(permissionRoute);
+	permissionsService.hooks(permissionHooks);
 };
