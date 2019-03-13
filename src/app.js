@@ -37,6 +37,9 @@ const app = express(feathers())
 			userId: req.headers.authorization,
 			url: req.url,
 			data: req.body,
+			method: req.method,
+			ip: req.ip,
+			ips: req.ips,
 		});
 		next();
 	})
