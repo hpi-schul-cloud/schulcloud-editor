@@ -1,8 +1,8 @@
 /* eslint-disable no-param-reassign */
-const { BadRequest, Forbidden } = require('@feathersjs/errors');
+const { BadRequest } = require('@feathersjs/errors');
 const { forceOwner, block } = require('../../../global/hooks');
-const { includeId } = require('../../../global/collection');
-const { LessonModel } = require('../models');
+const { isMemberOf, getSessionUser, isInGroup } = require('../../../global/collection');
+const { LessonModel, getLesson } = require('../../models');
 
 /**
  * Is enable later for more complex usecases if it needed.
@@ -34,21 +34,11 @@ const addNewGroups = async (context) => {
 	return context;
 };
 
-const isMemberOf = (groups, user, err = false) => {
-	const isMember = groups.some(group => includeId(group.users, user));
-	if (!isMember && err === true) {
-		throw new Forbidden('You have no permission to access this lesson.');
-	}
-	return isMember;
-};
-
-const getLesson = id => LessonModel.findById(id).lean().exec();
-
 /**
  * Can only save use in get and find operations.
  */
 const restrictedAfter = (context) => {
-	const { user } = context.params;
+	const user = getSessionUser(context);
 	if (context.result.data) {
 		const groups = [];
 		context.result.data.forEach((lesson) => {
@@ -68,9 +58,9 @@ const restrictedAfter = (context) => {
  * If not visible remove steps for not owners
  */
 const removeSteps = (context) => {
-	const { user } = context.params;
+	const user = getSessionUser(context);
 	const { owner, steps } = context.result;
-	const isMember = isMemberOf([owner], user);
+	const isMember = isInGroup(owner, user);
 	if (isMember === false) {
 		context.result.steps = steps.filter(step => step.visible === true);
 	}
@@ -78,7 +68,7 @@ const removeSteps = (context) => {
 };
 
 const restrictedOwner = async (context) => {
-	const { user } = context.params;
+	const user = getSessionUser(context);
 	const { owner } = await getLesson(context.id);
 	isMemberOf([owner], user, true);
 	return context;

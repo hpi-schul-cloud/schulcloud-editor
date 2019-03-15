@@ -2,7 +2,7 @@
 /* eslint-disable no-param-reassign */
 const { Forbidden } = require('@feathersjs/errors');
 const { block, populate } = require('../../../global/hooks');
-const { isInGroup } = require('../../../global/collection');
+const { isInGroup, getSessionUser } = require('../../../global/collection');
 
 
 const clearData = (context) => {
@@ -15,7 +15,7 @@ const recoverData = (context) => {
 
 const ForEachRestricted = (context) => {
 	const { items } = context.result;
-	const { user } = context.params;
+	const user = getSessionUser(context);
 
 	let bool = true;
 	items.forEach((e) => {

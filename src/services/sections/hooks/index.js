@@ -1,9 +1,11 @@
 /* eslint-disable no-param-reassign */
-const { BadRequest } = require('@feathersjs/errors');
+const { BadRequest, Forbidden } = require('@feathersjs/errors');
 
 const { block } = require('../../../global/hooks.js');
-const { StepModel } = require('../../models');
-const { sameId, forceArray } = require('../../../global/collection');
+const { StepModel, getSection } = require('../../models');
+const {
+	sameId, forceArray, isInGroup, getSessionUser,
+} = require('../../../global/collection');
 const {
 	subsection,
 	template,
@@ -17,7 +19,7 @@ const fetchLessonData = async (context) => {
 	const { parent, owner, lesson } = context.data;
 	if (parent && owner && lesson) {
 		return subsection(context, lesson, parent, owner);
-	// eslint-disable-next-line no-else-return
+		// eslint-disable-next-line no-else-return
 	} else if (!parent && !owner && lesson) {
 		return template(context, lesson);
 	}
@@ -69,14 +71,45 @@ const removeChilds = async (context) => {
 	return context;
 };
 
+const restrictedOwner = async (context) => {
+	const user = getSessionUser(context);
+	const { owner } = await getSection(context.id);
+	if (!isInGroup(owner, user)) {
+		throw new Forbidden('You have no permission to access this.');
+	}
+	return context;
+};
+
+const restricted = (permission = 'read') => async (context) => {
+	const hasPermission = p => (permission === 'read' && p.read === true) || p.write === true || p.create === true;
+
+	const user = getSessionUser(context);
+	const { owner, permissions } = await getSection(context.id);
+	if (isInGroup(owner, user)) {
+		return context;
+	}
+	for (let i = 0; i < permissions.length; i += 1) {
+		const p = permissions[i];
+		if (isInGroup(p.group, user) && hasPermission(p)) {
+			return context;
+		}
+	}
+	throw new Forbidden('You have no permission to access this.');
+};
+
+const restrictedStateMutation = (context) => {
+	console.log('todo state mutations');
+	return context;
+};
+
 exports.before = {
 	all: [],
-	find: [],
-	get: [],
+	find: [restricted('read')],
+	get: [restricted('read')],
 	create: [fetchLessonData],
 	update: [block],
-	patch: [],
-	remove: [],
+	patch: [restricted('write'), restrictedStateMutation],
+	remove: [restrictedOwner],
 };
 
 exports.after = {

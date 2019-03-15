@@ -1,11 +1,26 @@
 /* eslint-disable no-nested-ternary */
 /* eslint-disable no-param-reassign */
 
-const { addIdIfNotExist } = require('../../../global/collection');
-const { restricted, block, forceOwner } = require('../../../global/hooks');
+const { addIdIfNotExist, getSessionUser } = require('../../../global/collection');
+const { block, forceOwner } = require('../../../global/hooks');
 
 const addCurrentUser = (context) => {
 	context.data.users = addIdIfNotExist(context.data.users, context.params.user);
+	return context;
+};
+
+const restricted = (restricts = 'owner') => (context) => {
+	const user = getSessionUser(context);
+//	if (typeof restricts === 'string') {
+		context.params.query[restricts] = user;
+/*	} else if (isArray(restricts)) {
+		if (!context.params.query.$or) {
+			context.params.query.$or = [];
+		}
+		restricts.forEach((key) => {
+			context.params.query.$or.push({ [key]: user });
+		});
+	} */
 	return context;
 };
 
