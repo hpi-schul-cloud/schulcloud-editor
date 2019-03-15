@@ -1,6 +1,6 @@
 /* eslint-disable no-param-reassign */
 const { NotFound, MethodNotAllowed } = require('@feathersjs/errors');
-const { isArray, forceArray } = require('./collection');
+const { forceArray } = require('./collection');
 
 const objectPathResolver = (context, path) => {
 	if (path === undefined) {

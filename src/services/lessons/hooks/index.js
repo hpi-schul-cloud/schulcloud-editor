@@ -1,7 +1,9 @@
 /* eslint-disable no-param-reassign */
 const { BadRequest } = require('@feathersjs/errors');
 const { forceOwner, block } = require('../../../global/hooks');
-const { isMemberOf, getSessionUser, isInGroup } = require('../../../global/collection');
+const {
+	isMemberOf, getSessionUser, isInGroup, createId,
+} = require('../../../global/collection');
 const { LessonModel, getLesson } = require('../../models');
 
 /**
@@ -17,10 +19,19 @@ const reduceToOwnSection = (context) => {
 	return context;
 };
 
+const addLessonId = (context) => {
+	context.data._id = createId();
+	return context;
+};
+
 const addNewGroups = async (context) => {
+	const { _id } = context.data;
+	if (!_id) {
+		throw new BadRequest('Lesson id is required');
+	}
 	const createGroup = (key) => {
 		const users = context.data[key];
-		return context.app.service('groups').create({ users }, context.params)
+		return context.app.service('groups').create({ users, lesson: _id }, context.params)
 			.then(group => group._id)
 			.catch((err) => {
 				throw new BadRequest(`Can not create group ${key} for a new lesson.`, err);
@@ -104,7 +115,7 @@ exports.before = {
 	all: [],	// populate(['steps.sections', 'users', 'owner'])
 	find: [],
 	get: [],	// restricted(['owner', 'users'], 'users'),
-	create: [forceOwner, addNewGroups],
+	create: [addLessonId, forceOwner, addNewGroups],
 	update: [block],
 	patch: [restrictedOwner],
 	remove: [restrictedOwner],

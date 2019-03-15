@@ -2,6 +2,7 @@
 /* eslint-disable no-confusing-arrow */
 /* basic operations */
 const { Forbidden } = require('@feathersjs/errors');
+const mongoose = require('mongoose');
 
 const isObject = e => e !== undefined && typeof e === 'object';
 const isString = e => typeof e === 'string';
@@ -9,6 +10,7 @@ const isArray = e => Array.isArray(e);
 const forceArray = (keys = []) => isArray(keys) ? keys : [keys];
 
 /* bson id operations */
+const createId = () => mongoose.Types.ObjectId();
 const bson = e => e.toString();
 const sameId = (e1, e2) => bson(e1) === bson(e2);
 const includeId = (array, e2) => array.some(e1 => sameId(e1, e2));
@@ -52,4 +54,5 @@ module.exports = {
 	addIdIfNotExist,
 	isMemberOf,
 	getSessionUser,
+	createId,
 };
