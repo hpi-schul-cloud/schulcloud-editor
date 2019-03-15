@@ -41,20 +41,6 @@ const exist = (path, keys, executer = throwNotFoundIfTrue) => (context) => {
 	return executer(context, isNotFound, path, keys);
 };
 
-const restricted = (restricts = 'owner') => (context) => {
-	const { user } = context.params;
-	if (typeof restricts === 'string') {
-		context.params.query[restricts] = user;
-	} else if (isArray(restricts)) {
-		if (!context.params.query.$or) {
-			context.params.query.$or = [];
-		}
-		restricts.forEach((key) => {
-			context.params.query.$or.push({ [key]: user });
-		});
-	}
-	return context;
-};
 
 // todo restricted to groups ..populate id?
 
@@ -79,26 +65,11 @@ const forceOwner = (context) => {
 	return context;
 };
 
-/**
- * This is a helper for developers to log informations.
- */
-const log = (context) => {
-	const {
-		params, data, path, method, result,
-	} = context;
-	console.log({
-		params, data, path, method, result, query: params.query,
-	});
-	return context;
-};
-
 module.exports = {
 	exist,
 	filter,
-	restricted,
 	objectPathResolver,
 	block,
 	populate,
 	forceOwner,
-	log,
 };

@@ -1,10 +1,8 @@
 /* eslint-disable no-param-reassign */
-const { BadRequest, Forbidden } = require('@feathersjs/errors');
-const {
-	forceOwner, block,
-} = require('../../../global/hooks');
-const { includeId } = require('../../../global/collection');
-
+const { BadRequest } = require('@feathersjs/errors');
+const { forceOwner, block } = require('../../../global/hooks');
+const { isMemberOf, getSessionUser, isInGroup } = require('../../../global/collection');
+const { LessonModel, getLesson } = require('../../models');
 
 /**
  * Is enable later for more complex usecases if it needed.
@@ -13,7 +11,7 @@ const { includeId } = require('../../../global/collection');
 const reduceToOwnSection = (context) => {
 	context.result.steps = context.result.steps.map((step) => {
 		// eslint-disable-next-line prefer-destructuring
-		step.sections = step.sections[0];	// array to own element
+		step.sections = step.sections[0] || null;	// array to own element
 		return step;
 	});
 	return context;
@@ -36,35 +34,69 @@ const addNewGroups = async (context) => {
 	return context;
 };
 
-const isMemberOf = (groups, user) => {
-	const isMember = groups.some(group => includeId(group.users, user));
-	if (!isMember) {
-		throw new Forbidden('You are not a member of this lesson');
-	}
-};
-
+/**
+ * Can only save use in get and find operations.
+ */
 const restrictedAfter = (context) => {
-	const { user } = context.params;
+	const user = getSessionUser(context);
 	if (context.result.data) {
 		const groups = [];
 		context.result.data.forEach((lesson) => {
 			groups.push(lesson.users);
 			groups.push(lesson.owner);
 		});
-		isMemberOf(groups, user);
+		isMemberOf(groups, user, true);
 	} else {
 		const { users, owner } = context.result;
-		isMemberOf([users, owner], user);
+		isMemberOf([users, owner], user, true);
 	}
 
 	return context;
 };
 
-const restrictedAfterOwner = (context) => {
-	const { user } = context.params;
-	if (!includeId(context.result.owner.users, user)) {
-		throw new Forbidden('You have not the access to do this.');
+/**
+ * If not visible remove steps for not owners
+ */
+const removeSteps = (context) => {
+	const user = getSessionUser(context);
+	const { owner, steps } = context.result;
+	const isMember = isInGroup(owner, user);
+	if (isMember === false) {
+		context.result.steps = steps.filter(step => step.visible === true);
 	}
+	return context;
+};
+
+const restrictedOwner = async (context) => {
+	const user = getSessionUser(context);
+	const { owner } = await getLesson(context.id);
+	isMemberOf([owner], user, true);
+	return context;
+};
+
+const removeEmptySteps = async (context) => {
+	const id = context.result._id;
+	let changes = false;
+	// set emptys steps to undefined and detect changes.
+	let steps = context.result.steps.map((step) => {
+		if (step.sections === null || (step.sections || []).length <= 0) {
+			changes = true;
+			return undefined;
+		}
+		return step;
+	});
+	// If any changes is detected, then remove undefineds and update Lesson.
+	// The return value do not wait if update is finish.
+	if (changes === true) {
+		steps = steps.filter(step => step);
+		LessonModel.findByIdAndUpdate(id, { $set: { steps } }).exec((err) => {
+			if (err) {
+				throw new Error('Can not patch lesson steps', err);
+			}
+		});
+		context.result.steps = steps;
+	}
+
 	return context;
 };
 
@@ -74,18 +106,18 @@ exports.before = {
 	get: [],	// restricted(['owner', 'users'], 'users'),
 	create: [forceOwner, addNewGroups],
 	update: [block],
-	patch: [],
-	remove: [],
+	patch: [restrictedOwner],
+	remove: [restrictedOwner],
 };
 
 exports.after = {
 	all: [reduceToOwnSection],
 	find: [restrictedAfter],
-	get: [restrictedAfter],
+	get: [restrictedAfter, removeSteps],
 	create: [],
 	update: [],
-	patch: [restrictedAfterOwner],
-	remove: [restrictedAfterOwner],
+	patch: [removeEmptySteps],
+	remove: [],
 };
 
 exports.error = {

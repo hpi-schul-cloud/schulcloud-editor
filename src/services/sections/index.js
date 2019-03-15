@@ -1,12 +1,15 @@
 const service = require('feathers-mongoose');
 
-const { sectionModel } = require('./models/');
+const { SectionModel } = require('./models/');
 const hooks = require('./hooks/');
+const permissionHooks = require('./hooks/permissionHooks');
+const { Permission } = require('./services');
+
 
 module.exports = function setup() {
 	const app = this;
 	const option = {
-		Model: sectionModel,
+		Model: SectionModel,
 		lean: true,
 		paginate: {
 			default: 50,
@@ -16,4 +19,9 @@ module.exports = function setup() {
 	app.use('sections', service(option));
 	const sectionsService = app.service('sections');
 	sectionsService.hooks(hooks);
+
+	const permissionRoute = 'sections/:sectionId/permissions';
+	app.use(permissionRoute, new Permission());
+	const permissionsService = app.service(permissionRoute);
+	permissionsService.hooks(permissionHooks);
 };

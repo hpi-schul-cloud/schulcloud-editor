@@ -11,9 +11,18 @@ const groupSchema = new Schema({
 	timestamps: true,
 });
 
-const groupModel = mongoose.model('group', groupSchema);
+function autoSelect(next) {
+	this.select('-createdAt -updatedAt -__v');
+	next();
+}
+
+groupSchema
+	.pre('findOne', autoSelect)
+	.pre('find', autoSelect);
+
+const GroupModel = mongoose.model('group', groupSchema);
 
 module.exports = {
-	groupModel,
+	GroupModel,
 	groupSchema,
 };
