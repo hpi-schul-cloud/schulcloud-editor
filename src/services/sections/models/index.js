@@ -26,7 +26,7 @@ const sectionSchema = new Schema({
 	timestamps: true,
 	minimize: false,
 });
-/*
+
 function autoPopulate(next) {
 	this.populate('permissions.group');
 	this.populate('owner');
@@ -35,7 +35,17 @@ function autoPopulate(next) {
 
 sectionSchema
 	.pre('findOne', autoPopulate)
-	.pre('find', autoPopulate); */
+	.pre('find', autoPopulate);
+
+
+function autoSelect(next) {
+	this.select('-createdAt -updatedAt -__v');
+	next();
+}
+
+sectionSchema
+	.pre('findOne', autoSelect)
+	.pre('find', autoSelect);
 
 
 const SectionModel = mongoose.model('section', sectionSchema);
