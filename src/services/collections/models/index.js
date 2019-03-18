@@ -11,7 +11,6 @@ const collectionSchema = new Schema({
 	timestamps: true,
 });
 
-
 function autoPopulate(next) {
 	this.populate('groups');
 	this.populate('owner');

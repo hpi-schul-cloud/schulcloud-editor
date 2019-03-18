@@ -60,7 +60,6 @@ const createGroupsInData = (context, lesson, keys) => {
 	return Promise.all(forceArray(keys).map(k => createGroup(k))).then(() => context);
 };
 
-
 module.exports = {
 	isObject,
 	isArray,
