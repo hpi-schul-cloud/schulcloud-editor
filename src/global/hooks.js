@@ -1,6 +1,6 @@
 /* eslint-disable no-param-reassign */
 const { NotFound, MethodNotAllowed } = require('@feathersjs/errors');
-const { isArray, forceArray } = require('./collection');
+const { forceArray } = require('./collection');
 
 const objectPathResolver = (context, path) => {
 	if (path === undefined) {
@@ -60,16 +60,18 @@ const populate = paths => (context) => {
 	return context;
 };
 
-const forceOwner = (context) => {
-	context.data.owner = context.params.user;
+const forceOwnerInData = (context) => {
+	if (!context.data.owner) {
+		context.data.owner = context.params.user;
+	}
 	return context;
 };
 
 module.exports = {
-	exist,
-	filter,
-	objectPathResolver,
+	// exist,
+	// filter,
+	// objectPathResolver,
 	block,
 	populate,
-	forceOwner,
+	forceOwnerInData,
 };

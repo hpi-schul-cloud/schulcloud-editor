@@ -2,7 +2,7 @@
 /* eslint-disable no-param-reassign */
 
 const { addIdIfNotExist, getSessionUser } = require('../../../global/collection');
-const { block, forceOwner } = require('../../../global/hooks');
+const { block, forceOwnerInData } = require('../../../global/hooks');
 
 const addCurrentUser = (context) => {
 	context.data.users = addIdIfNotExist(context.data.users, context.params.user);
@@ -28,7 +28,7 @@ exports.before = {
 	all: [],
 	find: [restricted('users')],
 	get: [restricted('users')],
-	create: [forceOwner, addCurrentUser],
+	create: [forceOwnerInData, addCurrentUser],
 	update: [block],
 	patch: [restricted('users')],
 	remove: [restricted('owner')],

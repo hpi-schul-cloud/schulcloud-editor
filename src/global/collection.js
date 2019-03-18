@@ -1,7 +1,8 @@
 /* eslint-disable no-param-reassign */
 /* eslint-disable no-confusing-arrow */
 /* basic operations */
-const { Forbidden } = require('@feathersjs/errors');
+const { Forbidden, BadRequest } = require('@feathersjs/errors');
+const mongoose = require('mongoose');
 
 const isObject = e => e !== undefined && typeof e === 'object';
 const isString = e => typeof e === 'string';
@@ -9,6 +10,7 @@ const isArray = e => Array.isArray(e);
 const forceArray = (keys = []) => isArray(keys) ? keys : [keys];
 
 /* bson id operations */
+const createId = () => mongoose.Types.ObjectId();
 const bson = e => e.toString();
 const sameId = (e1, e2) => bson(e1) === bson(e2);
 const includeId = (array, e2) => array.some(e1 => sameId(e1, e2));
@@ -37,6 +39,26 @@ const getSessionUser = (context) => {
 	return user;
 };
 
+const createGroupsInData = (context, lesson, keys) => {
+	if (!lesson || !keys) {
+		throw new BadRequest('The LessonId or keys are required.');
+	}
+
+	const createGroup = (key) => {
+		const users = forceArray(context.data[key]);
+		return context.app.service('groups').create({ users, lesson }, context.params)
+			.then((group) => {
+				const { _id } = group;
+				context.data[key] = _id;
+				return _id;
+			})
+			.catch((err) => {
+				throw new BadRequest(`Can not create group ${key} for a lesson.`, err);
+			});
+	};
+
+	return Promise.all(forceArray(keys).map(k => createGroup(k))).then(() => context);
+};
 
 module.exports = {
 	isObject,
@@ -52,4 +74,6 @@ module.exports = {
 	addIdIfNotExist,
 	isMemberOf,
 	getSessionUser,
+	createId,
+	createGroupsInData,
 };
