@@ -13,7 +13,7 @@ const collectionSchema = new Schema({
 
 
 function autoPopulate(next) {
-	this.populate('items');
+	this.populate('groups');
 	this.populate('owner');
 	next();
 }
