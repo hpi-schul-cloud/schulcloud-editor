@@ -4,7 +4,7 @@ const configuration = require('@feathersjs/configuration');
 const favicon = require('serve-favicon');
 const path = require('path');
 // const bodyParser = require('body-parser');
-// const logger = require('winston');
+const logger = require('./logger');
 
 const hooks = require('./global/');
 const database = require('./database/');
@@ -32,15 +32,7 @@ const app = express(feathers())
 	// .configure(middleware)
 	.use((req, res, next) => {
 		req.feathers.headers = req.headers;
-		console.log({	// later log the information
-			timestamp: new Date(),
-			userId: req.headers.authorization,
-			url: req.url,
-			data: req.body,
-			method: req.method,
-			ip: req.ip,
-			ips: req.ips,
-		});
+		logger.request(req);
 		next();
 	})
 	.configure(services)
@@ -52,6 +44,8 @@ const app = express(feathers())
 			res.json(error);
 		},
 	}));
+
+app.logger = logger;
 /*
 app.on('unhandledRejection', (reason, p) => {
 	logger.info('Unhandled Rejection at: Promise ', p, ' reason: ', reason);
