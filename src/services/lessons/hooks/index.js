@@ -1,8 +1,7 @@
 /* eslint-disable no-param-reassign */
-const { BadRequest } = require('@feathersjs/errors');
-const { forceOwner, block } = require('../../../global/hooks');
+const { forceOwnerInData, block } = require('../../../global/hooks');
 const {
-	isMemberOf, getSessionUser, isInGroup, createId,
+	isMemberOf, getSessionUser, isInGroup, createId, createGroupsInData,
 } = require('../../../global/collection');
 const { LessonModel, getLesson } = require('../../models');
 
@@ -24,26 +23,7 @@ const addLessonId = (context) => {
 	return context;
 };
 
-const addNewGroups = async (context) => {
-	const { _id } = context.data;
-	if (!_id) {
-		throw new BadRequest('Lesson id is required');
-	}
-	const createGroup = (key) => {
-		const users = context.data[key];
-		return context.app.service('groups').create({ users, lesson: _id }, context.params)
-			.then(group => group._id)
-			.catch((err) => {
-				throw new BadRequest(`Can not create group ${key} for a new lesson.`, err);
-			});
-	};
-
-	const [owner, users] = await Promise.all([createGroup('owner'), createGroup('users')]);
-
-	context.data.owner = owner;
-	context.data.users = users;
-	return context;
-};
+const addNewGroups = context => createGroupsInData(context, context.data._id, ['owner', 'users']);
 
 /**
  * Can only save use in get and find operations.
@@ -115,7 +95,7 @@ exports.before = {
 	all: [],	// populate(['steps.sections', 'users', 'owner'])
 	find: [],
 	get: [],	// restricted(['owner', 'users'], 'users'),
-	create: [addLessonId, forceOwner, addNewGroups],
+	create: [addLessonId, forceOwnerInData, addNewGroups],
 	update: [block],
 	patch: [restrictedOwner],
 	remove: [restrictedOwner],

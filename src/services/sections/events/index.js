@@ -5,7 +5,7 @@ const lessonRemoved = (app) => {
 		const { method, path } = context;
 		const on = 'sections';
 		SectionModel.deleteMany({ lesson: context.id }).lean().exec((err, doc) => {
-			console.log({
+			app.logger({
 				on, method, path, result, err, doc,
 			});
 		});

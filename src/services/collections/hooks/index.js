@@ -1,52 +1,41 @@
 /* eslint-disable no-confusing-arrow */
 /* eslint-disable no-param-reassign */
 const { Forbidden } = require('@feathersjs/errors');
-const { block, populate } = require('../../../global/hooks');
-const { isInGroup, getSessionUser } = require('../../../global/collection');
+const { block } = require('../../../global/hooks');
+const { isInGroup, getSessionUser, createGroupsInData } = require('../../../global/collection');
+const { getCollection } = require('../../models');
 
-
-const clearData = (context) => {
-	console.log('todo clear data');
-};
-
-const recoverData = (context) => {
-	console.log('todo recoverData');
-};
-
-const ForEachRestricted = (context) => {
-	const { items } = context.result;
+const restrictedOwner = async (context) => {
 	const user = getSessionUser(context);
-
-	let bool = true;
-	items.forEach((e) => {
-		if (!(isInGroup(e, user) || isInGroup(e.owner, user) || isInGroup(e.users, user))) {
-			bool = false;
-		}
-	});
-	if (bool === false) {
-		if (['patch', 'remove', 'update'].includes(context.method)) {
-			recoverData(context);
-		} else if (['create'].includes(context.method)) {
-			clearData(context);
-		}
-		throw new Forbidden('You have not the access to see all the items in this collection.');
+	const { owner } = await getCollection(context.id);
+	if (!isInGroup(owner, user)) {
+		throw new Forbidden('You have no permission to access this.');
 	}
 	return context;
 };
 
+/**
+ * Use session user for new creating owner group, if no owner is set.
+ */
+const addNewGroupsIfNeeded = (context) => {
+	if (!context.data.owner) {
+		return createGroupsInData(context, getSessionUser(context), 'owner');
+	}
+	return context;
+};
 
 exports.before = {
-	all: [populate('items')],
-	find: [block],
-	get: [],
-	create: [],
+	all: [],
+	find: [restrictedOwner],
+	get: [restrictedOwner],
+	create: [addNewGroupsIfNeeded],
 	update: [block],
-	patch: [],
-	remove: [],
+	patch: [restrictedOwner],
+	remove: [restrictedOwner],
 };
 
 exports.after = {
-	all: [ForEachRestricted],
+	all: [],
 	find: [],
 	get: [],
 	create: [],

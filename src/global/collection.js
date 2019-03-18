@@ -1,7 +1,7 @@
 /* eslint-disable no-param-reassign */
 /* eslint-disable no-confusing-arrow */
 /* basic operations */
-const { Forbidden } = require('@feathersjs/errors');
+const { Forbidden, BadRequest } = require('@feathersjs/errors');
 const mongoose = require('mongoose');
 
 const isObject = e => e !== undefined && typeof e === 'object';
@@ -39,6 +39,27 @@ const getSessionUser = (context) => {
 	return user;
 };
 
+const createGroupsInData = (context, lesson, keys) => {
+	if (!lesson || !keys) {
+		throw new BadRequest('The LessonId or keys are required.');
+	}
+
+	const createGroup = (key) => {
+		const users = forceArray(context.data[key]);
+		return context.app.service('groups').create({ users, lesson }, context.params)
+			.then((group) => {
+				const { _id } = group;
+				context.data[key] = _id;
+				return _id;
+			})
+			.catch((err) => {
+				throw new BadRequest(`Can not create group ${key} for a lesson.`, err);
+			});
+	};
+
+	return Promise.all(forceArray(keys).map(k => createGroup(k))).then(() => context);
+};
+
 
 module.exports = {
 	isObject,
@@ -55,4 +76,5 @@ module.exports = {
 	isMemberOf,
 	getSessionUser,
 	createId,
+	createGroupsInData,
 };

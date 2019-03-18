@@ -4,11 +4,23 @@ const { Schema } = mongoose;
 
 const collectionSchema = new Schema({
 	lesson: { type: Schema.Types.ObjectId, ref: 'lesson', required: true },
-	items: [{ type: Schema.Types.ObjectId, ref: 'group' }],
+	groups: [{ type: Schema.Types.ObjectId, ref: 'group' }],
+	owner: { type: Schema.Types.ObjectId, ref: 'group', required: true },
 	title: { type: String, default: '' },
 }, {
 	timestamps: true,
 });
+
+
+function autoPopulate(next) {
+	this.populate('items');
+	this.populate('owner');
+	next();
+}
+
+collectionSchema
+	.pre('findOne', autoPopulate)
+	.pre('find', autoPopulate);
 
 function autoSelect(next) {
 	this.select('-createdAt -updatedAt -__v');
