@@ -8,6 +8,7 @@ const isObject = e => e !== undefined && typeof e === 'object';
 const isString = e => typeof e === 'string';
 const isArray = e => Array.isArray(e);
 const forceArray = (keys = []) => isArray(keys) ? keys : [keys];
+const isArrayWithElement = e => isArray(e) && e.length > 0;
 
 /* bson id operations */
 const createId = () => mongoose.Types.ObjectId();
@@ -60,6 +61,18 @@ const createGroupsInData = (context, lesson, keys) => {
 	return Promise.all(forceArray(keys).map(k => createGroup(k))).then(() => context);
 };
 
+const isForced = context => context.params.force;
+
+const emptyHook = () => ({
+	all: [],
+	find: [],
+	get: [],
+	create: [],
+	update: [],
+	patch: [],
+	remove: [],
+});
+
 module.exports = {
 	isObject,
 	isArray,
@@ -76,4 +89,7 @@ module.exports = {
 	getSessionUser,
 	createId,
 	createGroupsInData,
+	isForced,
+	isArrayWithElement,
+	emptyHook,
 };
