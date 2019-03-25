@@ -2,11 +2,20 @@
 const { GeneralError, Forbidden } = require('@feathersjs/errors');
 // const logger = require('winston');
 
+const forceOperation = (context) => {
+	const { force } = context.params.query;
+	context.params.force = force === context.app.get('forceKey');
+	delete context.params.query.force;
+	return context;
+};
+
 const addUserId = (context) => {
 	const userId = (context.params.headers || {}).authorization;
 	if (userId) {
 		// todo validate mongoose id
 		context.params.user = userId.toString();
+	} else if (context.params.force) {
+		context.params.user = '_isForceWithoutUser_';
 	} else {
 		throw new Forbidden('Can not resolve user information.');
 	}
@@ -19,7 +28,7 @@ const addUserId = (context) => {
  * @param {context} ctx
  */
 const errorHandler = (ctx) => {
-	if (ctx.error) {	
+	if (ctx.error) {
 		if (ctx.error.hook) {
 			delete ctx.error.hook;
 		}
@@ -42,7 +51,7 @@ const errorHandler = (ctx) => {
 };
 
 exports.before = {
-	all: [addUserId],
+	all: [forceOperation, addUserId],
 	find: [],
 	get: [],
 	create: [],

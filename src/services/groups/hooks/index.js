@@ -10,17 +10,12 @@ const addCurrentUser = (context) => {
 };
 
 const restricted = (restricts = 'owner') => (context) => {
+	if (context.params.force) {
+		return context;
+	}
 	const user = getSessionUser(context);
-//	if (typeof restricts === 'string') {
-		context.params.query[restricts] = user;
-/*	} else if (isArray(restricts)) {
-		if (!context.params.query.$or) {
-			context.params.query.$or = [];
-		}
-		restricts.forEach((key) => {
-			context.params.query.$or.push({ [key]: user });
-		});
-	} */
+	context.params.query[restricts] = user;
+
 	return context;
 };
 

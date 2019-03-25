@@ -5,7 +5,7 @@ const lessonRemoved = (app) => {
 		const { method, path } = context;
 		const on = 'collections';
 		CollectionModel.deleteMany({ lesson: context.id }).lean().exec((err, doc) => {
-			app.logger({
+			app.logger.event({
 				on, method, path, result, err, doc,
 			});
 		});
