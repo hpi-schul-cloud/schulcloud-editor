@@ -6,7 +6,7 @@ exports.before = {
 	get: [],
 	create: [],
 	update: [block],
-	patch: [block],
+	patch: [],
 	remove: [],
 };
 
