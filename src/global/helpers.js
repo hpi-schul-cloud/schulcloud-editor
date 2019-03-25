@@ -7,7 +7,7 @@ const mongoose = require('mongoose');
 
 const isObject = e => typeof e === 'object';
 const isString = e => typeof e === 'string';
-const isSaveDefined = e => !e && !null;
+const isSaveDefined = e => e && !null;
 const isArray = e => Array.isArray(e);
 const forceArray = (keys = []) => isArray(keys) ? keys : [keys];
 const isArrayWithElement = e => isArray(e) && e.length > 0;
