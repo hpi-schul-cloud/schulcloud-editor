@@ -5,6 +5,7 @@ const {
 	isInGroup,
 	createId,
 	createGroupsInData,
+	isForced,
 } = require('../../../global/collection');
 const { getLesson } = require('../../models');
 const patchGroupIfArrayHook = require('./patchGroupIfArrayHook');
@@ -60,6 +61,9 @@ const removeSteps = (context) => {
  * @before
  */
 const restrictedOwner = async (context) => {
+	if (isForced(context)) {
+		return context;
+	}
 	const user = getSessionUser(context);
 	const { owner } = await getLesson(context.id);
 	isMemberOf([owner], user, true);

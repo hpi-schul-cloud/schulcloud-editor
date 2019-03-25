@@ -1,6 +1,4 @@
-const winston = require('winston');
-
-const remove = require('./remove');
+const event = require('./event');
 const request = require('./request');
 
 const logger = {
@@ -9,7 +7,7 @@ const logger = {
 	info: console.log,
 };
 
-logger.remove = remove(logger);
+logger.event = event(logger);
 logger.request = request(logger);
 
 module.exports = logger;
