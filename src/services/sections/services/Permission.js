@@ -2,7 +2,7 @@
 /* eslint-disable object-curly-newline */
 /* eslint-disable class-methods-use-this */
 const { getPermissions, patchPermissions } = require('../helpers/');
-const { sameId } = require('../../../global/collection');
+const { sameId } = require('../../global').helpers;
 
 /**
  * The getPermissions() function is save to use, it pass the params over section hooks.

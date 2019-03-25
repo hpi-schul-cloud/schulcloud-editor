@@ -1,8 +1,8 @@
 /* eslint-disable no-nested-ternary */
 /* eslint-disable no-param-reassign */
 
-const { addIdIfNotExist, getSessionUser } = require('../../../global/collection');
-const { block, forceOwnerInData } = require('../../../global/hooks');
+const { addIdIfNotExist, getSessionUser } = require('../../global').helpers;
+const { block, forceOwnerInData } = require('../../global').hooks;
 
 const addCurrentUser = (context) => {
 	context.data.users = addIdIfNotExist(context.data.users, context.params.user);

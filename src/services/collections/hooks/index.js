@@ -1,9 +1,9 @@
 /* eslint-disable no-confusing-arrow */
 /* eslint-disable no-param-reassign */
 const { Forbidden } = require('@feathersjs/errors');
-const { block } = require('../../../global/hooks');
-const { isInGroup, getSessionUser, createGroupsInData } = require('../../../global/collection');
-const { getCollection } = require('../../models');
+const { block } = require('../../global').hooks;
+const { isInGroup, getSessionUser, createGroupsInData } = require('../../global').helpers;
+const { getCollection } = require('../../global').models;
 
 const restrictedOwner = async (context) => {
 	const user = getSessionUser(context);

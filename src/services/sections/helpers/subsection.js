@@ -1,7 +1,7 @@
 /* eslint-disable no-param-reassign */
 const { BadRequest } = require('@feathersjs/errors');
 
-const { getGroup, getSection, SectionModel } = require('../../models');
+const { getGroup, getSection, SectionModel } = require('../../global').models;
 
 /**
  * Validate the group and section id. But not the lesson.

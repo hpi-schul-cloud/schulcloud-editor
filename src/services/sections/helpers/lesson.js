@@ -1,6 +1,6 @@
 /* eslint-disable no-param-reassign */
 const { Forbidden, BadRequest } = require('@feathersjs/errors');
-const { rollbackSection } = require('./');
+const { rollbackSection } = require('./index');
 
 /**
  * Use the service for permission check.

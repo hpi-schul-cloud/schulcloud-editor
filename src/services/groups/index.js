@@ -16,9 +16,4 @@ module.exports = function setup() {
 	app.use('groups', service(option));
 	const groupService = app.service('groups');
 	groupService.hooks(hooks);
-
-	groupService.on('patched', (p1, p2) => {
-		console.log(p1);
-		console.log(p2);
-	});
 };

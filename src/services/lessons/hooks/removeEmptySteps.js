@@ -1,5 +1,5 @@
 /* eslint-disable no-param-reassign */
-const { LessonModel } = require('../../models');
+const { LessonModel } = require('../../global').models;
 
 const removeEmptySteps = async (context) => {
 	const id = context.result._id;

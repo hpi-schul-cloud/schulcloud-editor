@@ -1,4 +1,4 @@
-const { block } = require('../../../global/hooks.js');
+const { block } = require('../../global').hooks;
 
 exports.before = {
 	all: [],

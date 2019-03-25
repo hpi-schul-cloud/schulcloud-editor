@@ -1,4 +1,4 @@
-const { forceOwnerInData, block } = require('../../../global/hooks');
+const { forceOwnerInData, block } = require('../../global').hooks;
 const {
 	reduceToOwnSection,
 	addLessonId,

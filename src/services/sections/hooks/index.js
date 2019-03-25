@@ -1,11 +1,11 @@
 /* eslint-disable no-param-reassign */
 const { BadRequest, Forbidden } = require('@feathersjs/errors');
 
-const { block } = require('../../../global/hooks.js');
-const { StepModel, getSection } = require('../../models');
+const { block } = require('../../global').hooks;
+const { StepModel, getSection } = require('../../global').models;
 const {
 	sameId, forceArray, isInGroup, getSessionUser,
-} = require('../../../global/collection');
+} = require('../../global').helpers;
 const {
 	subsection,
 	template,
