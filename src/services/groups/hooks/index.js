@@ -3,12 +3,12 @@
 
 const { addIdIfNotExist, getSessionUser } = require('../../global').helpers;
 const { block, forceOwnerInData } = require('../../global').hooks;
-
+/* @deprecated
 const addCurrentUser = (context) => {
 	context.data.users = addIdIfNotExist(context.data.users, context.params.user);
 	return context;
 };
-
+*/
 const restricted = (restricts = 'owner') => (context) => {
 	if (context.params.force) {
 		return context;
@@ -23,7 +23,7 @@ exports.before = {
 	all: [],
 	find: [restricted('users')],
 	get: [restricted('users')],
-	create: [forceOwnerInData, addCurrentUser],
+	create: [forceOwnerInData],
 	update: [block],
 	patch: [restricted('users')],
 	remove: [restricted('owner')],

@@ -1,20 +1,28 @@
+/* eslint-disable no-console */
+const path = require('path');
 const feathers = require('@feathersjs/feathers');
+// eslint-disable-next-line import/newline-after-import
 const express = require('@feathersjs/express');
+process.env.NODE_CONFIG_DIR = path.join(__dirname, '../config/');
+process.env.NODE_ENV = process.env.NODE_ENV || 'default';
 const configuration = require('@feathersjs/configuration');
 const favicon = require('serve-favicon');
-const path = require('path');
 // const bodyParser = require('body-parser'); @deprecated
 
 const hooks = require('./global/');
 const database = require('./database/');
 const services = require('./services/');
 const middleware = require('./middleware');
-
 // const defaultHeaders = require('./middleware/defaultHeaders'); @deprecated
 const handleResponseType = require('./middleware/handleResponseType');
 
-
 const conf = configuration();
+
+console.log('\n___process.env___');
+['NODE_CONFIG_DIR', 'NODE_ENV', 'EDITOR_MS_FORCE_KEY']
+	.forEach(key => console.log(key, process.env[key]));
+console.log('From config file:', conf());
+console.log('_________________\n');
 
 const app = express(feathers())
 	.configure(conf)
