@@ -1,6 +1,6 @@
 const { GroupModel } = require('./groups/models');
 const { SectionModel } = require('./sections/models');
-const { LessonModel, StepModel } = require('./lessons/models');
+const { LessonModel, StepModel, LessonAttachmentModel } = require('./lessons/models');
 const { CollectionModel } = require('./collections/models');
 
 const getGroup = id => GroupModel.findById(id).lean().exec();
@@ -15,6 +15,7 @@ module.exports = {
 	GroupModel,
 	SectionModel,
 	LessonModel,
+	LessonAttachmentModel,
 	StepModel,
 	CollectionModel,
 	// getter

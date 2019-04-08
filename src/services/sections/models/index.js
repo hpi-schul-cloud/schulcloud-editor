@@ -19,6 +19,7 @@ const sectionSchema = new Schema({
 	lesson: { type: Schema.Types.ObjectId, ref: 'lesson', required: true },
 	owner: { type: Schema.Types.ObjectId, ref: 'group', required: true },
 	parent: { type: Schema.Types.ObjectId, ref: 'section', default: null },
+	title: String,
 	permissions: [{ type: permissionGroupSchema }],
 	state: { type: Object, default: {} },
 	flag: { type: String, enum: ['isFromStudent', 'isTemplate'], default: 'isTemplate' },
@@ -50,8 +51,20 @@ sectionSchema
 
 const SectionModel = mongoose.model('section', sectionSchema);
 
+
+const sectionAttachmentSchema = new Schema({
+	lesson: { type: Schema.Types.ObjectId, ref: 'lesson', required: true },
+	key: { type: String, enum: ['nexboard'], required: true },
+	value: { type: Schema.Types.Mixed, required: true },
+
+});
+
+const SectionAttachmentModel = mongoose.model('sectionAttachment', sectionAttachmentSchema);
+
 module.exports = {
 	SectionModel,
 	sectionSchema,
 	permissionGroupSchema,
+	SectionAttachmentModel,
+	sectionAttachmentSchema,
 };

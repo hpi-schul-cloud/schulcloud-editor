@@ -40,7 +40,7 @@ const app = express(feathers())
 		},
 	}));
 
-app.logger = logger;
+// app.logger = logger;
 /*
 app.on('unhandledRejection', (reason, p) => { @deprecated
 	logger.info('Unhandled Rejection at: Promise ', p, ' reason: ', reason);
