@@ -1,5 +1,5 @@
 
-const { getSection } = require('../../models');
+const { getSection } = require('../../global').models;
 
 const rollbackSection = (context) => {
 	// todo: rollback section

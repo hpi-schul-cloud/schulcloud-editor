@@ -21,6 +21,7 @@ const sectionSchema = new Schema({
 	parent: { type: Schema.Types.ObjectId, ref: 'section', default: null },
 	title: String,
 	permissions: [{ type: permissionGroupSchema }],
+	title: { type: String, default: '' },
 	state: { type: Object, default: {} },
 	flag: { type: String, enum: ['isFromStudent', 'isTemplate'], default: 'isTemplate' },
 }, {

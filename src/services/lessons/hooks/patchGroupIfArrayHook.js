@@ -1,6 +1,6 @@
 /* eslint-disable no-param-reassign */
-const { isArray, isArrayWithElement } = require('../../../global/collection');
-const { getLesson, updateGroup } = require('../../models');
+const { isArray, isArrayWithElement } = require('../../global').helpers;
+const { getLesson, updateGroup } = require('../../global').models;
 
 const patchGroupIfArray = (context, lesson, newOwner, key) => {
 	const users = context.data[key];

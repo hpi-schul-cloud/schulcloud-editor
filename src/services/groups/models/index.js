@@ -6,7 +6,7 @@ const { Schema } = mongoose;
 const groupSchema = new Schema({
 	lesson: { type: Schema.Types.ObjectId, ref: 'lesson', required: true },
 	type: { type: String, default: 'group', enum: ['group'] },
-	owner: { type: Schema.Types.ObjectId },
+	owner: { type: Schema.Types.ObjectId, required: true },
 	users: [{ type: Schema.Types.ObjectId }],
 }, {
 	timestamps: true,

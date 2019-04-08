@@ -1,4 +1,4 @@
-const { block } = require('../../../global/hooks.js');
+const { block } = require('../../global').hooks;
 
 exports.before = {
 	all: [],
@@ -6,7 +6,7 @@ exports.before = {
 	get: [],
 	create: [],
 	update: [block],
-	patch: [block],
+	patch: [],
 	remove: [],
 };
 

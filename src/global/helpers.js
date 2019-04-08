@@ -1,11 +1,13 @@
 /* eslint-disable no-param-reassign */
 /* eslint-disable no-confusing-arrow */
+
 /* basic operations */
 const { Forbidden, BadRequest } = require('@feathersjs/errors');
 const mongoose = require('mongoose');
 
-const isObject = e => e !== undefined && typeof e === 'object';
+const isObject = e => typeof e === 'object';
 const isString = e => typeof e === 'string';
+const isSaveDefined = e => e && !null;
 const isArray = e => Array.isArray(e);
 const forceArray = (keys = []) => isArray(keys) ? keys : [keys];
 const isArrayWithElement = e => isArray(e) && e.length > 0;
@@ -21,8 +23,8 @@ const addIdIfNotExist = (array = [], e) => {
 	return !includeId(array, e) ? pushId(array, e) : array;
 };
 
-/* high level operations */
-const isGroup = e => !undefined && typeof e === 'object' && e.type === 'group' && e.users;
+/* group operations */
+const isGroup = e => isSaveDefined(e) && isObject(e) && e.type === 'group' && e.users;
 const isInGroup = (group, user) => isGroup(group) && includeId(group.users, user);
 const isMemberOf = (groups, user, err = false) => {
 	const isMember = forceArray(groups).some(group => isInGroup(group, user));
@@ -32,6 +34,7 @@ const isMemberOf = (groups, user, err = false) => {
 	return isMember;
 };
 
+/* context operations */
 const getSessionUser = (context) => {
 	const { user } = context.params;
 	if (!user) {
@@ -76,6 +79,7 @@ const emptyHook = () => ({
 module.exports = {
 	isObject,
 	isArray,
+	isSaveDefined,
 	forceArray,
 	isGroup,
 	isString,

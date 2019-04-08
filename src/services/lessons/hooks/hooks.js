@@ -6,7 +6,7 @@ const {
 	createId,
 	createGroupsInData,
 	isForced,
-} = require('../../../global/collection');
+} = require('../../global').helpers;
 const { getLesson } = require('../../models');
 const patchGroupIfArrayHook = require('./patchGroupIfArrayHook');
 const removeEmptySteps = require('./removeEmptySteps');
