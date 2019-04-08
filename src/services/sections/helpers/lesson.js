@@ -34,10 +34,8 @@ const patchLesson = (context, id, data) => context.app.service('lessons')
 const template = async (context, lesson) => {
 	const { owner } = await getLesson(context, lesson);
 	/** @override */
-	context.data = {
-		lesson,
-		owner,
-	};
+	context.data.lesson = lesson;
+	context.data.owner = owner;
 	return context;
 };
 

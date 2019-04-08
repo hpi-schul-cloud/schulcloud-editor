@@ -7,7 +7,8 @@ const logger = {
 	info: console.log,
 };
 
-logger.event = event(logger);
+// add events log for methods
+logger.event = event(logger, ['create', 'remove', 'update', 'patch']);
 logger.request = request(logger);
 
 module.exports = logger;
