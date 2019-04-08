@@ -20,6 +20,7 @@ const sectionSchema = new Schema({
 	owner: { type: Schema.Types.ObjectId, ref: 'group', required: true },
 	parent: { type: Schema.Types.ObjectId, ref: 'section', default: null },
 	permissions: [{ type: permissionGroupSchema }],
+	title: { type: String, default: '' },
 	state: { type: Object, default: {} },
 	flag: { type: String, enum: ['isFromStudent', 'isTemplate'], default: 'isTemplate' },
 }, {
