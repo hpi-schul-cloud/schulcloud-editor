@@ -1,5 +1,6 @@
 const { GroupModel } = require('./groups/models');
 const { SectionModel } = require('./sections/models');
+const { AttachmentModel } = require('./attachments/models');
 const { LessonModel } = require('./lessons/models');
 const { CollectionModel } = require('./collections/models');
 
@@ -15,6 +16,7 @@ module.exports = {
 	GroupModel,
 	SectionModel,
 	LessonModel,
+	AttachmentModel,
 	CollectionModel,
 	// getter
 	getGroup,

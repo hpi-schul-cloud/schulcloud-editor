@@ -47,7 +47,6 @@ sectionSchema
 	.post('find', after('section'))
 	.post('findOne', after('section'));
 
-
 function autoSelect(next) {
 	this.select('-createdAt -updatedAt -__v');
 	next();
@@ -56,7 +55,6 @@ function autoSelect(next) {
 sectionSchema
 	.pre('findOne', autoSelect)
 	.pre('find', autoSelect);
-
 
 const SectionModel = mongoose.model('section', sectionSchema);
 
