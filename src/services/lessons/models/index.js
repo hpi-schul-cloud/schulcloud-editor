@@ -1,27 +1,22 @@
 const mongoose = require('mongoose');
 
+const { after } = require('../../../global/helpers');
+
 const { Schema } = mongoose;
-
-const stepSchema = new Schema({
-	note: { type: String, default: '' },
-	visible: { type: Boolean, default: true },
-	sections: [{ type: Schema.Types.ObjectId, ref: 'section', default: [] }],
-});
-
-const StepModel = mongoose.model('step', stepSchema);
 
 const lessonSchema = new Schema({
 	title: { type: String, default: '' },
 	note: { type: String, default: '' },
-	steps: [{ type: stepSchema, default: [] }],
+	sections: [{ type: Schema.Types.ObjectId, ref: 'section' }],
 	owner: { type: Schema.Types.ObjectId, ref: 'group', required: true },
 	users: { type: Schema.Types.ObjectId, ref: 'group' },
+	type: { type: String, default: 'lesson', enum: ['lesson'] },
 }, {
 	timestamps: true,
 });
 
 function autoPopulate(next) {
-	this.populate('steps.sections');
+	this.populate('sections');
 	this.populate('owner');
 	this.populate('users');
 	next();
@@ -29,7 +24,9 @@ function autoPopulate(next) {
 
 lessonSchema
 	.pre('findOne', autoPopulate)
-	.pre('find', autoPopulate);
+	.pre('find', autoPopulate)
+	.post('find', after('lesson'))
+	.post('findOne', after('lesson'));
 
 function autoSelect(next) {
 	this.select('-createdAt -updatedAt -__v');
@@ -45,6 +42,4 @@ const LessonModel = mongoose.model('lesson', lessonSchema);
 module.exports = {
 	LessonModel,
 	lessonSchema,
-	stepSchema,
-	StepModel,
 };

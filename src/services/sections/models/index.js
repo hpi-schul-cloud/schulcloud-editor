@@ -1,4 +1,7 @@
+/* eslint-disable no-param-reassign */
 const mongoose = require('mongoose');
+
+const { after } = require('../../../global/helpers');
 
 const { Schema } = mongoose;
 
@@ -17,6 +20,9 @@ const permissionGroupSchema = new Schema({
 
 const sectionSchema = new Schema({
 	lesson: { type: Schema.Types.ObjectId, ref: 'lesson', required: true },
+	visible: { type: Boolean, default: true },
+	note: { type: String, default: '' },
+	// type: { type: String, default: 'section', enum: ['section'] },
 	owner: { type: Schema.Types.ObjectId, ref: 'group', required: true },
 	parent: { type: Schema.Types.ObjectId, ref: 'section', default: null },
 	permissions: [{ type: permissionGroupSchema }],
@@ -34,9 +40,12 @@ function autoPopulate(next) {
 	next();
 }
 
+
 sectionSchema
 	.pre('findOne', autoPopulate)
-	.pre('find', autoPopulate);
+	.pre('find', autoPopulate)
+	.post('find', after('section'))
+	.post('findOne', after('section'));
 
 function autoSelect(next) {
 	this.select('-createdAt -updatedAt -__v');
