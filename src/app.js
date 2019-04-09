@@ -16,7 +16,6 @@ const middleware = require('./middleware');
 // const defaultHeaders = require('./middleware/defaultHeaders'); @deprecated
 const handleResponseType = require('./middleware/handleResponseType');
 
-
 const conf = configuration();
 
 console.log('\n___process.env___');
