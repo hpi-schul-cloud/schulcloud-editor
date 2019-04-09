@@ -1,12 +1,10 @@
 const { forceOwnerInData, block } = require('../../global').hooks;
 const {
-	reduceToOwnSection,
 	addLessonId,
 	addNewGroups,
 	restrictedAfter,
-	removeSteps,
+	removeHiddenSteps,
 	restrictedOwner,
-	removeEmptySteps,
 	patchGroupIfArrayHook,
 } = require('./hooks');
 
@@ -21,12 +19,12 @@ exports.before = {
 };
 
 exports.after = {
-	all: [reduceToOwnSection],
+	all: [],
 	find: [restrictedAfter],
-	get: [restrictedAfter, removeSteps],
+	get: [restrictedAfter, removeHiddenSteps],
 	create: [],
 	update: [],
-	patch: [removeEmptySteps],
+	patch: [],
 	remove: [],
 };
 

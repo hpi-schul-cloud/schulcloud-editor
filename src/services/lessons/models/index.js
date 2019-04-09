@@ -2,18 +2,10 @@ const mongoose = require('mongoose');
 
 const { Schema } = mongoose;
 
-const stepSchema = new Schema({
-	note: { type: String, default: '' },
-	visible: { type: Boolean, default: true },
-	sections: [{ type: Schema.Types.ObjectId, ref: 'section', default: [] }],
-});
-
-const StepModel = mongoose.model('step', stepSchema);
-
 const lessonSchema = new Schema({
 	title: { type: String, default: '' },
 	note: { type: String, default: '' },
-	steps: [{ type: stepSchema, default: [] }],
+	sections: [{ type: Schema.Types.ObjectId, ref: 'section' }],
 	owner: { type: Schema.Types.ObjectId, ref: 'group', required: true },
 	users: { type: Schema.Types.ObjectId, ref: 'group' },
 }, {
@@ -21,7 +13,7 @@ const lessonSchema = new Schema({
 });
 
 function autoPopulate(next) {
-	this.populate('steps.sections');
+	this.populate('sections');
 	this.populate('owner');
 	this.populate('users');
 	next();
@@ -45,6 +37,4 @@ const LessonModel = mongoose.model('lesson', lessonSchema);
 module.exports = {
 	LessonModel,
 	lessonSchema,
-	stepSchema,
-	StepModel,
 };
