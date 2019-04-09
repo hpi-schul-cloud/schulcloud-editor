@@ -8,6 +8,7 @@ const { subsection, template, removeSubSections } = require('../helpers/');
 
 const fetchLessonData = async (context) => {
 	const { parent, owner, lesson } = context.data;
+
 	if (parent && owner && lesson) {
 		return subsection(context, lesson, parent, owner);
 	}
