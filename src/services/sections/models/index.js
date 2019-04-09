@@ -38,7 +38,6 @@ sectionSchema
 	.pre('findOne', autoPopulate)
 	.pre('find', autoPopulate);
 
-
 function autoSelect(next) {
 	this.select('-createdAt -updatedAt -__v');
 	next();
@@ -48,9 +47,7 @@ sectionSchema
 	.pre('findOne', autoSelect)
 	.pre('find', autoSelect);
 
-
 const SectionModel = mongoose.model('section', sectionSchema);
-
 
 module.exports = {
 	SectionModel,
