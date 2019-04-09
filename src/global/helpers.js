@@ -66,6 +66,20 @@ const createGroupsInData = (context, lesson, keys) => {
 
 const isForced = context => context.params.force;
 
+// models after helper
+const after = name => (docs, next) => {
+	if (Array.isArray(docs)) {
+		docs = docs.map((doc) => {
+			doc.type = name;
+			return doc;
+		});
+	} else {
+		docs.type = name;
+	}
+
+	next();
+};
+
 const emptyHook = () => ({
 	all: [],
 	find: [],
@@ -96,4 +110,5 @@ module.exports = {
 	isForced,
 	isArrayWithElement,
 	emptyHook,
+	after,
 };
