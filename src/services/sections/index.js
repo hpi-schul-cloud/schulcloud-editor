@@ -20,7 +20,6 @@ module.exports = function setup() {
 	const sectionsService = app.service('sections');
 	sectionsService.hooks(hooks);
 
-
 	const permissionRoute = 'sections/:sectionId/permissions';
 	app.use(permissionRoute, new Permission());
 	const permissionsService = app.service(permissionRoute);
