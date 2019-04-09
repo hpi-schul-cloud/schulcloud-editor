@@ -32,12 +32,12 @@ const addNewGroups = context => createGroupsInData(context, context.data._id, ['
  * If not owner and section is visible false remove it.
  * @after
  */
-const removeHiddenSteps = (context) => {
+const removeHiddenSections = (context) => {
 	const user = getSessionUser(context);
 	const { owner, sections } = context.result;
 	const isMember = isInGroup(owner, user);
 	if (isMember === false) {
-		context.result.sections = sections.filter(section => section.visible);
+		context.result.sections = sections.filter(section => section.visible === true);
 	}
 	return context;
 };
@@ -59,7 +59,7 @@ module.exports = {
 	addLessonId,
 	addNewGroups,
 	restrictedAfter,
-	removeHiddenSteps,
+	removeHiddenSections,
 	restrictedOwner,
 	patchGroupIfArrayHook,
 };

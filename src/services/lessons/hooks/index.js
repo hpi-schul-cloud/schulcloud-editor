@@ -3,7 +3,7 @@ const {
 	addLessonId,
 	addNewGroups,
 	restrictedAfter,
-	removeHiddenSteps,
+	removeHiddenSections,
 	restrictedOwner,
 	patchGroupIfArrayHook,
 } = require('./hooks');
@@ -21,7 +21,7 @@ exports.before = {
 exports.after = {
 	all: [],
 	find: [restrictedAfter],
-	get: [restrictedAfter, removeHiddenSteps],
+	get: [restrictedAfter, removeHiddenSections],
 	create: [],
 	update: [],
 	patch: [],

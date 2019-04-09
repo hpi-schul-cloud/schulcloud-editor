@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
 
+const { after } = require('../../../global/helpers');
+
 const { Schema } = mongoose;
 
 const lessonSchema = new Schema({
@@ -8,6 +10,7 @@ const lessonSchema = new Schema({
 	sections: [{ type: Schema.Types.ObjectId, ref: 'section' }],
 	owner: { type: Schema.Types.ObjectId, ref: 'group', required: true },
 	users: { type: Schema.Types.ObjectId, ref: 'group' },
+	type: { type: String, default: 'lesson', enum: ['lesson'] },
 }, {
 	timestamps: true,
 });
@@ -21,7 +24,9 @@ function autoPopulate(next) {
 
 lessonSchema
 	.pre('findOne', autoPopulate)
-	.pre('find', autoPopulate);
+	.pre('find', autoPopulate)
+	.post('find', after('lesson'))
+	.post('findOne', after('lesson'));
 
 function autoSelect(next) {
 	this.select('-createdAt -updatedAt -__v');
