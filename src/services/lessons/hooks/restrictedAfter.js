@@ -1,4 +1,4 @@
-const { isMemberOf, getSessionUser } = require('../../../global/collection');
+const { isMemberOf, getSessionUser } = require('../../global').helpers;
 /**
  * Can only save use in get and find operations.
  */

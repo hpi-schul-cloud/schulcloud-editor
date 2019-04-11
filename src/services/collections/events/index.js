@@ -1,4 +1,4 @@
-const { CollectionModel } = require('../../models');
+const { CollectionModel } = require('../../global').models;
 
 const lessonRemoved = (app) => {
 	app.service('lessons').on('removed', (result, context) => {

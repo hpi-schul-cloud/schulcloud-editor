@@ -6,25 +6,10 @@ const {
 	createId,
 	createGroupsInData,
 	isForced,
-} = require('../../../global/collection');
+} = require('../../global').helpers;
 const { getLesson } = require('../../models');
 const patchGroupIfArrayHook = require('./patchGroupIfArrayHook');
-const removeEmptySteps = require('./removeEmptySteps');
 const restrictedAfter = require('./restrictedAfter');
-
-/**
- * Is enable later for more complex usecases if it needed.
- * In first step the database model result is simplyfy with this hook.
- * @after
- */
-const reduceToOwnSection = (context) => {
-	context.result.steps = context.result.steps.map((step) => {
-		// eslint-disable-next-line prefer-destructuring
-		step.sections = step.sections[0] || null;	// array to own element
-		return step;
-	});
-	return context;
-};
 
 /**
  * @method patch, create
@@ -44,15 +29,15 @@ const addLessonId = (context) => {
 const addNewGroups = context => createGroupsInData(context, context.data._id, ['owner', 'users']);
 
 /**
- * If not visible remove steps for not owners.
+ * If not owner and section is visible false remove it.
  * @after
  */
-const removeSteps = (context) => {
+const removeHiddenSections = (context) => {
 	const user = getSessionUser(context);
-	const { owner, steps } = context.result;
+	const { owner, sections } = context.result;
 	const isMember = isInGroup(owner, user);
 	if (isMember === false) {
-		context.result.steps = steps.filter(step => step.visible === true);
+		context.result.sections = sections.filter(section => section.visible === true);
 	}
 	return context;
 };
@@ -71,12 +56,10 @@ const restrictedOwner = async (context) => {
 };
 
 module.exports = {
-	reduceToOwnSection,
 	addLessonId,
 	addNewGroups,
 	restrictedAfter,
-	removeSteps,
+	removeHiddenSections,
 	restrictedOwner,
-	removeEmptySteps,
 	patchGroupIfArrayHook,
 };

@@ -1,12 +1,13 @@
 const mongoose = require('mongoose');
 
+const { after } = require('../../../global/helpers');
+
 const { Schema } = mongoose;
 
 // todo test if context is needed
 const groupSchema = new Schema({
 	lesson: { type: Schema.Types.ObjectId, ref: 'lesson', required: true },
-	type: { type: String, default: 'group', enum: ['group'] },
-	owner: { type: Schema.Types.ObjectId },
+	owner: { type: Schema.Types.ObjectId, required: true },
 	users: [{ type: Schema.Types.ObjectId }],
 }, {
 	timestamps: true,
@@ -19,7 +20,9 @@ function autoSelect(next) {
 
 groupSchema
 	.pre('findOne', autoSelect)
-	.pre('find', autoSelect);
+	.pre('find', autoSelect)
+	.post('find', after('group'))
+	.post('findOne', after('group'));
 
 const GroupModel = mongoose.model('group', groupSchema);
 

@@ -1,6 +1,8 @@
+/* eslint-disable no-param-reassign */
+/* eslint-disable object-curly-newline */
 /* eslint-disable class-methods-use-this */
 const { getPermissions, patchPermissions } = require('../helpers/');
-const { sameId } = require('../../../global/collection');
+const { sameId } = require('../../global').helpers;
 
 /**
  * The getPermissions() function is save to use, it pass the params over section hooks.
@@ -21,24 +23,38 @@ class Permission {
 	 */
 	async create({ group, read, write, create }, params) {
 		const { sectionId } = params.route;
-		const { app } = this;
 
-		const permissions = await getPermissions(app, sectionId, params);
+		const permissions = await getPermissions(this.app, sectionId, params);
 		permissions.push({
 			group, read, write, create,
 		});
 
-		return patchPermissions(app, sectionId, permissions, params);
+		return patchPermissions(this.app, sectionId, permissions, params);
+	}
+
+	async patch(permissionId, { read, write, create }, params) {
+		const { sectionId } = params.route;
+
+		let permissions = await getPermissions(this.app, sectionId, params);
+		permissions = permissions.map((permission) => {
+			if (sameId(permission._id, permissionId)) {
+				if (read) { permission.read = read; }
+				if (write) { permission.write = write; }
+				if (create) { permission.create = create; }
+			}
+			return permission;
+		});
+
+		return patchPermissions(this.app, sectionId, permissions, params);
 	}
 
 	async remove(permissionId, params) {
 		const { sectionId } = params.route;
-		const { app } = this;
 
-		let permissions = await getPermissions(app, sectionId, params);
+		let permissions = await getPermissions(this.app, sectionId, params);
 		permissions = permissions.filter(permission => !sameId(permission._id, permissionId));
 
-		return patchPermissions(app, sectionId, permissions, params);
+		return patchPermissions(this.app, sectionId, permissions, params);
 	}
 
 	setup(app) {
