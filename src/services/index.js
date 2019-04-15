@@ -3,6 +3,7 @@ const sections = require('./sections');
 const lessons = require('./lessons');
 const collections = require('./collections');
 const attachments = require('./attachments');
+const user = require('./users');
 
 const groupsEvents = require('./groups/events/');
 const sectionsEvents = require('./sections/events/');
@@ -18,6 +19,7 @@ module.exports = function setup() {
 	app.configure(lessons);
 	app.configure(collections);
 	app.configure(attachments);
+	app.configure(user);
 
 	/** then execute the attach of all event listener */
 	groupsEvents(app);
