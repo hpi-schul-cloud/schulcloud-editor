@@ -7,7 +7,7 @@ it will throw an event and the services have added the operationens for it.
 
 
 const Information = require('./services/infomation');
-const informationHooks = require('./hooks/')
+const informationHooks = require('./hooks/information')
 
 module.exports = function setup() {
 	const app = this;

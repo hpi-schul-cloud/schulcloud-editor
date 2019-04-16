@@ -17,7 +17,7 @@ class UserInformation {
 				],
 				$populate: [
 					'lesson'
-				]
+				],
 			}
 			
 			const group = await groupService.find(params);
