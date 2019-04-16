@@ -2,6 +2,14 @@
 const { GeneralError, Forbidden } = require('@feathersjs/errors');
 // const logger = require('winston');
 
+
+const addDefaultValues = (context) => {
+	if (!context.params.query) {
+		context.params.query = {};
+	}
+return context;
+};
+
 const forceOperation = (context) => {
 	const { force } = context.params.query;
 	context.params.force = force === context.app.get('forceKey');
@@ -51,7 +59,7 @@ const errorHandler = (ctx) => {
 };
 
 exports.before = {
-	all: [forceOperation, addUserId],
+	all: [addDefaultValues, forceOperation, addUserId],
 	find: [],
 	get: [],
 	create: [],

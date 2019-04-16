@@ -6,11 +6,13 @@ it will throw an event and the services have added the operationens for it.
 */
 
 
-const UserInformation = require('./services/infomation');
+const Information = require('./services/infomation');
+const informationHooks = require('./hooks/')
 
 module.exports = function setup() {
 	const app = this;
 
-    app.use('userInformation', new UserInformation());
-    const informationService = app.service('userInformation');
+    app.use('user/information', new Information());
+    const informationService = app.service('user/information');
+    informationService.hooks(informationHooks);
 };
