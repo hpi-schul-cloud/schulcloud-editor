@@ -17,7 +17,7 @@ const sectionRemove = (app) => {
 		let { sections } = await getLesson(lesson);
 
 		// remove deleted sections
-		sections = forceArray(sections).filter(sectionId => sameId(sectionId, _id));
+		sections = forceArray(sections).filter(section => !sameId(section._id, _id));
 
 		// patch upated sections into lesson
 		LessonModel.findByIdAndUpdate(lesson, { sections }).lean().exec((err, doc) => {
