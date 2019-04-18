@@ -1,5 +1,5 @@
 
-const {ObjectId} = require('mongoose').Types
+const { ObjectId } = require('mongoose').Types;
 
 class UserInformation {
 	constructor(options = {}) {
@@ -7,28 +7,21 @@ class UserInformation {
 	}
 
 	async get(id, params) {
-		try{
-			const groupService = this.app.service('groups')
+
+		try {
+			const groupService = this.app.service('lessons');
 			const userId = params.headers.authorization;
-			params.query = {
-				$or: [
-					{ owner: userId },
-					{ users: userId }
-				],
-				$populate: [
-					'lesson'
-				],
-			}
-			
+			const modifiedParams = {
+				...params,
+			};
+
 			const group = await groupService.find(params);
-			
+
 
 			return Promise.resolve(group);
-		} catch(err) {
+		} catch (err) {
 			return Promise.reject(err);
 		}
-
-		
 	}
 
 	setup(app) {

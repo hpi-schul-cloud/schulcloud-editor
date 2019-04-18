@@ -7,12 +7,12 @@ it will throw an event and the services have added the operationens for it.
 
 
 const Information = require('./services/infomation');
-const informationHooks = require('./hooks/information')
+const informationHooks = require('./hooks/information');
 
 module.exports = function setup() {
 	const app = this;
 
-    app.use('user/information', new Information());
-    const informationService = app.service('user/information');
-    informationService.hooks(informationHooks);
+	app.use('user/information', new Information());
+	const informationService = app.service('user/information');
+	informationService.hooks(informationHooks);
 };
