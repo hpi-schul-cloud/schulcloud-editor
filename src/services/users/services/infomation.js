@@ -9,13 +9,12 @@ class UserInformation {
 	async get(id, params) {
 
 		try {
-			const groupService = this.app.service('lessons');
-			const userId = params.headers.authorization;
+			const lessonService = this.app.service('lessons');
 			const modifiedParams = {
 				...params,
 			};
 
-			const group = await groupService.find(params);
+			const group = await lessonService.find(modifiedParams);
 
 
 			return Promise.resolve(group);

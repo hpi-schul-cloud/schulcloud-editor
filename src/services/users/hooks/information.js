@@ -20,15 +20,14 @@ const rekursiveIdRemover = (data) => {
 };
 
 const removeIds = (context) => {
-	if (!context.result.data) return context;
-    // TODO: find a solution for converting
+	if (!context.result.data) {
+		return context;
+	}
 	const modifiedContext = context;
 	modifiedContext.result.data = rekursiveIdRemover(context.result.data);
 
 	return modifiedContext;
 };
-
-const clean = context => context;
 
 exports.before = {
 	all: [],
@@ -44,7 +43,7 @@ exports.before = {
 exports.after = {
 	all: [],
 	find: [],
-	get: [removeIds, clean],
+	get: [removeIds],
 	create: [],
 	update: [],
 	patch: [],
