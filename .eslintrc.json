@@ -48,5 +48,9 @@
 	},
 	"plugins": [
 		"import"
-	]
+	],
+	"env": {
+		"mocha": true,
+		"es6": true
+	}
 }
