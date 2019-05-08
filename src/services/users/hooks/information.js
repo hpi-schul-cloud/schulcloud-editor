@@ -20,7 +20,6 @@ const rekursiveIdRemover = (data) => {
 };
 
 const removeIds = (context) => {
-	console.log(context);
 	if (!context.result.data) {
 		return context;
 	}

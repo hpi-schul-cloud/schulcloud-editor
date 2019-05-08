@@ -19,7 +19,7 @@ describe('\'user information\' hook', () => {
 
 		app.service(serviceName).hooks({
 			after: {
-				get: hooks.before.get,
+				get: hooks.after.get,
 			},
 		});
 	});
@@ -63,24 +63,30 @@ describe('\'user information\' hook', () => {
 			},
 		];
 
-		const result = await app.service(serviceName).get(data);
+		const result = { data };
 
-		assert.deepEqual(result, [
-			{
-				titel: 'test',
-				type: 'lesson',
-				sections: [
-					{
-						titel: '',
-						type: 'section',
-					},
-				],
-			},
-			{
-				titel: 'test',
-				type: 'lesson',
-				sections: [],
-			},
-		]);
+		try {
+			const cleaned = await app.service(serviceName).get(result);
+
+			assert.deepEqual(cleaned, [
+				{
+					titel: 'test',
+					type: 'lesson',
+					sections: [
+						{
+							titel: '',
+							type: 'section',
+						},
+					],
+				},
+				{
+					titel: 'test',
+					type: 'lesson',
+					sections: [],
+				},
+			]);
+		} catch (e) {
+			return e;
+		}
 	});
 });
