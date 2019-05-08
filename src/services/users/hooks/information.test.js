@@ -24,7 +24,7 @@ describe('\'user information\' hook', () => {
 		});
 	});
 
-	it('removeIds from object and nested objects 1', async () => {
+	it('removeIds from objects 1', async () => {
 		const data = [
 			{
 				_id: {
@@ -90,7 +90,7 @@ describe('\'user information\' hook', () => {
 		}
 	});
 
-	it('removeIds from object and nested objects 2', async () => {
+	it('removeIds from objects 2', async () => {
 		const data = [
 			{
 				_id: {
