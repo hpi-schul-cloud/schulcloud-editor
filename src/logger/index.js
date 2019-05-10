@@ -17,7 +17,7 @@ if(process.env.NODE_ENV === "productive"){
 const logger = winston.createLogger({
 	levels: winston.config.syslog.levels,
 	transports: [
-		new winston.transports.Syslog(syslogConfig),
+		//new winston.transports.Syslog(syslogConfig),
 		new winston.transports.Console({
 			handleExceptions: true,
 			json: false
