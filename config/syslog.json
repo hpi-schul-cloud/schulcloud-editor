@@ -1,0 +1,14 @@
+{
+    "development": {
+        "host": "localhost",
+        "port": 1234,
+        "protocol": "udp4",
+        "app_name": "editor-microservice"
+    },
+    "productive": {
+        "host": "localhost",
+        "port": 1234,
+        "protocol": "udp4",
+        "app_name": "editor-microservice"
+    }
+}
