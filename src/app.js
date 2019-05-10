@@ -1,6 +1,7 @@
 /* eslint-disable no-console */
 const path = require('path');
 const feathers = require('@feathersjs/feathers');
+const socketio = require('@feathersjs/socketio');
 // eslint-disable-next-line import/newline-after-import
 const express = require('@feathersjs/express');
 process.env.NODE_CONFIG_DIR = path.join(__dirname, '../config/');
@@ -30,6 +31,7 @@ const app = express(feathers())
 	.use(express.urlencoded({ extended: true }))
 	// todo "handleResponseType" test it, maybe no effect see express.json() @deprecated
 	.configure(express.rest(handleResponseType))
+	.configure(socketio)
 
 	.use('/', express.static('public'))
 	.use(favicon(path.join('public', 'favicon.ico')))
