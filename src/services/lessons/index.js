@@ -15,5 +15,11 @@ module.exports = function setup() {
 	};
 	app.use('lessons', service(option));
 	const lessonsService = app.service('lessons');
+	lessonsService.on('get', message => {
+		console.log(message);
+	});
+	lessonsService.on('created', message => {
+		console.log(message);
+	});
 	lessonsService.hooks(hooks);
 };

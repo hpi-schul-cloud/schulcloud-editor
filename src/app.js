@@ -30,9 +30,22 @@ const app = express(feathers())
 	.configure(conf)
 	.use(express.json())
 	.use(express.urlencoded({ extended: true }))
+	.use(function(req, res, next) {
+		res.header("Access-Control-Allow-Origin", "*");
+		next();
+	})
 	// todo "handleResponseType" test it, maybe no effect see express.json() @deprecated
 	.configure(express.rest(handleResponseType))
-	.configure(socketio())
+	.configure(socketio(function(io){
+		io.origins((origin, callback) => callback(null, true));
+		io.use((socket, next) => {
+			let clientId = socket.handshake.headers['Authorization'];
+			//return next(new Error('authentication error'));
+			next();
+
+		  });
+		
+	}))
 
 	.use('/', express.static('public'))
 	.use(favicon(path.join('public', 'favicon.ico')))
