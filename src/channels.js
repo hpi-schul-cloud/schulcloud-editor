@@ -1,10 +1,13 @@
+const logger = require('./logger');
+
 module.exports = (app) => {
     app.on('connection', connection => {
         //TODO 
        // app.channel('unique editorid').join(connection);
+        logger.info('Socket.io: New Connection')
     })
 
-    app.on('connect', (lesson, { connection }) => {
+    app.on('lessons', (lesson, { connection }) => {
         // connection can be undefined if there is no
         // real-time connection, e.g. when logging in via REST
         if(conneciton){

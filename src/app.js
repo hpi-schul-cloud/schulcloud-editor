@@ -8,6 +8,7 @@ process.env.NODE_CONFIG_DIR = path.join(__dirname, '../config/');
 process.env.NODE_ENV = process.env.NODE_ENV || 'default';
 const configuration = require('@feathersjs/configuration');
 const favicon = require('serve-favicon');
+const channels = require('./channels');
 // const bodyParser = require('body-parser'); @deprecated
 
 const hooks = require('./global/');
@@ -31,7 +32,7 @@ const app = express(feathers())
 	.use(express.urlencoded({ extended: true }))
 	// todo "handleResponseType" test it, maybe no effect see express.json() @deprecated
 	.configure(express.rest(handleResponseType))
-	.configure(socketio)
+	.configure(socketio())
 
 	.use('/', express.static('public'))
 	.use(favicon(path.join('public', 'favicon.ico')))
@@ -41,6 +42,7 @@ const app = express(feathers())
 	.configure(database)
 	.configure(middleware)
 	.configure(services)
+	.configure(channels)
 	.hooks(hooks)
 	.use(express.errorHandler({
 		// force format html error to json
