@@ -1,6 +1,6 @@
 /* eslint-disable no-param-reassign */
 const { GeneralError, Forbidden } = require('@feathersjs/errors');
-// const logger = require('winston');
+const logger = require('../logger');
 
 const forceOperation = (context) => {
 	const { force } = context.params.query;
@@ -32,7 +32,7 @@ const errorHandler = (ctx) => {
 		if (ctx.error.hook) {
 			delete ctx.error.hook;
 		}
-		console.log(ctx.error);
+		logger.error(ctx.error);
 		if (!ctx.error.code) {
 			ctx.error = new GeneralError('server error', ctx.error);
 		}
@@ -45,8 +45,8 @@ const errorHandler = (ctx) => {
 		}
 		return ctx;
 	}
-	// logger.warn('Error with no error key is throw. Error logic can not handle it.');
-	console.log('Error with no error key is throw. Error logic can not handle it.');
+	logger.warn('Error with no error key is throw. Error logic can not handle it.');
+
 	throw new GeneralError('server error');
 };
 

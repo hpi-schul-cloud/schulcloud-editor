@@ -1,16 +1,14 @@
 const event = require('./event');
 const request = require('./request');
 const winston = require('winston');
-const syslogConfigs = require('../../config/syslog.json');
 
 
 const logger = winston.createLogger({
 	levels: winston.config.syslog.levels,
 	format: winston.format.combine(
-		winston.format.timestamp(),
-		winston.format.ms(),
-		winston.format.prettyPrint(),
-		winston.format.simple(),
+		winston.format.timestamp(), // adds current timestamp
+		winston.format.ms(),	// adds time since last log
+		winston.format.simple(), // output as string. Use 'winston.format.prettyPrint()' for well formated json
 	),
 	transports: [
 		new winston.transports.Console({
