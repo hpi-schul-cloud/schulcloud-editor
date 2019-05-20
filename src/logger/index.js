@@ -1,17 +1,7 @@
 const event = require('./event');
 const request = require('./request');
 const winston = require('winston');
-require('winston-syslog').Syslog
 const syslogConfigs = require('../../config/syslog.json');
-
-let syslogConfig = {};
-if(process.env.NODE_ENV === "productive"){
-	syslogConfig = syslogConfigs.productive;
-
-} else {
-	syslogConfig = syslogConfigs.development;
-}
-
 
 
 const logger = winston.createLogger({
@@ -20,12 +10,11 @@ const logger = winston.createLogger({
 		winston.format.timestamp(),
 		winston.format.ms(),
 		winston.format.prettyPrint(),
+		winston.format.simple(),
 	),
 	transports: [
-		//new winston.transports.Syslog(syslogConfig),
 		new winston.transports.Console({
-			handleExceptions: true,
-			json: false
+			handleExceptions: true
 		  })
 	]
 })
