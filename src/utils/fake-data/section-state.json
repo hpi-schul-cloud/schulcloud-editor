@@ -1,0 +1,35 @@
+{
+    "plugin": "rows",
+    "state": [
+        {
+            "plugin": "text",
+            "state": {
+                "object": "value",
+                "document": {
+                    "object": "document",
+                    "data": {},
+                    "nodes": [
+                        {
+                            "object": "block",
+                            "type": "paragraph",
+                            "data": {},
+                            "nodes": [
+                                {
+                                    "object": "text",
+                                    "leaves": [
+                                        {
+                                            "object": "leaf",
+                                            "text":
+                                                "Herzlich Willkommen in der Alpha-Version des neuen Themen-Werkzeugs!\n\nDas ist das Grundgerüst für den komplett überarbeiteten Themen-Editor. Schon in dieser frühen Entwicklungsphase freuen wir uns über Feedback zu den vorhandenen Funktionen, um diese zu verbessern und zu erweitern. Bitte beachte: Es wird nichts gespeichert, das ist eine reine Spielwiese.\n\nProbier es aus und gib uns formloses Feedback - jedes kleine bisschen hilft!",
+                                            "marks": []
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            }
+        }
+    ]
+}
