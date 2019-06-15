@@ -1,23 +1,32 @@
 {
-    "state": {
-        "0": {
+    "plugin": "rows",
+    "state": [
+        {
+            "plugin": "text",
             "state": {
+                "object": "value",
                 "document": {
-                    "nodes": {
-                        "0": {
-                            "nodes": {
-                                "0": {
-                                    "leaves": {
-                                        "0": {
-                                            "text": ":)"
-                                        },
-                                        "1": null
-                                    }
+                    "object": "document",
+                    "data": {},
+                    "nodes": [
+                        {
+                            "object": "block",
+                            "type": "paragraph",
+                            "data": {},
+                            "nodes": [
+                                {
+                                    "object": "text",
+                                    "leaves": [
+                                        {
+                                            "object": "leaf",
+                                            "text": ":)",
+                                            "marks": []
+                                        }
+                                    ]
                                 }
-                            }
+                            ]
                         },
-                        "1": {
-                            "x-new": true,
+                        {
                             "object": "block",
                             "type": "paragraph",
                             "data": {},
@@ -34,12 +43,11 @@
                                 }
                             ]
                         }
-                    }
+                    ]
                 }
             }
         },
-        "1": {
-            "x-new": true,
+        {
             "plugin": "text",
             "state": {
                 "object": "value",
@@ -68,5 +76,5 @@
                 }
             }
         }
-    }
+    ]
 }

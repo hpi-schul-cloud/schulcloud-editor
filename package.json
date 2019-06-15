@@ -7,9 +7,9 @@
     "start": "node src/",
     "startd": "nodemon src/",
     "debug": "nodemon --inspect=4002 src/",
-    "test": "cross-env NODE_ENV=test mocha src/**/*.test.js",
-    "test:inspect": "cross-env NODE_ENV=test mocha --debug-brk --inspect src/**/*.test.js",
-    "test:watch": "cross-env NODE_ENV=test mocha src/**/*.test.js  --watch"
+    "test": "cross-env NODE_ENV=test mocha src/**/*.test.js --timeout 5000",
+    "test:inspect": "cross-env NODE_ENV=test mocha --debug-brk --inspect src/**/*.test.js --timeout 5000",
+    "test:watch": "cross-env NODE_ENV=test mocha src/**/*.test.js  --watch --timeout 5000"
   },
   "repository": {
     "type": "git",
