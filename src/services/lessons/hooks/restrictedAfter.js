@@ -7,6 +7,7 @@ const restrictedAfter = (context) => {
 		return context;
 	}
 	const user = getSessionUser(context);
+	// find
 	if (context.result.data) {
 		const groups = [];
 		context.result.data.forEach((lesson) => {
@@ -15,6 +16,7 @@ const restrictedAfter = (context) => {
 		});
 		isMemberOf(groups, user, true);
 	} else {
+	// get
 		const { users, owner } = context.result;
 		isMemberOf([users, owner], user, true);
 	}

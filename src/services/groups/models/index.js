@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const { after } = require('../../../global/helpers');
+const { addDocType } = require('../../../global/helpers');
 
 const { Schema } = mongoose;
 
@@ -21,8 +21,8 @@ function autoSelect(next) {
 groupSchema
 	.pre('findOne', autoSelect)
 	.pre('find', autoSelect)
-	.post('find', after('group'))
-	.post('findOne', after('group'));
+	.post('find', addDocType('group'))
+	.post('findOne', addDocType('group'));
 
 const GroupModel = mongoose.model('group', groupSchema);
 

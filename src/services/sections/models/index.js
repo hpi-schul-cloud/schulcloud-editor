@@ -1,7 +1,7 @@
 /* eslint-disable no-param-reassign */
 const mongoose = require('mongoose');
 
-const { after } = require('../../../global/helpers');
+const { addDocType } = require('../../../global/helpers');
 
 const { Schema } = mongoose;
 
@@ -28,10 +28,10 @@ const sectionSchema = new Schema({
 	permissions: [{ type: permissionGroupSchema }],
 	title: { type: String, default: '' },
 	state: { type: Object, default: {} },
-	flag: { type: String, enum: ['isFromStudent', 'isTemplate'], default: 'isTemplate' },
+	// flag: { type: String, enum: ['isFromStudent', 'isTemplate'], default: 'isTemplate' }, vermutlich nicht benötigt da über parent abgebildet
 }, {
 	timestamps: true,
-	minimize: false,
+	minimize: false, // to also return key value === null
 });
 
 function autoPopulate(next) {
@@ -44,8 +44,8 @@ function autoPopulate(next) {
 sectionSchema
 	.pre('findOne', autoPopulate)
 	.pre('find', autoPopulate)
-	.post('find', after('section'))
-	.post('findOne', after('section'));
+	.post('find', addDocType('section'))
+	.post('findOne', addDocType('section'));
 
 function autoSelect(next) {
 	this.select('-createdAt -updatedAt -__v');
