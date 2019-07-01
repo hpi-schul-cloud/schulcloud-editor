@@ -10,7 +10,7 @@ const getPermissions = (app, id, params) => app.service('sections')
 		throw new BadRequest('Can not fetch section.', err);
 	});
 
-/** 
+/**
  * @returns section
 */
 const patchPermissions = (app, id, permissions, params) => app.service('sections')
