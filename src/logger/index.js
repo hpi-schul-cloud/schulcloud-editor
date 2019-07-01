@@ -1,6 +1,6 @@
+const winston = require('winston');
 const event = require('./event');
 const request = require('./request');
-const winston = require('winston');
 
 
 const logger = winston.createLogger({
@@ -8,14 +8,14 @@ const logger = winston.createLogger({
 	format: winston.format.combine(
 		winston.format.timestamp(), // adds current timestamp
 		winston.format.ms(),	// adds time since last log
-		winston.format.simple(), // output as string. Use 'winston.format.prettyPrint()' for well formated json
+		winston.format.prettyPrint(), // Use 'winston.format.prettyPrint()' for string output
 	),
 	transports: [
 		new winston.transports.Console({
-			handleExceptions: true
-		  })
-	]
-})
+			handleExceptions: true,
+		}),
+	],
+});
 
 
 // add events log for methods

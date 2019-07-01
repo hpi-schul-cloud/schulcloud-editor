@@ -37,7 +37,7 @@ const errorHandler = (ctx) => {
 			ctx.error = new GeneralError('server error', ctx.error);
 		}
 
-		// logger.warn(ctx.error);
+		// logger.warning(ctx.error);
 
 		if (process.env.NODE_ENV === 'production') {
 			ctx.error.stack = null;
@@ -45,7 +45,7 @@ const errorHandler = (ctx) => {
 		}
 		return ctx;
 	}
-	logger.warn('Error with no error key is throw. Error logic can not handle it.');
+	logger.warning('Error with no error key is throw. Error logic can not handle it.');
 
 	throw new GeneralError('server error');
 };
