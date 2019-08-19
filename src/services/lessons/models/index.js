@@ -5,26 +5,21 @@ const { after } = require('../../../global/helpers');
 const { Schema } = mongoose;
 
 const lessonSchema = new Schema({
-	title: { type: String, default: '' },
-	note: { type: String, default: '' },
+	title: { type: String, required: true },
+	note: { type: String },
 	sections: [{ type: Schema.Types.ObjectId, ref: 'section' }],
-	owner: { type: Schema.Types.ObjectId, ref: 'group', required: true },
-	users: { type: Schema.Types.ObjectId, ref: 'group' },
+	permissons: [{ type: Schema.Types.ObjectId, ref: '' }],
 	type: { type: String, default: 'lesson', enum: ['lesson'] },
+	visible: { type: Boolean, default: true },
+	courseId: { type: Schema.Types.ObjectId },
+	position: { type: Number, default: (new Date().getTime()) },
+	fork: { type: Schema.Types.ObjectId }, // is forked from
+	deletedAt: { type: Date },
 }, {
 	timestamps: true,
 });
 
-function autoPopulate(next) {
-	this.populate('sections');
-	this.populate('owner');
-	this.populate('users');
-	next();
-}
-
 lessonSchema
-	.pre('findOne', autoPopulate)
-	.pre('find', autoPopulate)
 	.post('find', after('lesson'))
 	.post('findOne', after('lesson'));
 
