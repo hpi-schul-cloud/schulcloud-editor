@@ -7,7 +7,6 @@ module.exports = (logger, methods = []) => ({
 	// trigger only if found elements exist
 	if (doc.n > 0) {
 		logger.info({
-			timestamp: new Date(),
 			request: {
 				method, path, result: result._id,
 			},
@@ -17,7 +16,6 @@ module.exports = (logger, methods = []) => ({
 		});
 	} else if (doc._id) {
 		logger.info({
-			timestamp: new Date(),
 			request: {
 				method, path, result: result._id,
 			},
