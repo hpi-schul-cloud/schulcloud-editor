@@ -15,6 +15,8 @@ const services = require('./services/');
 const middleware = require('./middleware');
 // const defaultHeaders = require('./middleware/defaultHeaders'); @deprecated
 const handleResponseType = require('./middleware/handleResponseType');
+const getAuthorizationHeader = require('./middleware/getAuthorizationHeader');
+const decodeJWT = require('./middleware/decodeJWT');
 
 const conf = configuration();
 
@@ -33,13 +35,15 @@ const app = express(feathers())
 
 	.use('/', express.static('public'))
 	.use(favicon(path.join('public', 'favicon.ico')))
+	.use(getAuthorizationHeader)
+	.use(decodeJWT)
 
 	// .use(defaultHeaders) // todo test it, position,  if we need it? @deprecated
 
 	.configure(database)
 	.configure(middleware)
 	.configure(services)
-	.hooks(hooks)
+	//.hooks(hooks)
 	.use(express.errorHandler({
 		// force format html error to json
 		// eslint-disable-next-line no-unused-vars

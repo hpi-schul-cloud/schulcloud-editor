@@ -1,0 +1,21 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "definitions": {
+
+		"title": {
+			"type": "string"
+		},
+		"visible": {
+			"type": "boolean"
+		},
+		"courseId": {
+			"type": "string"
+		},
+		"fork": {
+			"type": "string"
+		},
+		"note": {
+			"type": "string"
+		}
+    }
+}
