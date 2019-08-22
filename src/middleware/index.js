@@ -10,7 +10,8 @@ module.exports = function setup() {
 	const app = this;
 	app.logger = logger;
 
-	getForceKey(app);
-	ping(app);
-	app.use(requestLogs(app));
+	
+	//getForceKey(app);
+	//ping(app);
+	//app.use(requestLogs(app));
 };

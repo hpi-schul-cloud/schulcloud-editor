@@ -1,19 +1,19 @@
-
-const defaultConfig = require('./default.json');
+const logger = require('../src/logger');
+const defaultConfig = require('./default');
 
 let envConfig;
 
 switch (process.env.NODE_ENV) {
 	case 'test':
-		envConfig = require('./test.json');
+		envConfig = require('./test');
 		break;
 	case 'production':
-		envConfig = require('./production.json');
+		envConfig = require('./production');
 		break;
 	case 'development':
 	case 'default':
 	default:
-		envConfig = require('./development.json');
+		envConfig = require('./development');
 		break;
 }
 
@@ -33,11 +33,17 @@ const prepareEnv = (env) => {
 	return refObject;
 };
 
-const prepareConfig = (base, system, env) => {
+const prepareConfig = (base, system, env = []) => {
 	const config = {};
 
 	Object.keys(base).forEach((key) => {
-		config[key] = env[key] || system[key] || base[key];
+		if (typeof base[key] === 'object') {
+			// deep copy do not include env
+			config[key] = prepareConfig(base[key], system[key]);
+		} else {
+			config[key] = env[key] || system[key] || base[key];
+		}
+		logger.debug(config[key]);
 	});
 
 	return config;
