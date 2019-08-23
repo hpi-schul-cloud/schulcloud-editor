@@ -6,6 +6,7 @@ const express = require('@feathersjs/express');
 process.env.NODE_CONFIG_DIR = path.join(__dirname, '../config/');
 process.env.NODE_ENV = process.env.NODE_ENV || 'default';
 const configuration = require('@feathersjs/configuration');
+const socketio = require('@feathersjs/socketio');
 const favicon = require('serve-favicon');
 // const bodyParser = require('body-parser'); @deprecated
 
@@ -39,7 +40,7 @@ const app = express(feathers())
 	.use(decodeJWT)
 
 	// .use(defaultHeaders) // todo test it, position,  if we need it? @deprecated
-
+	.configure(socketio())
 	.configure(database)
 	.configure(middleware)
 	.configure(services)
