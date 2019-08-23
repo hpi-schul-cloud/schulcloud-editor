@@ -24,6 +24,10 @@
         "$id": "#/properties/fork",
         "type": "string",
         "pattern": "[a-f0-9]{24}"
+      },
+      "note": {
+        "$id": "#/properties/note",
+        "type": "string"
       }
     },
     "additionalProperties": false

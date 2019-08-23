@@ -23,6 +23,9 @@ const hooks = {
 		patch: [
 			validateSchema(patchSchema, Ajv),
 		],
+		remove: [
+
+		],
 
 	},
 
@@ -36,6 +39,10 @@ const hooks = {
 };
 
 class Lessons {
+	setup(app) {
+		this.app = app;
+	}
+
 	async find(params) {
 		const { route } = params;
 
@@ -110,16 +117,13 @@ class Lessons {
 		const { route } = params;
 
 		try {
-			let lesson = await LessonModel.findOne({
+			return await LessonModel.updateOne({
 				_id: id,
 				courseId: route.courseId,
 				deletedAt: { $exists: false },
-			}).exec();
-			lesson = {
-				...lesson,
+			}, {
 				...data,
-			};
-			return await lesson.save();
+			}).exec();
 		} catch (err) {
 			logger.error(`Failed to update the lesson ${err}`);
 			throw err;
@@ -144,8 +148,13 @@ class Lessons {
 	}
 }
 
+const joinLessonChannel = app => (user) => {
+	app.channel(`lessons/${user.lesson}`).join(user.connection);
+};
+
 
 module.exports = {
 	Lessons,
 	hooks,
+	joinLessonChannel,
 };

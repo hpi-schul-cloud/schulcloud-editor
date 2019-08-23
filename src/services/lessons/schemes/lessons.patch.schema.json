@@ -13,6 +13,10 @@
       "visible": {
         "$id": "#/properties/visible",
         "type": "boolean"
+      },
+      "note": {
+        "$id": "#/properties/note",
+        "type": "string"
       }
     },
     "additionalProperties": false
