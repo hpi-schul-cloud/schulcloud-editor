@@ -10,7 +10,7 @@ const forceOperation = (context) => {
 };
 
 const addUserId = (context) => {
-	const userId = (context.params.headers || {}).authorization;
+	const { userId } = context.params;
 	if (userId) {
 		// todo validate mongoose id
 		context.params.user = userId.toString();
