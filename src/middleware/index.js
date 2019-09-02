@@ -6,6 +6,7 @@ const requestLogs = require('./requestLogs');
 const ping = require('./ping');
 const handleJWTAndAddToContext = require('./handleJWTAndAddToContext');
 const addHeaderToContext = require('./addHeaderToContext');
+const addForceTest = require('./addForceTest');
 
 module.exports = function setup() {
 	logger.info('Configure additional middleware operations.');
@@ -18,4 +19,5 @@ module.exports = function setup() {
 	app.configure(ping);
 	app.configure(requestLogs);
 	app.configure(handleJWTAndAddToContext);
+	app.configure(addForceTest);
 };

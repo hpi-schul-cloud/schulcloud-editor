@@ -21,5 +21,5 @@ permissionSchema
 	.post('findOne', addTypeString('permission'));
 
 module.exports = {
-	ViewportModel: mongoose.model('permission', permissionSchema),
+	PermissionModel: mongoose.model('permission', permissionSchema),
 };
