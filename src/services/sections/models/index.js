@@ -8,7 +8,8 @@ const sectionSchema = new Schema({
 	parent: [{ type: Schema.Types.ObjectId, ref: 'lesson', default: null }], // todo: required ?
 	title: { type: String, default: '' },
 	state: { type: Object, default: {} },
-	permissions: [],
+	permissions: [{ type: Object }],
+	deletedAt: { type: Date, expires: (60 * 60 * 24 * 30) },
 }, {
 	timestamps: true,
 	minimize: false, // to return empty objects

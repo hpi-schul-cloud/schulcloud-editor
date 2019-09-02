@@ -8,7 +8,8 @@ const lessonSchema = new Schema({
 	title: { type: String, default: '' },
 	courseId: { type: Schema.Types.ObjectId },
 	sections: [{ type: Schema.Types.ObjectId, ref: 'section' }],
-	permissions: [],
+	permissions: [{ type: Object }],
+	deletedAt: { type: Date, expires: (60 * 60 * 24 * 30) },
 }, {
 	timestamps: true,
 });
