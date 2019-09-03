@@ -1,6 +1,7 @@
 /* eslint-disable no-console */
 const path = require('path');
 const feathers = require('@feathersjs/feathers');
+const socketio = require('@feathersjs/socketio');
 // eslint-disable-next-line import/newline-after-import
 const express = require('@feathersjs/express');
 process.env.NODE_CONFIG_DIR = path.join(__dirname, '../config/');
@@ -39,6 +40,7 @@ const app = express(feathers())
 	.configure(database)
 	.configure(middleware)
 	.configure(services)
+	.configure(socketio())
 	.hooks(hooks)
 	.use(express.errorHandler({
 		// force format html error to json

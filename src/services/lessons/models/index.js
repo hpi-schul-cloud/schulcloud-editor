@@ -10,11 +10,18 @@ const lessonSchema = new Schema({
 	sections: [{ type: Schema.Types.ObjectId, ref: 'section' }],
 	permissions: [{ type: Object }],
 	deletedAt: { type: Date, expires: (60 * 60 * 24 * 30) },
+	createdFrom: { type: Schema.Types.ObjectId },
 }, {
 	timestamps: true,
 });
 
+function autoPopulate(next) {
+	this.populate('sections');
+	next();
+}
+
 lessonSchema
+	.pre('findOne', autoPopulate)
 	.post('find', addTypeString('lesson'))
 	.post('findOne', addTypeString('lesson'));
 

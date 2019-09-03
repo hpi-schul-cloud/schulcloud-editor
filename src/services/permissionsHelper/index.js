@@ -86,5 +86,8 @@ module.exports = function setup(app) {
 	const permissionService = app.service(path);
 	permissionService.hooks(hooks);
 
+	const serviceToModified = app.service(baseService);
+	
+
 	app.logger.info(`Permission services is adding add ${path} with key ${permissionKey}.`);
 };
