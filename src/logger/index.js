@@ -2,6 +2,22 @@ const winston = require('winston');
 const event = require('./event');
 const request = require('./request');
 
+let logLevel = process.env.LOG_LEVEL;
+
+if (!logLevel) {
+	switch (process.env.NODE_ENV) {
+		case 'default':
+		case 'development':
+			logLevel = 'debug';
+			break;
+		case 'test':
+			logLevel = 'emerg';
+			break;
+		case 'production':
+		default:
+			logLevel = 'info';
+	}
+}
 
 const logger = winston.createLogger({
 	levels: winston.config.syslog.levels,
@@ -12,6 +28,7 @@ const logger = winston.createLogger({
 	),
 	transports: [
 		new winston.transports.Console({
+			logLevel,
 			handleExceptions: true,
 		}),
 	],
