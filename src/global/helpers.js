@@ -68,6 +68,9 @@ const isForced = context => context.params.force;
 
 // models after helper
 const addTypeString = name => (docs, next) => {
+	if (!docs) {
+		next();
+	}
 	if (Array.isArray(docs)) {
 		docs = docs.map((doc) => {
 			doc.type = name;
@@ -78,6 +81,11 @@ const addTypeString = name => (docs, next) => {
 	}
 
 	next();
+};
+
+const convertParamsToInternRequest = (params) => {
+	params.provider = undefined;
+	return params;
 };
 
 const emptyHook = () => ({
@@ -111,4 +119,5 @@ module.exports = {
 	isArrayWithElement,
 	emptyHook,
 	addTypeString,
+	convertParamsToInternRequest,
 };
