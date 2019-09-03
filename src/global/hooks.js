@@ -67,11 +67,33 @@ const forceOwnerInData = (context) => {
 	return context;
 };
 
+/* eslint-disable no-param-reassign */
+const filterOutResults = keys => (context) => {
+	if (context.result && context.type === 'after' && context.params.provider === 'rest') {
+		if (!Array.isArray(keys)) {
+			keys = [keys];
+		}
+		if (context.method === 'find' && Array.isArray(context.result.data)) {
+			context.result.data.forEach((ele) => {
+				keys.forEach((key) => {
+					delete ele[key];
+				});
+			});
+		} else {
+			keys.forEach((key) => {
+				delete context.result[key];
+			});
+		}
+	}
+	return context;
+};
+
 module.exports = {
 	// exist,
 	// filter,
 	// objectPathResolver,
 	block,
-	populate,
-	forceOwnerInData,
+	// populate,
+	// forceOwnerInData,
+	filterOutResults,
 };
