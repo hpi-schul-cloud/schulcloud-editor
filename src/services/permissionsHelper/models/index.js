@@ -1,24 +1,18 @@
 const mongoose = require('mongoose');
 
-const { addTypeString } = require('../../../global/helpers');
-
 const { Schema } = mongoose;
 
 const permissionSchema = new Schema({
-	group: [{ type: Schema.Types.ObjectId, ref: 'group', required: true }],
+	group: { type: Schema.Types.ObjectId, ref: 'group' },
 	users: [{ type: Schema.Types.ObjectId }],
 	read: { type: Boolean, default: false },
 	write: { type: Boolean, default: false },
-	activated: { type: Boolean, default: true },
-	pubishDate: {},
-	endDate: {},
+	activated: { type: Boolean, default: false },
+	pubishDate: { type: Date, default: null },
+	endDate: { type: Date, default: null },
 }, {
 	timestamps: true,
 });
-
-permissionSchema
-	.post('find', addTypeString('permission'))
-	.post('findOne', addTypeString('permission'));
 
 module.exports = {
 	PermissionModel: mongoose.model('permission', permissionSchema),

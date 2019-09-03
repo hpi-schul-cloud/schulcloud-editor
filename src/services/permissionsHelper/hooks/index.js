@@ -1,11 +1,11 @@
-const { block } = require('../../../global/hooks');
+const restictedExternAccess = require('./restictedExternAccess');
 
 exports.before = {
 	all: [],
-	find: [],
+	find: [restictedExternAccess],
 	get: [],
-	create: [],
-	update: [block],
+	create: [restictedExternAccess],
+	update: [],
 	patch: [],
 	remove: [],
 };
