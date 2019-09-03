@@ -1,4 +1,4 @@
-const { block } = require('../../../global/hooks');
+const { block, filterOutResults } = require('../../../global/hooks');
 
 exports.before = {
 	all: [],
@@ -11,7 +11,7 @@ exports.before = {
 };
 
 exports.after = {
-	all: [],
+	all: [filterOutResults('permissions')],
 	find: [],
 	get: [],
 	create: [],
