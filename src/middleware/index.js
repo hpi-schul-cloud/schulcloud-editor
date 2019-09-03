@@ -1,5 +1,4 @@
 /* eslint-disable no-console */
-const logger = require('../logger');
 const loggerAddHandler = require('./addLoggerToApp');
 const getForceKey = require('./getForceKey');
 const requestLogs = require('./requestLogs');
@@ -9,7 +8,7 @@ const addHeaderToContext = require('./addHeaderToContext');
 const addForceTest = require('./addForceTest');
 
 module.exports = function setup() {
-	logger.info('Configure additional middleware operations.');
+	console.log('___Configure additional middleware operations___\n');
 
 	const app = this;
 	// important that logger is add as first
@@ -20,4 +19,6 @@ module.exports = function setup() {
 	app.configure(requestLogs);
 	app.configure(handleJWTAndAddToContext);
 	app.configure(addForceTest);
+
+	console.log('_________________\n');
 };

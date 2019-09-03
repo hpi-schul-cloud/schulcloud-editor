@@ -19,10 +19,10 @@ const handleResponseType = require('./middleware/handleResponseType');
 const conf = configuration();
 
 console.log('\n___process.env___');
-['NODE_CONFIG_DIR', 'NODE_ENV', 'EDITOR_MS_FORCE_KEY']
+['NODE_CONFIG_DIR', 'NODE_ENV'] // 'EDITOR_MS_FORCE_KEY'
 	.forEach(key => console.log(key, process.env[key]));
 console.log('From config file:', conf());
-console.log('_________________\n');
+console.log('\n');
 
 const app = express(feathers())
 	.configure(conf)
