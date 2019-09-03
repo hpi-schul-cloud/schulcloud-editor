@@ -1,5 +1,5 @@
 const { block, filterOutResults } = require('../../../global/hooks');
-
+// todo filter should add over permissionHelper
 exports.before = {
 	all: [],
 	find: [],
