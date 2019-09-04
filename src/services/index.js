@@ -13,7 +13,10 @@ module.exports = function setup() {
 	app.configure(lessons);
 	app.configure(permissionsHelper.bind({ baseService: 'lessons' }));
 	app.configure(groups);
+	app.configure(permissionsHelper.bind({ baseService: 'groups' }));
 	app.configure(sections);
+	app.configure(permissionsHelper.bind({ baseService: 'sections' }));
 	app.configure(viewports);
+	app.configure(permissionsHelper.bind({ baseService: 'viewports' }));
 	/** then configure all event listener */
 };
