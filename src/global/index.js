@@ -19,6 +19,21 @@ const addUserId = (context) => {
 	throw new Forbidden('Can not resolve user information.');
 };
 
+const addcreatedFrom = (context) => {
+	if (context.method === 'create' && context.data && !context.data.createdFrom) {
+		context.data.createdFrom = context.params.user;
+	}
+	return context;
+};
+
+const addUpdateFrom = (context) => {
+	if (context.method === 'create' && context.data && !context.data.updateFrom) {
+		context.data.updateFrom = context.params.user;
+	}
+	return context;
+};
+
+
 /**
  * For errors without error code create server error with code 500.
  * In production mode remove error stack and data.
@@ -52,14 +67,14 @@ exports.before = {
 	all: [addUserId],
 	find: [],
 	get: [],
-	create: [],
-	update: [],
+	create: [addcreatedFrom],
+	update: [addUpdateFrom],
 	patch: [],
 	remove: [],
 };
 
 exports.after = {
-	all: [filterOutResults(['__v', 'createdAt', 'updatedAt'])],
+	all: [filterOutResults(['__v', 'createdAt', 'updatedAt', 'createdFrom', 'updatedFrom'])], // todo select is better but need more stable implementations
 	find: [],
 	get: [],
 	create: [],
