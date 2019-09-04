@@ -84,8 +84,9 @@ const addTypeString = name => (docs, next) => {
 };
 
 const convertParamsToInternRequest = (params) => {
-	params.provider = undefined;
-	return params;
+	const copyParams = Object.assign({}, params);
+	copyParams.provider = undefined;
+	return copyParams;
 };
 
 const emptyHook = () => ({
