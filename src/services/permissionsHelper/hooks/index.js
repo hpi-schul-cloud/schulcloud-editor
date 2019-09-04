@@ -1,7 +1,8 @@
-const restictedExternAccess = require('./restictedExternAccess');
+const restictedAndAddAccess = require('./restictedAndAddAccess');
+const limitDataViewForReadAccess = require('./limitDataViewForReadAccess');
 
 exports.before = {
-	all: [restictedExternAccess],
+	all: [restictedAndAddAccess, limitDataViewForReadAccess],
 	find: [],
 	get: [],
 	create: [],
