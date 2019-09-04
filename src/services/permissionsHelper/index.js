@@ -2,13 +2,14 @@ const { Forbidden, GeneralError, BadRequest } = require('@feathersjs/errors');
 /* eslint-disable no-param-reassign */
 /* eslint-disable class-methods-use-this */
 const { convertParamsToInternRequest } = require('../../global/helpers');
+const { filterOutResults } = require('../../global/hooks');
 const { PermissionModel } = require('./models');
 const hooks = require('./hooks');
 
 const addReferencedData = (baseService, permissionKey) => async (context) => {
 	const { params, app } = context;
 	const { ressourceId } = params.route;
-	params.query.$select = { [permissionKey]: 1 };
+	// params.query.$select = { [permissionKey]: 1 };
 	params.query.$populate = { path: 'group' };
 	const baseData = await app.service(baseService).get(ressourceId,
 		convertParamsToInternRequest(params))
@@ -18,6 +19,7 @@ const addReferencedData = (baseService, permissionKey) => async (context) => {
 
 	context.params.baseId = ressourceId;
 	context.params.baseService = app.service(baseService);
+	context.params.baseData = baseData;
 	context.params.basePermissions = baseData[permissionKey]; // todo generic over settings
 	return context;
 };
@@ -33,6 +35,11 @@ class PermissionService {
 		};
 	}
 
+	/**
+	 * Create new embedded permissions for a user, or group.
+	 * @param {*} data
+	 * @param {*} params
+	 */
 	async create(data, params) {
 		const { _doc: newPermission, errors } = new PermissionModel(data);
 		if (errors || !newPermission) {
@@ -49,23 +56,35 @@ class PermissionService {
 		return newPermission;
 	}
 
-	userIsInside(users = [], userId) {
-		return users.some(id => id.toString() === userId);
+	/**
+	 * Return data from base data.
+	 * @param {*} userId
+	 * @param {*} params
+	 * @return {params}
+	 */
+	async get(userId, params) { // todo userId ?
+		return params;
 	}
 
-	async get(userId, { basePermissions }) {
-		const userIncludedPermissions = basePermissions.filter(
-			perm => this.userIsInside(perm.users, userId)
-			|| this.userIsInside((perm.group || {}).users, userId),
-		);
-		if (userIncludedPermissions.length <= 0) {
-			throw new Forbidden(this.err.noAccess);
-		}
-		return userIncludedPermissions;
-	}
-
+	/**
+	 * Return all permissions for data.
+	 * @param {*} params
+	 */
 	async find(params) {
 		return params.basePermissions;
+	}
+
+	async remove(permissionId, params) {
+		const { baseService, baseId, basePermissions } = params;
+		const newPermissions = basePermissions.filter(
+			perm => perm._id.toString() !== permissionId.toString(),
+		);
+		// todo slice mongoose operations
+		await baseService.patch(baseId, { [this.permissionKey]: newPermissions },
+			convertParamsToInternRequest(params))
+			.catch((err) => {
+				throw new GeneralError(this.err.create, err);
+			});
 	}
 
 	setup(app) {
@@ -86,8 +105,13 @@ module.exports = function setup(app) {
 	const permissionService = app.service(path);
 	permissionService.hooks(hooks);
 
+
 	const serviceToModified = app.service(baseService);
-	
+	['create', 'find', 'get', 'patch', 'remove', 'update'].forEach((method) => {
+		// add after filter that remove the embedded permissions in baseServices
+		serviceToModified.__hooks.after[method].push(filterOutResults(permissionKey));
+	});
+
 
 	app.logger.info(`Permission services is adding add ${path} with key ${permissionKey}.`);
 };

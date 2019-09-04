@@ -1,10 +1,10 @@
 const restictedExternAccess = require('./restictedExternAccess');
 
 exports.before = {
-	all: [],
-	find: [restictedExternAccess],
+	all: [restictedExternAccess],
+	find: [],
 	get: [],
-	create: [restictedExternAccess],
+	create: [],
 	update: [],
 	patch: [],
 	remove: [],
