@@ -33,7 +33,7 @@ const app = express(feathers())
 	.configure(express.rest(handleResponseType))
 
 	.use('/', express.static('public'))
-	.use(favicon(path.join('public', 'favicon.ico')))
+	.use(favicon(path.join(__dirname, '..', 'public', 'favicon.ico')))
 
 	// .use(defaultHeaders) // todo test it, position,  if we need it? @deprecated
 
