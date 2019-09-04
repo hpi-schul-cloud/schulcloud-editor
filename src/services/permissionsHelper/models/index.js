@@ -3,12 +3,12 @@ const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
 const permissionSchema = new Schema({
-	group: { type: Schema.Types.ObjectId, ref: 'group' },
+	group: { type: Schema.Types.ObjectId, ref: 'group', default: null },
 	users: [{ type: Schema.Types.ObjectId }],
 	read: { type: Boolean, default: false },
 	write: { type: Boolean, default: false },
 	activated: { type: Boolean, default: false },
-	pubishDate: { type: Date, default: null },
+	publishDate: { type: Date, default: null },
 	endDate: { type: Date, default: null },
 }, {
 	timestamps: true,
