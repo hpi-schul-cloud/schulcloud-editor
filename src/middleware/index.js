@@ -16,9 +16,9 @@ module.exports = function setup() {
 	app.configure(addHeaderToContext);
 	app.configure(getForceKey);
 	app.configure(ping);
-	app.configure(requestLogs);
 	app.configure(handleJWTAndAddToContext);
 	app.configure(addForceTest);
+	app.configure(requestLogs);
 
 	console.log('_________________\n');
 };
