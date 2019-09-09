@@ -1,27 +1,19 @@
-const { forceOwnerInData, block } = require('../../global').hooks;
-const {
-	addLessonId,
-	addNewGroups,
-	restrictedAfter,
-	removeHiddenSections,
-	restrictedOwner,
-	patchGroupIfArrayHook,
-} = require('./hooks');
-
+const { block } = require('../../../global/hooks');
+// todo filter should add over permissionHelper
 exports.before = {
 	all: [],
 	find: [],
 	get: [],
-	create: [addLessonId, forceOwnerInData, addNewGroups],
+	create: [],
 	update: [block],
-	patch: [restrictedOwner, patchGroupIfArrayHook],
-	remove: [restrictedOwner],
+	patch: [],
+	remove: [],
 };
 
 exports.after = {
 	all: [],
-	find: [restrictedAfter],
-	get: [restrictedAfter, removeHiddenSections],
+	find: [],
+	get: [],
 	create: [],
 	update: [],
 	patch: [],

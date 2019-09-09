@@ -1,6 +1,7 @@
 /* eslint-disable no-console */
 const path = require('path');
 const feathers = require('@feathersjs/feathers');
+const socketio = require('@feathersjs/socketio');
 // eslint-disable-next-line import/newline-after-import
 const express = require('@feathersjs/express');
 process.env.NODE_CONFIG_DIR = path.join(__dirname, '../config/');
@@ -22,10 +23,10 @@ const decodeJWT = require('./middleware/decodeJWT');
 const conf = configuration();
 
 console.log('\n___process.env___');
-['NODE_CONFIG_DIR', 'NODE_ENV', 'EDITOR_MS_FORCE_KEY']
+['NODE_CONFIG_DIR', 'NODE_ENV'] // 'EDITOR_MS_FORCE_KEY'
 	.forEach(key => console.log(key, process.env[key]));
 console.log('From config file:', conf());
-console.log('_________________\n');
+console.log('\n');
 
 const app = express(feathers())
 	.configure(conf)
@@ -35,7 +36,7 @@ const app = express(feathers())
 	.configure(express.rest(handleResponseType))
 
 	.use('/', express.static('public'))
-	.use(favicon(path.join('public', 'favicon.ico')))
+	.use(favicon(path.join(__dirname, '..', 'public', 'favicon.ico')))
 	.use(getAuthorizationHeader)
 	.use(decodeJWT)
 
@@ -44,7 +45,8 @@ const app = express(feathers())
 	.configure(database)
 	.configure(middleware)
 	.configure(services)
-	//.hooks(hooks)
+	.configure(socketio())
+	.hooks(hooks)
 	.use(express.errorHandler({
 		// force format html error to json
 		// eslint-disable-next-line no-unused-vars

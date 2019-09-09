@@ -1,8 +1,8 @@
-const { block } = require('../../global').hooks;
+const { block } = require('../../../global/hooks');
 
 exports.before = {
 	all: [],
-	find: [block],
+	find: [],
 	get: [],
 	create: [],
 	update: [block],

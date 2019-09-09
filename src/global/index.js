@@ -1,26 +1,38 @@
 /* eslint-disable no-param-reassign */
 const { GeneralError, Forbidden } = require('@feathersjs/errors');
 const logger = require('../logger');
-
-const forceOperation = (context) => {
-	const { force } = context.params.query;
-	context.params.force = force === context.app.get('forceKey');
-	delete context.params.query.force;
-	return context;
-};
+const { filterOutResults } = require('./hooks');
 
 const addUserId = (context) => {
-	const userId = (context.params.headers || {}).authorization;
-	if (userId) {
+	if (context.params.force) {
+		context.params.user = '_isForce_';
+		return context;
+	}
+
+	if (context.params.userId) {
 		// todo validate mongoose id
-		context.params.user = userId.toString();
-	} else if (context.params.force) {
-		context.params.user = '_isForceWithoutUser_';
-	} else {
-		throw new Forbidden('Can not resolve user information.');
+		// todo add name ?
+		context.params.user = context.params.userId.toString();
+		return context;
+	}
+
+	throw new Forbidden('Can not resolve user information.');
+};
+
+const addcreatedFrom = (context) => {
+	if (context.method === 'create' && context.data && !context.data.createdFrom) {
+		context.data.createdFrom = context.params.user;
 	}
 	return context;
 };
+
+const addUpdateFrom = (context) => {
+	if (context.method === 'create' && context.data && !context.data.updateFrom) {
+		context.data.updateFrom = context.params.user;
+	}
+	return context;
+};
+
 
 /**
  * For errors without error code create server error with code 500.
@@ -32,17 +44,18 @@ const errorHandler = (ctx) => {
 		if (ctx.error.hook) {
 			delete ctx.error.hook;
 		}
-		logger.error(ctx.error);
+
 		if (!ctx.error.code) {
-			ctx.error = new GeneralError('server error', ctx.error);
+			ctx.error = new GeneralError(ctx.error.message || 'server error', ctx.error.stack || '');
 		}
 
-		// logger.warning(ctx.error);
+		logger.error(ctx.error);
 
 		if (process.env.NODE_ENV === 'production') {
 			ctx.error.stack = null;
 			ctx.error.data = undefined;
 		}
+
 		return ctx;
 	}
 	logger.warning('Error with no error key is throw. Error logic can not handle it.');
@@ -51,17 +64,17 @@ const errorHandler = (ctx) => {
 };
 
 exports.before = {
-	all: [forceOperation, addUserId],
+	all: [addUserId],
 	find: [],
 	get: [],
-	create: [],
-	update: [],
+	create: [addcreatedFrom],
+	update: [addUpdateFrom],
 	patch: [],
 	remove: [],
 };
 
 exports.after = {
-	all: [],
+	all: [filterOutResults(['__v', 'createdAt', 'updatedAt', 'createdFrom', 'updatedFrom'])], // todo select is better but need more stable implementations
 	find: [],
 	get: [],
 	create: [],

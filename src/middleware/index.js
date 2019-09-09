@@ -1,17 +1,24 @@
 /* eslint-disable no-console */
-const logger = require('../logger');
+const loggerAddHandler = require('./addLoggerToApp');
 const getForceKey = require('./getForceKey');
 const requestLogs = require('./requestLogs');
 const ping = require('./ping');
+const handleJWTAndAddToContext = require('./handleJWTAndAddToContext');
+const addHeaderToContext = require('./addHeaderToContext');
+const addForceTest = require('./addForceTest');
 
 module.exports = function setup() {
-	logger.info('Configure additional middleware operations.');
+	console.log('___Configure additional middleware operations___\n');
 
 	const app = this;
-	app.logger = logger;
+	// important that logger is add as first
+	app.configure(loggerAddHandler);
+	app.configure(addHeaderToContext);
+	app.configure(getForceKey);
+	app.configure(ping);
+	app.configure(handleJWTAndAddToContext);
+	app.configure(addForceTest);
+	app.configure(requestLogs);
 
-	
-	//getForceKey(app);
-	//ping(app);
-	//app.use(requestLogs(app));
+	console.log('_________________\n');
 };

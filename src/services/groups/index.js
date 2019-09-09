@@ -3,6 +3,8 @@ const service = require('feathers-mongoose');
 const { GroupModel } = require('./models/');
 const hooks = require('./hooks/');
 
+// todo add additional services for extern groups with names,
+// or force that it can only add names over force event operation
 module.exports = function setup() {
 	const app = this;
 	const option = {
@@ -14,6 +16,6 @@ module.exports = function setup() {
 		},
 	};
 	app.use('groups', service(option));
-	const groupService = app.service('groups');
-	groupService.hooks(hooks);
+	const lessonsService = app.service('groups');
+	lessonsService.hooks(hooks);
 };

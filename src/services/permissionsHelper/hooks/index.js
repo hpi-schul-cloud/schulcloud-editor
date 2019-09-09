@@ -1,7 +1,8 @@
-/* eslint-disable no-param-reassign */
+const restictedAndAddAccess = require('./restictedAndAddAccess');
+const limitDataViewForReadAccess = require('./limitDataViewForReadAccess');
 
 exports.before = {
-	all: [],
+	all: [restictedAndAddAccess, limitDataViewForReadAccess],
 	find: [],
 	get: [],
 	create: [],

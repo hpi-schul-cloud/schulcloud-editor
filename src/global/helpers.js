@@ -67,7 +67,10 @@ const createGroupsInData = (context, lesson, keys) => {
 const isForced = context => context.params.force;
 
 // models after helper
-const after = name => (docs, next) => {
+const addTypeString = name => (docs, next) => {
+	if (!docs) {
+		next();
+	}
 	if (Array.isArray(docs)) {
 		docs = docs.map((doc) => {
 			doc.type = name;
@@ -88,6 +91,12 @@ const template = (strings, ...keys) => (...values) => {
 		result.push(value, strings[i + 1]);
 	});
 	return result.join('');
+};
+
+const convertParamsToInternRequest = (params) => {
+	const copyParams = Object.assign({}, params);
+	copyParams.provider = undefined;
+	return copyParams;
 };
 
 const emptyHook = () => ({
@@ -120,6 +129,7 @@ module.exports = {
 	isForced,
 	isArrayWithElement,
 	emptyHook,
-	after,
 	template,
+	addTypeString,
+	convertParamsToInternRequest,
 };
