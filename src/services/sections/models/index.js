@@ -11,7 +11,7 @@ const sectionSchema = new Schema({
 	permissions: [{ type: Object }],
 	deletedAt: { type: Date, expires: (60 * 60 * 24 * 30) },
 	createdFrom: { type: Schema.Types.ObjectId, default: null },
-	updatedFrom: { type: Schema.Types.ObjectId, default: null },
+	updatedBy: { type: Schema.Types.ObjectId, default: null },
 }, {
 	timestamps: true,
 	minimize: false, // to return empty objects

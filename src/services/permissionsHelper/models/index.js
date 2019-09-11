@@ -11,7 +11,7 @@ const permissionSchema = new Schema({
 	publishDate: { type: Date, default: null },
 	endDate: { type: Date, default: null },
 	createdFrom: { type: Schema.Types.ObjectId, default: null },
-	updatedFrom: { type: Schema.Types.ObjectId, default: null },
+	updatedBy: { type: Schema.Types.ObjectId, default: null },
 }, {
 	timestamps: true,
 });

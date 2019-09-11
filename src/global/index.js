@@ -19,16 +19,16 @@ const addUserId = (context) => {
 	throw new Forbidden('Can not resolve user information.');
 };
 
-const addcreatedFrom = (context) => {
+const addCreatedFrom = (context) => {
 	if (context.method === 'create' && context.data && !context.data.createdFrom) {
 		context.data.createdFrom = context.params.user;
 	}
 	return context;
 };
 
-const addUpdateFrom = (context) => {
-	if (context.method === 'create' && context.data && !context.data.updateFrom) {
-		context.data.updateFrom = context.params.user;
+const addPatchedBy = (context) => {
+	if (context.method === 'patch' && context.data && !context.data.updateFrom) {
+		context.data.updatedBy = context.params.user;
 	}
 	return context;
 };
@@ -67,9 +67,9 @@ exports.before = {
 	all: [addUserId],
 	find: [],
 	get: [],
-	create: [addcreatedFrom],
-	update: [addUpdateFrom],
-	patch: [],
+	create: [addCreatedFrom],
+	update: [],
+	patch: [addPatchedBy],
 	remove: [],
 };
 

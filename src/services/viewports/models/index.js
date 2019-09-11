@@ -12,7 +12,7 @@ const viewportSchema = new Schema({
 	additional: { type: Object, default: null },
 	deletedAt: { type: Date, expires: (60 * 60 * 24 * 30) },
 	createdFrom: { type: Schema.Types.ObjectId, default: null },
-	updatedFrom: { type: Schema.Types.ObjectId, default: null },
+	updatedBy: { type: Schema.Types.ObjectId, default: null },
 }, {
 	timestamps: true,
 });

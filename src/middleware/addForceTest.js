@@ -1,6 +1,6 @@
 const handleForceTest = app => (req, res, next) => {
 	const { force } = req.query;
-	if (force === app.get('forceKey')) {
+	if (force !== undefined && force === app.get('forceKey')) {
 		delete req.query.force;
 		req.feathers.force = true;
 	} else {
