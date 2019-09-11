@@ -1,12 +1,13 @@
 const { block } = require('../../../global/hooks');
+const mapUserIds = require('./mapUserIds');
 
 exports.before = {
 	all: [],
 	find: [],
 	get: [],
-	create: [],
+	create: [mapUserIds],
 	update: [block],
-	patch: [],
+	patch: [mapUserIds],
 	remove: [],
 };
 
