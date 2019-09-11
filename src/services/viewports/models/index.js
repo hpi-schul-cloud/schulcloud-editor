@@ -10,6 +10,7 @@ const viewportSchema = new Schema({
 	sectionposition: { type: Number, default: 0 },
 	sectionUserViewId: { type: Schema.Types.ObjectId, default: null }, // todo: ref
 	additional: { type: Object, default: null },
+	lessonId: { type: Schema.Types.ObjectId, ref: 'lesson' },
 	deletedAt: { type: Date, expires: (60 * 60 * 24 * 30) },
 	createdFrom: { type: Schema.Types.ObjectId, default: null },
 	updatedBy: { type: Schema.Types.ObjectId, default: null },
