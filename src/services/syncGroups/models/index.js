@@ -5,12 +5,14 @@ const { addTypeString } = require('../../../global/helpers');
 const { Schema } = mongoose;
 
 const userNamesSchema = new Schema({
-	user: [{ type: Schema.Types.ObjectId, require: true }],
+	id: { type: Schema.Types.ObjectId, require: true },
 	name: { type: String, require: true },
-});
+}, { _id: false });
 
 const syncGroupSchema = new Schema({
 	users: [{ type: Schema.Types.ObjectId }],
+	permission: { type: String, enum: ['read', 'write'], default: 'read' },
+	courseId: { type: Schema.Types.ObjectId },
 	userNames: [userNamesSchema],
 	deletedAt: { type: Date, expires: (60 * 60 * 24 * 30) },
 	createdBy: { type: Schema.Types.ObjectId },
@@ -24,5 +26,5 @@ syncGroupSchema
 	.post('findOne', addTypeString('syncGroup'));
 
 module.exports = {
-	GroupModel: mongoose.model('syncGroup', syncGroupSchema),
+	SyncGroup: mongoose.model('syncGroup', syncGroupSchema),
 };

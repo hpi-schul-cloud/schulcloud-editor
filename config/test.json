@@ -2,5 +2,9 @@
 	"host": "localhost",
 	"port": 4001,
 	"mongodb": "mongodb://localhost:27017/schulcloud-editor-test",
-	"public": "../public/"
+	"public": "../public/",
+	"routes": {
+		"api": "http://localhost:3030",
+		"coursePermissions": "/courses/:courseId/userPermissions"
+	}
 }

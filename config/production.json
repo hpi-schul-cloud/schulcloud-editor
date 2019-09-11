@@ -2,5 +2,9 @@
 	"host": "localhost",
 	"port": "PORT",
 	"mongodb": "MONGO_URI",
-	"public": "../public/"
+	"public": "../public/",
+	"routes": {
+		"api": "ROUTE_API",
+		"coursePermissions": "ROUTE_COURSE_PERMISSIONS"
+	}
 }

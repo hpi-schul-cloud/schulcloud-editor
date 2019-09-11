@@ -1,5 +1,7 @@
 /* eslint-disable no-param-reassign */
-const { NotFound, MethodNotAllowed } = require('@feathersjs/errors');
+const { NotFound, MethodNotAllowed, Forbidden } = require('@feathersjs/errors');
+const axios = require('axios');
+
 const { forceArray } = require('./helpers');
 
 const objectPathResolver = (context, path) => {
@@ -88,6 +90,39 @@ const filterOutResults = keys => (context) => {
 	return context;
 };
 
+
+/**
+ * Request Course service to get permissions
+ *
+ * @param {string} permission
+ */
+const checkCoursePermission = permission => async (context) => {
+	const { params: { user, route: { courseId }, authorization }, app } = context;
+	const { api, coursePermissions } = app.get('routes');
+	const baseURL = (api + coursePermissions).replace(':courseId', courseId);
+	const coursePermissionServices = axios.create({
+		baseURL,
+		timeout: 4000,
+	});
+
+	const { data: permissions } = await coursePermissionServices.get(user, {
+		headers: {
+			Authorization: authorization,
+		},
+	}).catch((err) => {
+		if (err.response) {
+			throw new Forbidden(err.response.statusText || 'You have no access.', err.response.data || err.response);
+		}
+		throw new Forbidden('You have no access.', err);
+	});
+
+	if (permissions.includes(permission)) {
+		return context;
+	}
+
+	throw new Forbidden('You have no access.');
+};
+
 module.exports = {
 	// exist,
 	// filter,
@@ -96,4 +131,5 @@ module.exports = {
 	// populate,
 	// forceOwnerInData,
 	filterOutResults,
+	checkCoursePermission,
 };
