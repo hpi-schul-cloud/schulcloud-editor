@@ -11,8 +11,8 @@ const viewportSchema = new Schema({
 	sectionUserViewId: { type: Schema.Types.ObjectId, default: null }, // todo: ref
 	additional: { type: Object, default: null },
 	deletedAt: { type: Date, expires: (60 * 60 * 24 * 30) },
-	createdFrom: { type: Schema.Types.ObjectId, default: null },
-	updatedFrom: { type: Schema.Types.ObjectId, default: null },
+	createdBy: { type: Schema.Types.ObjectId },
+	updatedBy: { type: Schema.Types.ObjectId },
 }, {
 	timestamps: true,
 });

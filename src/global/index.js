@@ -19,16 +19,16 @@ const addUserId = (context) => {
 	throw new Forbidden('Can not resolve user information.');
 };
 
-const addcreatedFrom = (context) => {
-	if (context.method === 'create' && context.data && !context.data.createdFrom) {
-		context.data.createdFrom = context.params.user;
+const addCreatedBy = (context) => {
+	if (context.method === 'create' && context.data) { // && !context.data.createdBy
+		context.data.createdBy = context.params.user;
 	}
 	return context;
 };
 
-const addUpdateFrom = (context) => {
-	if (context.method === 'create' && context.data && !context.data.updateFrom) {
-		context.data.updateFrom = context.params.user;
+const addUpadtedBy = (context) => {
+	if (['patch', 'update'].includes(context.method) && context.data) { //  && !context.data.updatedBy
+		context.data.updatedBy = context.params.user;
 	}
 	return context;
 };
@@ -67,14 +67,14 @@ exports.before = {
 	all: [addUserId],
 	find: [],
 	get: [],
-	create: [addcreatedFrom],
-	update: [addUpdateFrom],
-	patch: [],
+	create: [addCreatedBy],
+	update: [addUpadtedBy],
+	patch: [addUpadtedBy],
 	remove: [],
 };
 
 exports.after = {
-	all: [filterOutResults(['__v', 'createdAt', 'updatedAt', 'createdFrom', 'updatedFrom'])], // todo select is better but need more stable implementations
+	all: [filterOutResults(['__v', 'createdAt', 'updatedAt', 'createdBy', 'updatedBy'])], // todo select is better but need more stable implementations
 	find: [],
 	get: [],
 	create: [],
