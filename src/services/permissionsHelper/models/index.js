@@ -10,8 +10,8 @@ const permissionSchema = new Schema({
 	activated: { type: Boolean, default: false },
 	publishDate: { type: Date, default: null },
 	endDate: { type: Date, default: null },
-	createdBy: { type: String, default: '' },
-	updatedBy: { type: String, default: '' },
+	createdBy: { type: Schema.Types.ObjectId },
+	updatedBy: { type: Schema.Types.ObjectId },
 }, {
 	timestamps: true,
 });
