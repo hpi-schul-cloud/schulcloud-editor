@@ -10,8 +10,8 @@ const lessonSchema = new Schema({
 	sections: [{ type: Schema.Types.ObjectId, ref: 'section' }],
 	permissions: [{ type: Object }],
 	deletedAt: { type: Date, expires: (60 * 60 * 24 * 30) },
-	createdFrom: { type: Schema.Types.ObjectId, default: null },
-	updatedBy: { type: Schema.Types.ObjectId, default: null },
+	createdBy: { type: Schema.Types.ObjectId },
+	updatedBy: { type: Schema.Types.ObjectId },
 }, {
 	timestamps: true,
 });
