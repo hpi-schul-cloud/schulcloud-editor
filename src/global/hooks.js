@@ -1,4 +1,3 @@
-/* eslint-disable no-param-reassign */
 const { MethodNotAllowed, Forbidden } = require('@feathersjs/errors');
 const axios = require('axios');
 
@@ -6,7 +5,6 @@ const block = () => {
 	throw new MethodNotAllowed();
 };
 
-/* eslint-disable no-param-reassign */
 const filterOutResults = keys => (context) => {
 	if (context.result && context.type === 'after' && context.params.provider === 'rest') {
 		if (!Array.isArray(keys)) {
