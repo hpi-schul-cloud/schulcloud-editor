@@ -16,6 +16,6 @@ module.exports = function setup() {
 		},
 	};
 	app.use('groups', service(option));
-	const lessonsService = app.service('groups');
-	lessonsService.hooks(hooks);
+	const groupsService = app.service('groups');
+	groupsService.hooks(hooks);
 };
