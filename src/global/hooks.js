@@ -1,6 +1,8 @@
 const { MethodNotAllowed, Forbidden } = require('@feathersjs/errors');
 const axios = require('axios');
 
+const { server: { coursePermissions } } = require('../routes');
+
 const block = () => {
 	throw new MethodNotAllowed();
 };
@@ -43,23 +45,7 @@ const checkCoursePermission = permission => async (context) => {
 		return context;
 	}
 
-	const { api, coursePermissions } = app.get('routes');
-	const baseURL = (api + coursePermissions).replace(':courseId', courseId); // todo wrapper in routes that can request over get(couseId)?
-	const coursePermissionServices = axios.create({
-		baseURL,
-		timeout: 4000,
-	});
-
-	const { data: permissions } = await coursePermissionServices.get(user, {
-		headers: {
-			Authorization: authorization,
-		},
-	}).catch((err) => {
-		if (err.response) {
-			throw new Forbidden(err.response.statusText || 'You have no access.', err.response.data || err.response);
-		}
-		throw new Forbidden('You have no access.', err);
-	});
+	const { data: permissions } = await coursePermissions(app, courseId, user, authorization);
 
 	if (permissions.includes(permission)) {
 		return context;

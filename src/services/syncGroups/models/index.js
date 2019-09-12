@@ -4,6 +4,7 @@ const { addTypeString } = require('../../../global/helpers');
 
 const { Schema } = mongoose;
 
+// @deprecated
 const userNamesSchema = new Schema({
 	id: { type: Schema.Types.ObjectId, require: true },
 	name: { type: String, require: true },
@@ -13,7 +14,7 @@ const syncGroupSchema = new Schema({
 	users: [{ type: Schema.Types.ObjectId }],
 	permission: { type: String, enum: ['read', 'write'], default: 'read' },
 	courseId: { type: Schema.Types.ObjectId },
-	userNames: [userNamesSchema],
+	// userNames: [userNamesSchema],
 	deletedAt: { type: Date, expires: (60 * 60 * 24 * 30) },
 	createdBy: { type: Schema.Types.ObjectId },
 	updatedBy: { type: Schema.Types.ObjectId },

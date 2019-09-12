@@ -4,7 +4,10 @@
 	"mongodb": "MONGO_URI",
 	"public": "../public/",
 	"routes": {
-		"api": "ROUTE_API",
-		"coursePermissions": "ROUTE_COURSE_PERMISSIONS"
+		"server": {
+			"baseUrl": "SERVER_BASE_URL",
+			"coursePermissionsUri": "ROUTE_COURSE_PERMISSIONS"
+		},
+		"timeout": "2000"
 	}
 }
