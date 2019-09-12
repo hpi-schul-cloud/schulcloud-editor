@@ -14,6 +14,7 @@ const hooks = require('./global/');
 const database = require('./database/');
 const services = require('./services/');
 const middleware = require('./middleware');
+const swagger = require('./swagger');
 // const defaultHeaders = require('./middleware/defaultHeaders'); @deprecated
 const handleResponseType = require('./middleware/handleResponseType');
 
@@ -37,6 +38,7 @@ const app = express(feathers())
 
 	// .use(defaultHeaders) // todo test it, position,  if we need it? @deprecated
 
+	.configure(swagger)
 	.configure(database)
 	.configure(middleware)
 	.configure(services)
