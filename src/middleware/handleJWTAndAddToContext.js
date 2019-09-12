@@ -8,6 +8,7 @@ const jwtHandler = (req, res, next) => {
 		const { accountId, userId } = decode(jwt);
 		req.feathers.accountId = accountId;
 		req.feathers.userId = userId;
+		req.feathers.authorization = req.headers.authorization;
 	}
 
 	next();
