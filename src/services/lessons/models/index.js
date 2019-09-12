@@ -7,15 +7,13 @@ const { Schema } = mongoose;
 const lessonSchema = new Schema({
 	title: { type: String, required: true },
 	sections: [{ type: Schema.Types.ObjectId, ref: 'section' }],
-	updatedFrom: { type: Schema.Types.ObjectId, default: null },
-	createdFrom: { type: Schema.Types.ObjectId, default: null },
+	permissions: [{ type: Object }],
+	deletedAt: { type: Date, expires: (60 * 60 * 24 * 30) },
+	createdBy: { type: Schema.Types.ObjectId },
+	updatedBy: { type: Schema.Types.ObjectId },
 	visible: { type: Boolean, default: true },
-	courseId: { type: Schema.Types.ObjectId },
 	position: { type: Number, default: Date.now },
 	fork: { type: Schema.Types.ObjectId }, // is forked from
-	// soft delete, will be deleted after one month (s * m * h * d)
-	deletedAt: { type: Date, expires: (60 * 60 * 24 * 30) },
-	permissions: [{ type: Object }],
 }, {
 	timestamps: true,
 });
