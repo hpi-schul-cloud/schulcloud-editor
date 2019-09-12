@@ -4,7 +4,8 @@
     "title": "LessonCreate",
     "required": [
       "title",
-      "courseId"
+      "courseId",
+      "createdBy"
     ],
     "properties": {
       "title": {
@@ -17,6 +18,11 @@
       },
       "courseId": {
         "$id": "#/properties/courseId",
+        "type": "string",
+        "pattern": "[a-f0-9]{24}"
+      },
+      "createdBy": {
+        "$id": "#/properties/createdBy",
         "type": "string",
         "pattern": "[a-f0-9]{24}"
       },

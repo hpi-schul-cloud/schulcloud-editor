@@ -22,7 +22,7 @@ const addUserId = (context) => {
 
 const addCreatedBy = (context) => {
 	if (context.method === 'create' && context.data) { // && !context.data.createdBy
-		context.data.createdBy = context.params.user;
+		context.data.createdBy = context.params.user.id;
 	}
 	return context;
 };
