@@ -2,7 +2,7 @@ const { Forbidden } = require('@feathersjs/errors');
 
 const logger = require('../../../logger');
 const { courseService, routes } = require('../../../../routes/course');
-const config = require('../../../../config');
+const config = require('../../../../config/index');
 /**
  * Request Course service to get permissions, is only needed for create and lessons overview
  * all other permissions are internal
@@ -10,7 +10,7 @@ const config = require('../../../../config');
  * @param {string} permission
  */
 const checkCoursePermission = permission => async (context) => {
-	const { params: { user, route, authorization } } = context;
+	const { params: { user, route, headers } } = context;
 
 	try {
 		const permissions = await courseService
@@ -18,14 +18,14 @@ const checkCoursePermission = permission => async (context) => {
 				routes.permissions({ courseId: route.courseId }),
 				{
 					params: {
-						userId: user.userId,
+						userId: user.id,
 					},
 					headers: {
-						Authorization: authorization,
+						Authorization: headers.authorization,
 					},
 				},
 			);
-		if (!permissions.data[user.userId].includes(permission)) {
+		if (!permissions.data[user.id].includes(permission)) {
 			throw new Forbidden('Missing privileges');
 		}
 	} catch (err) {

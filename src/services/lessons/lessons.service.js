@@ -103,7 +103,7 @@ class Lessons {
 		try {
 			const lesson = new LessonModel({
 				...data,
-				createdBy: user.userId,
+				createdBy: user.id,
 			});
 			await lesson.save();
 			return;

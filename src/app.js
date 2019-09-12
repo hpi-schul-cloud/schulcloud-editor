@@ -1,4 +1,5 @@
 /* eslint-disable no-console */
+const cors = require('cors');
 const path = require('path');
 const feathers = require('@feathersjs/feathers');
 const socketio = require('@feathersjs/socketio');
@@ -7,7 +8,6 @@ const express = require('@feathersjs/express');
 process.env.NODE_CONFIG_DIR = path.join(__dirname, '../config/');
 process.env.NODE_ENV = process.env.NODE_ENV || 'default';
 const configuration = require('@feathersjs/configuration');
-const socketio = require('@feathersjs/socketio');
 const favicon = require('serve-favicon');
 // const bodyParser = require('body-parser'); @deprecated
 
@@ -17,8 +17,6 @@ const services = require('./services/');
 const middleware = require('./middleware');
 // const defaultHeaders = require('./middleware/defaultHeaders'); @deprecated
 const handleResponseType = require('./middleware/handleResponseType');
-const getAuthorizationHeader = require('./middleware/getAuthorizationHeader');
-const decodeJWT = require('./middleware/decodeJWT');
 
 const conf = configuration();
 
@@ -32,14 +30,11 @@ const app = express(feathers())
 	.configure(conf)
 	.use(express.json())
 	.use(express.urlencoded({ extended: true }))
+	.use(cors())
 	// todo "handleResponseType" test it, maybe no effect see express.json() @deprecated
 	.configure(express.rest(handleResponseType))
-
 	.use('/', express.static('public'))
 	.use(favicon(path.join(__dirname, '..', 'public', 'favicon.ico')))
-	.use(getAuthorizationHeader)
-	.use(decodeJWT)
-
 	// .use(defaultHeaders) // todo test it, position,  if we need it? @deprecated
 	.configure(socketio())
 	.configure(database)
@@ -54,6 +49,8 @@ const app = express(feathers())
 			res.json(error);
 		},
 	}));
+
+
 /*
 app.on('unhandledRejection', (reason, p) => { @deprecated
 	logger.info('Unhandled Rejection at: Promise ', p, ' reason: ', reason);

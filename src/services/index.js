@@ -11,7 +11,7 @@ module.exports = function setup() {
 
 	/** first configure all services */
 	app.configure(lessons);
-	app.configure(permissionsHelper.bind({ baseService: 'lessons' }));
+	//app.configure(permissionsHelper.bind({ baseService: 'course/:courseId/lessons' }));
 	app.configure(groups);
 	app.configure(sections);
 	app.configure(permissionsHelper.bind({ baseService: 'sections' }));

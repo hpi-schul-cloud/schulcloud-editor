@@ -1,5 +1,5 @@
 const axios = require('axios');
-const conf = require('../config');
+const conf = require('../config/index');
 
 const courseService = axios.create({
 	baseURL: conf.routes.course.base,

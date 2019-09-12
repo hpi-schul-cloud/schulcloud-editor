@@ -22,7 +22,6 @@ const lessonSchema = new Schema({
 	.post('find', after('lesson'))
 	.post('findOne', after('lesson'));
 */
-const LessonModel = mongoose.model('lesson', lessonSchema);
 
 module.exports = {
 	LessonModel: mongoose.model('lesson', lessonSchema),
