@@ -1,13 +1,27 @@
-const { block } = require('../../../global/hooks');
+const { block, checkCoursePermission } = require('../../../global/hooks');
+// @deprecated
+// const mapUserIds = require('./mapUserIds');
+const addCourseId = require('./addCourseId');
+const readPermission = require('./readPermission');
 
 exports.before = {
 	all: [],
-	find: [],
-	get: [],
-	create: [],
+	find: [readPermission],
+	get: [readPermission],
+	create: [
+		checkCoursePermission('COURSE_EDIT'),
+		addCourseId,
+		// mapUserIds,
+	],
 	update: [block],
-	patch: [],
-	remove: [],
+	patch: [
+		checkCoursePermission('COURSE_EDIT'),
+		addCourseId,
+		// mapUserIds,
+	],
+	remove: [
+		checkCoursePermission('COURSE_EDIT'),
+	],
 };
 
 exports.after = {
