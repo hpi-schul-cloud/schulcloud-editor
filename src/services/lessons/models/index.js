@@ -6,6 +6,7 @@ const { Schema } = mongoose;
 
 const lessonSchema = new Schema({
 	title: { type: String, required: true },
+	courseId: { type: Schema.Types.ObjectId },
 	sections: [{ type: Schema.Types.ObjectId, ref: 'section' }],
 	permissions: [{ type: Object }],
 	deletedAt: { type: Date, expires: (60 * 60 * 24 * 30) },
