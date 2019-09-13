@@ -1,5 +1,5 @@
 const { Forbidden } = require('@feathersjs/errors');
-const { copyParams } = require('../../../global/util');
+const { copyParams } = require('../../../global/utils');
 
 const addReferencedData = (baseService, permissionKey) => async (context) => {
 	const { params, app } = context;

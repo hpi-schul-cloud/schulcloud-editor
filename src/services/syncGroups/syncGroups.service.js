@@ -1,5 +1,6 @@
-const { block, checkCoursePermission } = require('../../global/hooks');
-const { copyParams } = require('../../global/util');
+const { disallow } = require('feathers-hooks-common');
+const { checkCoursePermission } = require('../../global/hooks');
+const { copyParams } = require('../../global/utils');
 const { readPermission } = require('./hooks');
 
 // todo validation
@@ -11,7 +12,7 @@ SyncGroupsServiceHooks.before = {
 	create: [
 		checkCoursePermission('COURSE_EDIT'),
 	],
-	update: [block],
+	update: [disallow()],
 	patch: [
 		checkCoursePermission('COURSE_EDIT'),
 	],

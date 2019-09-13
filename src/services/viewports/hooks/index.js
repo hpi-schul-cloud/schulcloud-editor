@@ -1,11 +1,11 @@
-const { block } = require('../../../global/hooks');
+const { disallow } = require('feathers-hooks-common');
 
 exports.before = {
 	all: [],
 	find: [],
 	get: [],
 	create: [],
-	update: [block],
+	update: [disallow()],
 	patch: [],
 	remove: [],
 };

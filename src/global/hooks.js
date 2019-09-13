@@ -1,11 +1,6 @@
-const { MethodNotAllowed, Forbidden } = require('@feathersjs/errors');
-const axios = require('axios');
+const { Forbidden } = require('@feathersjs/errors');
 
 const { server: { coursePermissions } } = require('../routes');
-
-const block = () => {
-	throw new MethodNotAllowed();
-};
 
 const filterOutResults = keys => (context) => {
 	if (context.result && context.type === 'after' && context.params.provider === 'rest') {
@@ -55,7 +50,6 @@ const checkCoursePermission = permission => async (context) => {
 };
 
 module.exports = {
-	block,
 	filterOutResults,
 	checkCoursePermission,
 };
