@@ -87,13 +87,12 @@ const addTypeString = name => (docs, next) => {
  * Create a copy from params with all user informations
  * But is is marked the params as intern request.
  * It clear the requested query.
- * It map route keys into the query.
  * @param {*} params
  * @return params
  */
 const copyParams = (params) => {
 	const copy = Object.assign({}, params);
-	copy.query = Object.assign({}, copy.route); // clear and map query
+	copy.query = {};
 	copy.provider = undefined;
 	return copy;
 };

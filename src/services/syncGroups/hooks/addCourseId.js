@@ -4,7 +4,7 @@ const { BadRequest } = require('@feathersjs/errors');
  * @param {*} context
  */
 const addCourseId = (context) => {
-	const { courseId } = context.params;
+	const { courseId } = context.params.route;
 	if (!courseId) {
 		throw new BadRequest('No courseId exist.');
 	}
