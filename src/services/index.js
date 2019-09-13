@@ -7,9 +7,7 @@ const viewports = require('./viewports');
 const permissionsHelper = require('./permissionsHelper');
 // Events
 
-module.exports = function setup() {
-	const app = this;
-
+module.exports = function setup(app) {
 	/** first configure all services */
 	app.configure(lessons);
 	app.configure(permissionsHelper.bind({ baseService: 'lessons' }));

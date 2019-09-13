@@ -1,5 +1,5 @@
 const { Forbidden } = require('@feathersjs/errors');
-const { convertParamsToInternRequest } = require('../../../global/helpers');
+const { copyParams } = require('../../../global/util');
 
 const addReferencedData = (baseService, permissionKey) => async (context) => {
 	const { params, app } = context;
@@ -9,7 +9,7 @@ const addReferencedData = (baseService, permissionKey) => async (context) => {
 	params.query.$populate = { path: 'group' };
 
 	const baseData = await app.service(baseService).get(ressourceId,
-		convertParamsToInternRequest(params))
+		copyParams(params))
 		.catch((err) => {
 			throw new Forbidden('You have no access.', err);
 		});

@@ -1,6 +1,6 @@
 const { GeneralError, BadRequest, Forbidden } = require('@feathersjs/errors');
 /* eslint-disable class-methods-use-this */
-const { convertParamsToInternRequest } = require('../../global/helpers');
+const { copyParams } = require('../../global/util');
 
 const { filterOutResults } = require('../../global/hooks');
 const { PermissionModel } = require('./models');
@@ -34,7 +34,7 @@ class PermissionService {
 		const { baseService, baseId, basePermissions } = params;
 		basePermissions.push(newPermission);
 		await baseService.patch(baseId, { [this.permissionKey]: basePermissions },
-			convertParamsToInternRequest(params))
+			copyParams(params))
 			.catch((err) => {
 				throw new GeneralError(this.err.create, err);
 			});
@@ -73,7 +73,7 @@ class PermissionService {
 		);
 		// todo slice mongoose operations
 		await baseService.patch(baseId, { [this.permissionKey]: newPermissions },
-			convertParamsToInternRequest(params))
+			copyParams(params))
 			.catch((err) => {
 				throw new GeneralError(this.err.create, err);
 			});

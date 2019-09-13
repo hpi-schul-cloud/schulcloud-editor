@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const { addTypeString } = require('../../../global/helpers');
+const { addTypeString } = require('../../../global/util');
 
 const { Schema } = mongoose;
 

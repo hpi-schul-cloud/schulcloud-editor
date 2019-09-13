@@ -4,7 +4,7 @@ const feathers = require('@feathersjs/feathers');
 const socketio = require('@feathersjs/socketio');
 // eslint-disable-next-line import/newline-after-import
 const express = require('@feathersjs/express');
-process.env.NODE_CONFIG_DIR = path.join(__dirname, '../config/');
+process.env.NODE_CONFIG_DIR = path.join(__dirname, '..', 'config');
 process.env.NODE_ENV = process.env.NODE_ENV || 'default';
 const configuration = require('@feathersjs/configuration');
 const favicon = require('serve-favicon');

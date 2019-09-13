@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const { addTypeString } = require('../../../global/helpers');
+const { addTypeString } = require('../../../global/util');
 
 const { Schema } = mongoose;
 
@@ -27,5 +27,5 @@ syncGroupSchema
 	.post('findOne', addTypeString('syncGroup'));
 
 module.exports = {
-	SyncGroup: mongoose.model('syncGroup', syncGroupSchema),
+	SyncGroupModel: mongoose.model('syncGroup', syncGroupSchema),
 };
