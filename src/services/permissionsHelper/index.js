@@ -1,6 +1,6 @@
 const { GeneralError, BadRequest, Forbidden } = require('@feathersjs/errors');
 /* eslint-disable class-methods-use-this */
-const { copyParams } = require('../../global/util');
+const { copyParams } = require('../../global/utils');
 
 const { filterOutResults } = require('../../global/hooks');
 const { PermissionModel } = require('./models');

@@ -86,13 +86,15 @@ const addTypeString = name => (docs, next) => {
 /**
  * Create a copy from params with all user informations
  * But is is marked the params as intern request.
- * It clear the requested query.
+ * It clear the requested query and add deletedAt: { $exists: false };
  * @param {*} params
  * @return params
  */
 const copyParams = (params) => {
 	const copy = Object.assign({}, params);
-	copy.query = {};
+	copy.query = {
+		deletedAt: { $exists: false },
+	};
 	copy.provider = undefined;
 	return copy;
 };

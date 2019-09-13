@@ -1,4 +1,5 @@
 const { disallow } = require('feathers-hooks-common');
+const { GeneralError } = require('@feathersjs/errors');
 const { checkCoursePermission } = require('../../global/hooks');
 const { copyParams } = require('../../global/utils');
 const { readPermission } = require('./hooks');
@@ -25,7 +26,7 @@ class SyncGroupsService {
 	constructor(options) {
 		this.options = options || {};
 		this.docs = {};
-		this.baseService = 'model/syncGroup';
+		this.baseService = 'models/syncGroup';
 	}
 
 	find(params) {
@@ -38,14 +39,21 @@ class SyncGroupsService {
 			.get(id, copyParams(params));
 	}
 
-	remove(id, params) {
+	remove(id, _params) {
+		const params = copyParams(_params);
+		params.query.select = {
+			_id: 1,
+		};
 		return this.app.service(this.baseService)
-			.remove(id, copyParams(params));
+			.patch(id, { deletedAt: new Date() }, copyParams(params))
+			.catch((err) => {
+				throw new GeneralError('Can not set soft delete.', err);
+			});
 	}
 
-	create(id, data, params) {
+	create(data, params) {
 		return this.app.service(this.baseService)
-			.create(id, data, copyParams(params));
+			.create(data, copyParams(params));
 	}
 
 	patch(id, data, params) {

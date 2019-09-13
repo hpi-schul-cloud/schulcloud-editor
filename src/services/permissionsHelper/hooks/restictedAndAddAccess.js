@@ -1,5 +1,5 @@
 const { Forbidden } = require('@feathersjs/errors');
-const { userIsInGroupOrUsers } = require('../util/');
+const { userIsInGroupOrUsers } = require('../utils/');
 
 // todo it is fetch all permission data and select then,
 // to reduce traffic it should select only permissions in time.

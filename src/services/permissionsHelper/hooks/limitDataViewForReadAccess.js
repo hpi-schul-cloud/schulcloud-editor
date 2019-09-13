@@ -1,4 +1,4 @@
-const { userIsInGroupOrUsers } = require('../util/');
+const { userIsInGroupOrUsers } = require('../utils/');
 
 const limitDataViewForReadAccess = (context) => {
 	const { params } = context;

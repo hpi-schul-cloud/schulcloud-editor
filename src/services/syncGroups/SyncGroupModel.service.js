@@ -19,8 +19,8 @@ const SyncGroupModelService = (app) => {
 			max: 150,
 		},
 	};
-	app.use('model/syncGroup', service(option));
-	const syncGroupModelService = app.service('model/syncGroup');
+	app.use('models/syncGroup', service(option));
+	const syncGroupModelService = app.service('models/syncGroup');
 	syncGroupModelService.hooks(hooks);
 };
 
