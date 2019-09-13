@@ -1,7 +1,7 @@
 const { Forbidden } = require('@feathersjs/errors');
 const axios = require('axios');
 
-const coursePermissions = (app, courseId, user, authorization) => {
+const coursePermissions = (app, courseId, userId, authorization) => {
 	const { server: { baseUrl, coursePermissionsUri }, timeout } = app.get('routes');
 	const url = (baseUrl + coursePermissionsUri).replace(':courseId', courseId);
 	const coursePermissionServices = axios.create({
@@ -9,7 +9,7 @@ const coursePermissions = (app, courseId, user, authorization) => {
 		timeout,
 	});
 
-	return coursePermissionServices.get(user, {
+	return coursePermissionServices.get(userId, {
 		headers: {
 			Authorization: authorization,
 		},

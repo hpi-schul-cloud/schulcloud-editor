@@ -5,9 +5,9 @@
 	"public": "../public/",
 	"routes": {
 		"server": {
-			"baseUrl": "http://server:3030",
+			"baseUrl": "http://locahost:3030",
 			"coursePermissionsUri": "/courses/:courseId/userPermissions"
 		},
-		"timeout": "30000"
+		"timeout": "1000"
 	}
 }

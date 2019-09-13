@@ -3,12 +3,11 @@ const { NotFound } = require('@feathersjs/errors');
 const { validateSchema } = require('feathers-hooks-common');
 const Ajv = require('ajv');
 
-const createSchema = require('./schemes/lessons.create.schema');
-const patchSchema = require('./schemes/lessons.patch.schema');
+const { create: createSchema, patch: patchSchema } = require('./schemes');
 
 const logger = require('../../logger');
 const { LessonModel } = require('./models/');
-const { checkCoursePermission } = require('./hooks/permissions');
+const { checkCoursePermission } = require('../../global/hooks');
 const { setCourseId } = require('./hooks/setDefaults');
 
 const hooks = {

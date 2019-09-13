@@ -29,7 +29,7 @@ const addCreatedBy = (context) => {
 
 const addUpadtedBy = (context) => {
 	if (['patch', 'update'].includes(context.method) && context.data) { //  && !context.data.updatedBy
-		context.data.updatedBy = context.params.user;
+		context.data.updatedBy = context.params.user.id;
 	}
 	return context;
 };

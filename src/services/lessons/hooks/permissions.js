@@ -1,8 +1,7 @@
 const { Forbidden } = require('@feathersjs/errors');
 
 const logger = require('../../../logger');
-const { courseService, routes } = require('../../../../routes/course');
-const config = require('../../../../config/index');
+const { courseService, routes } = require('../../../routes/course');
 /**
  * Request Course service to get permissions, is only needed for create and lessons overview
  * all other permissions are internal
