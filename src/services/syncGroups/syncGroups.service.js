@@ -41,11 +41,16 @@ class SyncGroupsService {
 
 	remove(id, _params) {
 		const params = copyParams(_params);
-		params.query.select = {
-			_id: 1,
-		};
+		params.mongoose = { writeResult: true };
+		const deletedAt = new Date();
 		return this.app.service(this.baseService)
-			.patch(id, { deletedAt: new Date() }, copyParams(params))
+			.patch(id, { deletedAt }, params)
+			.then((res) => {
+				if (res.n === 1 && res.nModified === 1 && res.ok === 1) {
+					return { id, deletedAt };
+				}
+				throw res;
+			})
 			.catch((err) => {
 				throw new GeneralError('Can not set soft delete.', err);
 			});

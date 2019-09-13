@@ -93,7 +93,7 @@ const addTypeString = name => (docs, next) => {
 const copyParams = (params) => {
 	const copy = Object.assign({}, params);
 	copy.query = {
-		deletedAt: { $exists: false },
+		deletedAt: undefined,
 	};
 	copy.provider = undefined;
 	return copy;
