@@ -5,7 +5,7 @@ const { addTypeString } = require('../../../global/helpers');
 const { Schema } = mongoose;
 
 const lessonSchema = new Schema({
-	title: { type: String, required: true },
+	title: { type: String, default: '' },
 	courseId: { type: Schema.Types.ObjectId },
 	sections: [{ type: Schema.Types.ObjectId, ref: 'section' }],
 	permissions: [{ type: Object }],
@@ -22,6 +22,11 @@ const lessonSchema = new Schema({
 /* lessonSchema
 	.post('find', after('lesson'))
 	.post('findOne', after('lesson'));
+*/
+
+/* TODO: think about to be conform to the rest of the editor dokument
+lessonSchema
+	.post('find', addTypeString('lesson')
 */
 
 module.exports = {

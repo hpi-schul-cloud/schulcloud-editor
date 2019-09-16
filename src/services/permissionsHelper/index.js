@@ -110,7 +110,7 @@ class Proxy {
 		// params.userId = userId;
 		// Ergebnis (path access) auf permission prüfen
 		// const { ressourceId } = params.route;
-		const requestOther = params.userId !== userId;
+		const requestOther = params.user.id !== userId;
 		try {
 			const {
 				data: permissions, access,
