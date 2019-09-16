@@ -119,7 +119,6 @@ module.exports = {
 	isForced,
 	isArrayWithElement,
 	emptyHook,
-	template,
 	addTypeString,
 	convertParamsToInternRequest,
 };
