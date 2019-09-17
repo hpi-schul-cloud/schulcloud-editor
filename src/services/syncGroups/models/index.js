@@ -7,7 +7,8 @@ const { Schema } = mongoose;
 const syncGroupSchema = new Schema({
 	users: [{ type: Schema.Types.ObjectId }],
 	permission: { type: String, enum: ['read', 'write'], default: 'read' },
-	lessonId: { type: Schema.Types.ObjectId },
+	lessonId: { type: Schema.Types.ObjectId, required: true },
+	courseId: { type: Schema.Types.ObjectId, required: true },
 	deletedAt: { type: Date, expires: (60 * 60 * 24 * 30) },
 	createdBy: { type: Schema.Types.ObjectId },
 	updatedBy: { type: Schema.Types.ObjectId },

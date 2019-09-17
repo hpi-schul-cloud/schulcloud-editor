@@ -1,7 +1,3 @@
-const addLessonId = require('./addLessonId');
-const readPermission = require('./readPermission');
-
-module.exports = {
-	addLessonId,
-	readPermission,
-};
+exports.addLessonIdAndCourseId = require('./addLessonIdAndCourseId');
+exports.readPermission = require('./readPermission');
+exports.modifiedQueryToTarget = require('./modifiedQueryToTarget');
