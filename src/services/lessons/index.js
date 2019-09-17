@@ -1,19 +1,11 @@
-const service = require('feathers-mongoose');
-
-const { LessonModel } = require('./models/');
-const hooks = require('./hooks/');
+/* eslint-disable class-methods-use-this */
+const { Lessons, hooks: lessonsHooks, joinLessonChannel } = require('./lessons.service');
 
 module.exports = function setup() {
 	const app = this;
-	const option = {
-		Model: LessonModel,
-		lean: true, // set to false if you want Mongoose documents returned
-		paginate: {
-			default: 50,
-			max: 150,
-		},
-	};
-	app.use('lessons', service(option));
-	const lessonsService = app.service('lessons');
-	lessonsService.hooks(hooks);
+	app.use('/course/:courseId/lessons', new Lessons());
+	const lessonsService = app.service('course/:courseId/lessons');
+	lessonsService.hooks(lessonsHooks);
+	lessonsService.publish('patched', data => app.channel(`lesson/${data.id}`).send(data));
+	lessonsService.on('getted', joinLessonChannel);
 };

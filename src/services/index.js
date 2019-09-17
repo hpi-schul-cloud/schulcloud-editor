@@ -1,4 +1,3 @@
-// Services
 const lessons = require('./lessons');
 const groups = require('./groups');
 const syncGroups = require('./syncGroups');

@@ -12,19 +12,22 @@ const lessonSchema = new Schema({
 	deletedAt: { type: Date, expires: (60 * 60 * 24 * 30) },
 	createdBy: { type: Schema.Types.ObjectId },
 	updatedBy: { type: Schema.Types.ObjectId },
+	visible: { type: Boolean, default: true },
+	position: { type: Number, default: Date.now },
+	fork: { type: Schema.Types.ObjectId }, // is forked from
 }, {
 	timestamps: true,
 });
 
-function autoPopulate(next) {
-	this.populate('sections');
-	next();
-}
+/* lessonSchema
+	.post('find', after('lesson'))
+	.post('findOne', after('lesson'));
+*/
 
+/* TODO: think about to be conform to the rest of the editor dokument
 lessonSchema
-	.pre('findOne', autoPopulate)
-	.post('find', addTypeString('lesson'))
-	.post('findOne', addTypeString('lesson'));
+	.post('find', addTypeString('lesson')
+*/
 
 module.exports = {
 	LessonModel: mongoose.model('lesson', lessonSchema),

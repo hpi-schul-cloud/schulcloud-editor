@@ -42,3 +42,8 @@ backup/*
 
 #clipboard uploads
 uploads/*
+
+
+#config file
+config/*
+!config/default.example.json

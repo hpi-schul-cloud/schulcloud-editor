@@ -1,15 +1,16 @@
 const { Forbidden } = require('@feathersjs/errors');
 const axios = require('axios');
 
-const coursePermissions = (app, courseId, user, authorization) => {
+const coursePermissions = (app, courseId, userId, authorization) => {
 	const { server: { baseUrl, coursePermissionsUri }, timeout } = app.get('routes');
 	const url = (baseUrl + coursePermissionsUri).replace(':courseId', courseId);
+	// TODO: define gloabl - ticket EDTR-150
 	const coursePermissionServices = axios.create({
 		baseURL: url,
 		timeout,
 	});
 
-	return coursePermissionServices.get(user, {
+	return coursePermissionServices.get(userId, {
 		headers: {
 			Authorization: authorization,
 		},
