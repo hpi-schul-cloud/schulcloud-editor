@@ -5,14 +5,15 @@ const { filterOutResults } = require('./hooks');
 
 const addUserId = (context) => {
 	if (context.params.force) {
-		context.params.user = '_isForce_';
 		return context;
 	}
 
 	if (context.params.userId) {
 		// todo validate mongoose id
 		// todo add name ?
-		context.params.user = context.params.userId.toString();
+		context.params.user = {
+			id: context.params.userId.toString(),
+		};
 		return context;
 	}
 
@@ -21,14 +22,14 @@ const addUserId = (context) => {
 
 const addCreatedBy = (context) => {
 	if (context.method === 'create' && context.data) { // && !context.data.createdBy
-		context.data.createdBy = context.params.user;
+		context.data.createdBy = context.params.user.id;
 	}
 	return context;
 };
 
 const addUpadtedBy = (context) => {
 	if (['patch', 'update'].includes(context.method) && context.data) { //  && !context.data.updatedBy
-		context.data.updatedBy = context.params.user;
+		context.data.updatedBy = context.params.user.id;
 	}
 	return context;
 };

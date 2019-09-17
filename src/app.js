@@ -1,4 +1,5 @@
 /* eslint-disable no-console */
+const cors = require('cors');
 const path = require('path');
 const feathers = require('@feathersjs/feathers');
 const socketio = require('@feathersjs/socketio');
@@ -29,14 +30,13 @@ const app = express(feathers())
 	.configure(conf)
 	.use(express.json())
 	.use(express.urlencoded({ extended: true }))
+	.use(cors())
 	// todo "handleResponseType" test it, maybe no effect see express.json() @deprecated
 	.configure(express.rest(handleResponseType))
-
 	.use('/', express.static('public'))
 	.use(favicon(path.join(__dirname, '..', 'public', 'favicon.ico')))
-
 	// .use(defaultHeaders) // todo test it, position,  if we need it? @deprecated
-
+	.configure(socketio())
 	.configure(database)
 	.configure(middleware)
 	.configure(services)
@@ -49,6 +49,8 @@ const app = express(feathers())
 			res.json(error);
 		},
 	}));
+
+
 /*
 app.on('unhandledRejection', (reason, p) => { @deprecated
 	logger.info('Unhandled Rejection at: Promise ', p, ' reason: ', reason);

@@ -36,22 +36,18 @@ const filterOutResults = keys => (context) => {
 const checkCoursePermission = permission => async (context) => {
 	const {
 		params: {
-			user, provider, route: { courseId }, authorization,
+			user, route: { courseId }, authorization,
 		},
 		app,
 	} = context;
 
-	if (!(provider === 'rest')) {
-		return context;
+	const { data: permissions } = await coursePermissions(app, courseId, user.id, authorization);
+
+	if (!permissions.includes(permission)) {
+		throw new Forbidden('Missing privileges');
 	}
 
-	const { data: permissions } = await coursePermissions(app, courseId, user, authorization);
-
-	if (permissions.includes(permission)) {
-		return context;
-	}
-
-	throw new Forbidden('You have no access.');
+	return context;
 };
 
 module.exports = {
