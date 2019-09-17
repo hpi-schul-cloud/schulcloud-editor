@@ -15,6 +15,7 @@ const hooks = require('./global/');
 const database = require('./database/');
 const services = require('./services/');
 const middleware = require('./middleware');
+const socketMiddleware = require('./middleware/socket');
 // const defaultHeaders = require('./middleware/defaultHeaders'); @deprecated
 const handleResponseType = require('./middleware/handleResponseType');
 
@@ -30,17 +31,16 @@ const app = express(feathers())
 	.configure(conf)
 	.use(express.json())
 	.use(express.urlencoded({ extended: true }))
+	.configure(socketio(socketMiddleware))
 	.use(cors())
 	// todo "handleResponseType" test it, maybe no effect see express.json() @deprecated
 	.configure(express.rest(handleResponseType))
 	.use('/', express.static('public'))
 	.use(favicon(path.join(__dirname, '..', 'public', 'favicon.ico')))
 	// .use(defaultHeaders) // todo test it, position,  if we need it? @deprecated
-	.configure(socketio())
 	.configure(database)
 	.configure(middleware)
 	.configure(services)
-	.configure(socketio())
 	.hooks(hooks)
 	.use(express.errorHandler({
 		// force format html error to json
