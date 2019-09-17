@@ -1,9 +1,7 @@
-// @deprecated
-// const mapUserIds = require('./mapUserIds');
-const addCourseId = require('./addCourseId');
+const addLessonId = require('./addLessonId');
 const readPermission = require('./readPermission');
 
 module.exports = {
-	addCourseId,
+	addLessonId,
 	readPermission,
 };

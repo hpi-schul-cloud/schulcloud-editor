@@ -1,6 +1,6 @@
 const readPermission = (context) => {
-	const { route: { courseId }, query, user } = context.params;
-	query.courseId = courseId;
+	const { route: { lessonId }, query, user } = context.params;
+	query.lessonId = lessonId;
 	query.users = user;
 	return context;
 };
