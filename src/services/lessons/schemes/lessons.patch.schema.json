@@ -3,7 +3,8 @@
     "type": "object",
     "title": "LessonCreate",
     "required": [
-      "title"
+      "title",
+      "updatedBy"
     ],
     "properties": {
       "title": {
@@ -17,6 +18,11 @@
       "note": {
         "$id": "#/properties/note",
         "type": "string"
+      },
+      "updatedBy": {
+        "$id": "#/properties/updatedBy",
+        "type": "string",
+        "pattern": "[a-f0-9]{24}"
       }
     },
     "additionalProperties": false

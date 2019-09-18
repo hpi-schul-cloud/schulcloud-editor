@@ -2,7 +2,6 @@
 const cors = require('cors');
 const path = require('path');
 const feathers = require('@feathersjs/feathers');
-const socketio = require('@feathersjs/socketio');
 // eslint-disable-next-line import/newline-after-import
 const express = require('@feathersjs/express');
 process.env.NODE_CONFIG_DIR = path.join(__dirname, '../config/');
@@ -15,7 +14,6 @@ const hooks = require('./global/');
 const database = require('./database/');
 const services = require('./services/');
 const middleware = require('./middleware');
-const socketMiddleware = require('./middleware/socket');
 // const defaultHeaders = require('./middleware/defaultHeaders'); @deprecated
 const handleResponseType = require('./middleware/handleResponseType');
 
@@ -31,7 +29,6 @@ const app = express(feathers())
 	.configure(conf)
 	.use(express.json())
 	.use(express.urlencoded({ extended: true }))
-	.configure(socketio(socketMiddleware))
 	.use(cors())
 	// todo "handleResponseType" test it, maybe no effect see express.json() @deprecated
 	.configure(express.rest(handleResponseType))
