@@ -8,16 +8,16 @@ const { create: createSchema, patch: patchSchema } = require('./schemes');
 const logger = require('../../logger');
 const { LessonModel } = require('./models/');
 const { checkCoursePermission } = require('../../global/hooks');
-const { setCourseId } = require('./hooks/setDefaults');
+const { setCourseId } = require('./hooks/');
 
-const hooks = {
+const lessonsHooks = {
 	before: {
-		find: [/* do some validation */checkCoursePermission('LESSON_VIEW')],
+		find: [],
 		get: [],
 		create: [
 			setCourseId,
 			validateSchema(createSchema, Ajv),
-			checkCoursePermission('LESSON_CREATE'),
+			checkCoursePermission('LESSONS_CREATE'),
 		],
 		patch: [
 			validateSchema(patchSchema, Ajv),
@@ -25,17 +25,10 @@ const hooks = {
 		remove: [
 
 		],
-
 	},
-
-	after: {
-
-	},
-
-	error: {
-
-	},
+	after: {},
 };
+
 
 class Lessons {
 	setup(app) {
@@ -97,6 +90,11 @@ class Lessons {
 		return lesson;
 	}
 
+	async createSyncGroups() {
+		// fetch data from course
+		// read and write group
+	}
+
 	async create(data, params) {
 		const { user } = params;
 		try {
@@ -104,8 +102,11 @@ class Lessons {
 				...data,
 				createdBy: user.id,
 			});
+			// todo create permission group
+			// todo create permission
+			// const groups 
 			await lesson.save();
-			return;
+			return { _id: lesson._id };
 		} catch (err) {
 			logger.error(`Failed to create a lesson: ${err}`);
 			throw err;
@@ -151,9 +152,8 @@ const joinLessonChannel = app => (user) => {
 	app.channel(`lessons/${user.lesson}`).join(user.connection);
 };
 
-
 module.exports = {
 	Lessons,
-	hooks,
+	lessonsHooks,
 	joinLessonChannel,
 };

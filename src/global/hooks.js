@@ -1,7 +1,5 @@
 const { Forbidden } = require('@feathersjs/errors');
 
-const { server: { coursePermissions } } = require('../routes');
-
 const filterOutResults = keys => (context) => {
 	if (context.result && context.type === 'after' && context.params.provider === 'rest') {
 		if (!Array.isArray(keys)) {
@@ -35,8 +33,9 @@ const checkCoursePermission = permission => async (context) => {
 		},
 		app,
 	} = context;
+	const coursePermissions = app.get('routes:server:coursePermissions');
 
-	const { data: permissions } = await coursePermissions(app, courseId, user.id, authorization);
+	const { data: permissions } = await coursePermissions(courseId, user.id, authorization);
 
 	if (!permissions.includes(permission)) {
 		throw new Forbidden('Missing privileges');

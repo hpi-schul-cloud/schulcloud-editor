@@ -16,13 +16,13 @@ const database = require('./database/');
 const services = require('./services/');
 const middleware = require('./middleware');
 const swagger = require('./swagger');
-// const defaultHeaders = require('./middleware/defaultHeaders'); @deprecated
 const handleResponseType = require('./middleware/handleResponseType');
+const routes = require('./routes');
 
 const conf = configuration();
 
 console.log('\n___process.env___');
-['NODE_CONFIG_DIR', 'NODE_ENV'] // 'EDITOR_MS_FORCE_KEY'
+['NODE_CONFIG_DIR', 'NODE_ENV']
 	.forEach(key => console.log(key, process.env[key]));
 console.log('From config file:', conf());
 console.log('\n');
@@ -41,8 +41,8 @@ const app = express(feathers())
 	.configure(socketio())
 	.configure(database)
 	.configure(middleware)
+	.configure(routes)
 	.configure(services)
-	.configure(socketio())
 	.hooks(hooks)
 	.use(express.errorHandler({
 		// force format html error to json

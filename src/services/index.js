@@ -9,7 +9,7 @@ const permissionsHelper = require('./permissionsHelper');
 module.exports = function setup(app) {
 	/** first configure all services */
 	app.configure(lessons);
-	app.configure(permissionsHelper.bind({ baseService: 'lessons' }));
+	app.configure(permissionsHelper.bind({ baseService: 'course/:courseId/lessons', doNotProtect: ['create'] }));
 	app.configure(groups);
 	app.configure(syncGroups);
 	app.configure(sections);

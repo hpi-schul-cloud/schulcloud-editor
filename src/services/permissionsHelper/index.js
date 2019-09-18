@@ -7,7 +7,7 @@ const {
 } = require('./hooks');
 
 module.exports = function setup(app) {
-	const { baseService, permissionKey = 'permissions' } = this;
+	const { baseService, permissionKey = 'permissions', doNotProtect = [] } = this;
 	const pathMin = `${baseService}/:ressourceId`;
 	const path = `${pathMin}/permission`;
 
@@ -31,16 +31,16 @@ module.exports = function setup(app) {
 		permission: 'read',
 	}));
 
-
 	const serviceToModified = app.service(baseService);
 	['create', 'find', 'get', 'patch', 'remove', 'update'].forEach((method) => {
 		// add after filter that remove the embedded permissions in baseServices
 		serviceToModified.__hooks.after[method].push(filterOutResults(permissionKey));
 		// add access check in baseServices as first place in before all
-		const access = ['get', 'find'].includes(method) ? 'read' : 'write';
-		serviceToModified.__hooks.before[method].unshift(baseServicesAccess(pathMin, access));
+		if (!doNotProtect.includes(method)) {
+			const access = ['get', 'find'].includes(method) ? 'read' : 'write';
+			serviceToModified.__hooks.before[method].unshift(baseServicesAccess(pathMin, access));
+		}
 	});
-
 
 	app.logger.info(`Permission services is adding add ${path} with key ${permissionKey}.`);
 };
