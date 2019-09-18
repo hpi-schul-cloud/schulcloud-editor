@@ -4,6 +4,7 @@ const logger = require('../logger');
 const { filterOutResults } = require('./hooks');
 
 const addUserId = (context) => {
+
 	if (context.params.force) {
 		return context;
 	}
