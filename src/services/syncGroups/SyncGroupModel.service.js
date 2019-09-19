@@ -6,12 +6,24 @@ const { addLessonIdAndCourseId, modifiedQueryToTarget } = require('./hooks/');
 
 const hooks = {};
 hooks.before = {
-	all: [disallow('external')],
-	create: [addLessonIdAndCourseId],
-	patch: [modifiedQueryToTarget],
-	remove: [modifiedQueryToTarget],
-	get: [modifiedQueryToTarget],
-	find: [modifiedQueryToTarget],
+	all: [
+		disallow('external'),
+	],
+	create: [
+		addLessonIdAndCourseId,
+	],
+	patch: [
+		modifiedQueryToTarget,
+	],
+	remove: [
+		modifiedQueryToTarget,
+	],
+	get: [
+		modifiedQueryToTarget,
+	],
+	find: [
+		modifiedQueryToTarget,
+	],
 };
 
 const SyncGroupModelService = (app) => {
