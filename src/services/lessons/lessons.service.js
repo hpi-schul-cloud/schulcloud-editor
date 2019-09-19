@@ -119,7 +119,7 @@ class Lessons {
 		}
 	}
 
-	createDefaultPermissions(params, defaultGroups) {
+	async createDefaultPermissions(params, defaultGroups) {
 		// todo write intern permission services?
 		const service = this.app.service('course/:courseId/lessons/:ressourceId/permission');
 		try {
