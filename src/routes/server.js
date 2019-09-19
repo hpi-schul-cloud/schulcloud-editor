@@ -1,5 +1,6 @@
 const axios = require('axios');
 const coursePermissions = require('./server.coursePermissions');
+const me = require('./server.me');
 
 const server = (app) => {
 	const { server: { baseURL }, timeout } = app.get('routes');
@@ -14,4 +15,5 @@ const server = (app) => {
 module.exports = (app) => {
 	app.configure(server);
 	app.configure(coursePermissions);
+	app.configure(me);
 };

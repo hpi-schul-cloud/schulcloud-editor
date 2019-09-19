@@ -7,7 +7,7 @@
 		"server": {
 			"baseURL": "SERVER_BASE_URL",
 			"coursePermissionsUri": "ROUTE_COURSE_PERMISSIONS",
-			"courseUri": "ROUTE_COURSE"
+			"meUri": "ROUTE_ME"
 		},
 		"timeout": "2000"
 	}

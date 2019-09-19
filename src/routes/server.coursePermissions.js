@@ -1,10 +1,16 @@
 const { Forbidden } = require('@feathersjs/errors');
 
-const coursePermissions = (server, coursePermissionsUri) => (courseId, userId, Authorization) => {
-	const url = `${coursePermissionsUri}/${userId}`.replace(':courseId', courseId);
+const coursePermissions = (server, coursePermissionsUri) => (
+	courseId,
+	{ authorization = '', userId, query = {} }, // todo add query interpreter
+) => {
+	let url = coursePermissionsUri.replace(':courseId', courseId);
+	if (userId) {
+		url += `/${userId}`;
+	}
 	return server.get(url, {
 		headers: {
-			Authorization,
+			Authorization: authorization,
 		},
 	}).catch((err) => {
 		if (err.response) {

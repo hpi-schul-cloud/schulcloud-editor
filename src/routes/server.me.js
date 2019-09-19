@@ -1,7 +1,7 @@
 const { Forbidden } = require('@feathersjs/errors');
 
-const course = (server, courseUri) => (Authorization, courseId) => {
-	const url = `${courseUri}/${courseId}`;
+const me = (server, meUri) => (userId, Authorization, query) => {
+	const url = `${meUri}/${userId}`;
 	return server.get(url, {
 		headers: {
 			Authorization,
@@ -15,8 +15,8 @@ const course = (server, courseUri) => (Authorization, courseId) => {
 };
 
 module.exports = (app) => {
-	const { server: { courseUri } } = app.get('routes');
+	const { server: { meUri } } = app.get('routes');
 	const server = app.get('routes:server');
-	app.set('routes:server:course', course(server, courseUri));
-	app.logger.info('Add route app.get("routes:server:course")');
+	app.set('routes:server:me', me(server, meUri));
+	app.logger.info('Add route app.get("routes:server:me")');
 };
