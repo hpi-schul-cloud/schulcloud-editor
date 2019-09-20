@@ -7,19 +7,20 @@ const {
 } = require('./hooks');
 
 module.exports = function setup(app) {
-	const { baseService, permissionKey = 'permissions', doNotProtect = [] } = this;
+	const {
+		baseService,
+		permissionKey = 'permissions',
+		doNotProtect = [],
+		modelService,
+	} = this;
 	const pathMin = `${baseService}/:ressourceId`;
 	const path = `${pathMin}/permission`;
 
 	app.use(path, new PermissionService({
 		baseService,
+		modelService,
 		permissionKey,
 	}));
-
-	permissionServiceHooks.before.all.unshift(addReferencedData(baseService, permissionKey));
-
-	const permissionService = app.service(path);
-	permissionService.hooks(permissionServiceHooks);
 
 	app.use(`${pathMin}/write`, new ProxyService({
 		path,
@@ -30,6 +31,10 @@ module.exports = function setup(app) {
 		path,
 		permission: 'read',
 	}));
+
+	const permissionService = app.service(path);
+	permissionServiceHooks.before.all.unshift(addReferencedData(modelService, permissionKey));
+	permissionService.hooks(permissionServiceHooks);
 
 	const serviceToModified = app.service(baseService);
 	['create', 'find', 'get', 'patch', 'remove', 'update'].forEach((method) => {

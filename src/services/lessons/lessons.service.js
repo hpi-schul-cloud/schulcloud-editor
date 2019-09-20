@@ -1,5 +1,5 @@
 /* eslint-disable class-methods-use-this */
-const { NotFound, Forbidden } = require('@feathersjs/errors');
+const { NotFound, Forbidden, BadRequest } = require('@feathersjs/errors');
 const { validateSchema } = require('feathers-hooks-common');
 const Ajv = require('ajv');
 
@@ -29,6 +29,7 @@ const lessonsHooks = {
 };
 
 
+// todo remapped to lessonModelServices
 class Lessons {
 	setup(app) {
 		this.app = app;
@@ -119,12 +120,14 @@ class Lessons {
 		}
 	}
 
-	async createDefaultPermissions(params, defaultGroups) {
+	async createDefaultPermissionsData(params, defaultGroups) {
 		// todo write intern permission services?
 		const service = this.app.service('course/:courseId/lessons/:ressourceId/permission');
+		params.query.disabledPatch = true;
 		const promises = defaultGroups.map(({ _id, permission }) => service.create({
 			group: _id,
 			[permission]: true,
+			activated: true,
 		}, params));
 		return Promise.all(promises).catch((err) => {
 			throw new Forbidden(this.err.noAccess, err);
@@ -138,22 +141,19 @@ class Lessons {
 				...data,
 				createdBy: user.id,
 			});
-			// todo create permission group
-			// todo create permission
-			// const groups 
+
 			const lessonId = lesson._id;
 			const internParams = copyParams(params);
 			internParams.route.ressourceId = lessonId;
 			internParams.route.lessonId = lessonId;
 
 			const defaultGroups = await this.createDefaultGroups(internParams, lesson);
-			await this.createDefaultPermissions(internParams, defaultGroups);
+			lesson.permissions = await this.createDefaultPermissionsData(internParams, defaultGroups);
 
 			await lesson.save();
 			return { _id: lesson._id };
 		} catch (err) {
-			this.app.logger.error(`Failed to create a lesson: ${err}`);
-			throw err;
+			throw new BadRequest('Failed to create a lesson.', err);
 		}
 	}
 
