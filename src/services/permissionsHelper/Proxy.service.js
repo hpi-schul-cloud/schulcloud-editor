@@ -3,10 +3,10 @@ const { Forbidden } = require('@feathersjs/errors');
 const { restictedAndAddAccess } = require('./hooks');
 
 class ProxyService {
-	constructor(options = {}) {
-		this.docs = options.docs;
-		this.permissionServicesName = options.path;
-		this.permission = options.permission;
+	constructor({ docs = {}, path, permission }) {
+		this.docs = docs;
+		this.permissionServicesName = path;
+		this.permission = permission;
 		this.err = {
 			others: 'You have no access to request other users.',
 		};

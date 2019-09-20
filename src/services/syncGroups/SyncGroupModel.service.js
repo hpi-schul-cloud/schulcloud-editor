@@ -2,7 +2,7 @@ const service = require('feathers-mongoose');
 const { disallow } = require('feathers-hooks-common');
 
 const { SyncGroupModel } = require('./models/');
-const { addLessonIdAndCourseId, modifiedQueryToTarget } = require('./hooks/');
+const { modifiedQueryToTarget } = require('./hooks/');
 
 const hooks = {};
 hooks.before = {
@@ -10,8 +10,7 @@ hooks.before = {
 		disallow('external'),
 	],
 	create: [
-		addLessonIdAndCourseId,
-	],
+  ],
 	patch: [
 		modifiedQueryToTarget,
 	],

@@ -25,11 +25,12 @@ permissionServiceHooks.before = {
 
 
 class PermissionService {
-	constructor(options = {}) {
-		this.docs = options.docs;
-		this.baseServiceName = options.baseService;
-		this.permissionKey = options.permissionKey;
-		this.modelServiceName = options.modelService;
+	constructor({ baseService, docs = {}, permissionKey, modelService }) {
+		this.docs = docs;
+		this.baseServiceName = baseService;
+		this.permissionKey = permissionKey;
+    this.modelService = modelService;
+
 		this.err = {
 			create: 'Can not create new permission.',
 		};

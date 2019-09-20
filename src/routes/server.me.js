@@ -1,8 +1,10 @@
 const { Forbidden } = require('@feathersjs/errors');
+const server = require('./server');
 
-const me = (server, meUri) => (userId, Authorization, query) => {
+const me = app => (userId, Authorization, query) => {
+	const { server: { meUri } } = app.get('routes');
 	const url = `${meUri}/${userId}`;
-	return server.get(url, {
+	return server(app).get(url, {
 		headers: {
 			Authorization,
 		},
@@ -14,9 +16,12 @@ const me = (server, meUri) => (userId, Authorization, query) => {
 	});
 };
 
-module.exports = (app) => {
-	const { server: { meUri } } = app.get('routes');
-	const server = app.get('routes:server');
-	app.set('routes:server:me', me(server, meUri));
+const setupMe = (app) => {
+	app.set('routes:server:me', me(app));
 	app.logger.info('Add route app.get("routes:server:me")');
+};
+
+module.exports = {
+	setupMe,
+	me,
 };
