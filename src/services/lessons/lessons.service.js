@@ -130,14 +130,13 @@ class Lessons {
 	async createDefaultPermissions(params, defaultGroups) {
 		// todo write intern permission services?
 		const service = this.app.service('course/:courseId/lessons/:ressourceId/permission');
-		try {
-			return defaultGroups.map(({ _id, permission }) => service.create({
-				group: _id,
-				[permission]: true,
-			}, params));
-		} catch (err) {
+		const promises = defaultGroups.map(({ _id, permission }) => service.create({
+			group: _id,
+			[permission]: true,
+		}, params));
+		return Promise.all(promises).catch((err) => {
 			throw new Forbidden(this.err.noAccess, err);
-		}
+		});
 	}
 
 	async create(data, params) {

@@ -9,7 +9,8 @@ hooks.before = {
 	all: [
 		disallow('external'),
 	],
-	create: [],
+	create: [
+  ],
 	patch: [
 		modifiedQueryToTarget,
 	],
