@@ -11,6 +11,7 @@ module.exports = function setup(app) {
 		doNotProtect = [],
 		modelService,
 	} = this;
+
 	const pathMin = `${baseService}/:ressourceId`;
 	const path = `${pathMin}/permission`;
 
