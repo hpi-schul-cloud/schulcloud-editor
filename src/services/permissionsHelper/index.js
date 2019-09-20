@@ -2,9 +2,7 @@
 const { PermissionService, permissionServiceHooks } = require('./Permission.service');
 const { ProxyService } = require('./Proxy.service');
 const { filterOutResults } = require('../../global/hooks');
-const {
-	addReferencedData, baseServicesAccess,
-} = require('./hooks');
+const { baseServicesAccess } = require('./hooks');
 
 module.exports = function setup(app) {
 	const {
@@ -33,7 +31,6 @@ module.exports = function setup(app) {
 	}));
 
 	const permissionService = app.service(path);
-	permissionServiceHooks.before.all.unshift(addReferencedData(modelService, permissionKey));
 	permissionService.hooks(permissionServiceHooks);
 
 	const serviceToModified = app.service(baseService);
