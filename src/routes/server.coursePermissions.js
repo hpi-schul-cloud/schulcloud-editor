@@ -1,14 +1,16 @@
 const { Forbidden } = require('@feathersjs/errors');
+const server = require('./server');
 
-const coursePermissions = (server, coursePermissionsUri) => (
+const coursePermissions = app => (
 	courseId,
 	{ authorization = '', userId, query = {} }, // todo add query interpreter
 ) => {
+	const { server: { coursePermissionsUri } } = app.get('routes');
 	let url = coursePermissionsUri.replace(':courseId', courseId);
 	if (userId) {
 		url += `/${userId}`;
 	}
-	return server.get(url, {
+	return server(app).get(url, {
 		headers: {
 			Authorization: authorization,
 		},
@@ -20,9 +22,12 @@ const coursePermissions = (server, coursePermissionsUri) => (
 	});
 };
 
-module.exports = (app) => {
-	const { server: { coursePermissionsUri } } = app.get('routes');
-	const server = app.get('routes:server');
-	app.set('routes:server:coursePermissions', coursePermissions(server, coursePermissionsUri));
+const setupCoursePermissions = (app) => {
+	app.set('routes:server:coursePermissions', coursePermissions(app));
 	app.logger.info('Add route app.get("routes:server:coursePermissions")');
+};
+
+module.exports = {
+	setupCoursePermissions,
+	coursePermissions,
 };
