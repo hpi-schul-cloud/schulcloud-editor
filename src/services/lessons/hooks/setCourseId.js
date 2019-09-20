@@ -3,7 +3,7 @@ const { BadRequest } = require('@feathersjs/errors');
 const setCourseId = (context) => {
 	const { courseId } = context.params.route || {};
 	if (!courseId) {
-		throw new BadRequest('No lessonId or courseId exist.');
+		throw new BadRequest('No lessonId or courseId is set.');
 	}
 	if (!context.data) {
 		throw new BadRequest('Data key is missing.');
