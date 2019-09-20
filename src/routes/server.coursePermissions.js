@@ -1,16 +1,16 @@
 const { Forbidden } = require('@feathersjs/errors');
-const axios = require('axios');
+const server = require('./server');
 
-const coursePermissions = (app, courseId, userId, authorization) => {
-	const { server: { baseUrl, coursePermissionsUri }, timeout } = app.get('routes');
-	const url = (baseUrl + coursePermissionsUri).replace(':courseId', courseId);
-	// TODO: define gloabl - ticket EDTR-150
-	const coursePermissionServices = axios.create({
-		baseURL: url,
-		timeout,
-	});
-
-	return coursePermissionServices.get(userId, {
+const coursePermissions = app => (
+	courseId,
+	{ authorization = '', userId, query = {} }, // todo add query interpreter
+) => {
+	const { server: { coursePermissionsUri } } = app.get('routes');
+	let url = coursePermissionsUri.replace(':courseId', courseId);
+	if (userId) {
+		url += `/${userId}`;
+	}
+	return server(app).get(url, {
 		headers: {
 			Authorization: authorization,
 		},
@@ -22,4 +22,12 @@ const coursePermissions = (app, courseId, userId, authorization) => {
 	});
 };
 
-module.exports = coursePermissions;
+const setupCoursePermissions = (app) => {
+	app.set('routes:server:coursePermissions', coursePermissions(app));
+	app.logger.info('Add route app.get("routes:server:coursePermissions")');
+};
+
+module.exports = {
+	setupCoursePermissions,
+	coursePermissions,
+};

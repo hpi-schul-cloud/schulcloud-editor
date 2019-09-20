@@ -1,5 +1,7 @@
-const exp = {};
-exp.server = {};
-exp.server.coursePermissions = require('./server.coursePermissions');
+const { setupCoursePermissions } = require('./server.coursePermissions');
+const { setupMe } = require('./server.me');
 
-module.exports = exp;
+module.exports = (app) => {
+	app.configure(setupCoursePermissions);
+	app.configure(setupMe);
+};

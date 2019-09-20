@@ -1,23 +1,22 @@
 /* eslint-disable class-methods-use-this */
-const { NotFound } = require('@feathersjs/errors');
+const { NotFound, Forbidden } = require('@feathersjs/errors');
 const { validateSchema } = require('feathers-hooks-common');
 const Ajv = require('ajv');
 
-const { create: createSchema, patch: patchSchema } = require('./schemes');
-
-const logger = require('../../logger');
-const { LessonModel } = require('./models/');
 const { checkCoursePermission } = require('../../global/hooks');
-const { setCourseId } = require('./hooks/setDefaults');
+const { copyParams } = require('../../global/utils');
+const { create: createSchema, patch: patchSchema } = require('./schemes');
+const { LessonModel } = require('./models/');
+const { setCourseId } = require('./hooks/');
 
-const hooks = {
+const lessonsHooks = {
 	before: {
-		find: [/* do some validation */checkCoursePermission('LESSON_VIEW')],
+		find: [],
 		get: [],
 		create: [
 			setCourseId,
 			validateSchema(createSchema, Ajv),
-			checkCoursePermission('LESSON_CREATE'),
+			checkCoursePermission('LESSONS_CREATE'),
 		],
 		patch: [
 			validateSchema(patchSchema, Ajv),
@@ -25,21 +24,21 @@ const hooks = {
 		remove: [
 
 		],
-
 	},
-
-	after: {
-
-	},
-
-	error: {
-
-	},
+	after: {},
 };
 
+
 class Lessons {
+	constructor({ docs = {} }) {
+		this.docs = docs;
+	}
+
 	setup(app) {
 		this.app = app;
+		this.err = {
+			noAccess: 'You have no access',
+		};
 	}
 
 	async find(params) {
@@ -60,7 +59,7 @@ class Lessons {
 
 			return lessons || [];
 		} catch (err) {
-			logger.error(`Failed to find lessons: ${err}`);
+			this.app.logger.error(`Failed to find lessons: ${err}`);
 			throw err;
 		}
 	}
@@ -89,12 +88,56 @@ class Lessons {
 		try {
 			lesson = await mRequest.lean().exec();
 		} catch (err) {
-			logger.error(`Failed to get the lesson: ${err}`);
+			this.app.logger.error(`Failed to get the lesson: ${err}`);
 			throw err;
 		}
 		if (!lesson) throw new NotFound();
 
 		return lesson;
+	}
+
+	async createDefaultGroups(params, lesson) {
+		const { authorization, route: { courseId } } = params;
+		const coursePermissions = this.app.get('routes:server:coursePermissions');
+		const users = {
+			read: [],
+			write: ['0000d231816abba584714c9e'], // todo replace
+		};
+		try {
+			// const res = await coursePermissions(courseId, { authorization });
+			this.app.logger.warning('Course fetch data do not exist');
+
+			const readGroupPromise = this.app.service('models/syncGroup').create({
+				users: users.read,
+				permission: 'read',
+				courseId,
+				lessonId: lesson._id,
+			}, params);
+
+			const writeGroupPromise = this.app.service('models/syncGroup').create({
+				users: users.write,
+				permission: 'write',
+				courseId,
+				lessonId: lesson._id,
+			}, params);
+
+			return Promise.all([readGroupPromise, writeGroupPromise]);
+		} catch (err) {
+			throw new Forbidden(this.err.noAccess, err);
+		}
+	}
+
+	async createDefaultPermissions(params, defaultGroups) {
+		// todo write intern permission services?
+		const service = this.app.service('course/:courseId/lessons/:ressourceId/permission');
+		try {
+			return defaultGroups.map(({ _id, permission }) => service.create({
+				group: _id,
+				[permission]: true,
+			}, params));
+		} catch (err) {
+			throw new Forbidden(this.err.noAccess, err);
+		}
 	}
 
 	async create(data, params) {
@@ -104,10 +147,21 @@ class Lessons {
 				...data,
 				createdBy: user.id,
 			});
+			// todo create permission group
+			// todo create permission
+			// const groups 
+			const lessonId = lesson._id;
+			const internParams = copyParams(params);
+			internParams.route.ressourceId = lessonId;
+			internParams.route.lessonId = lessonId;
+
+			const defaultGroups = await this.createDefaultGroups(internParams, lesson);
+			await this.createDefaultPermissions(internParams, defaultGroups);
+
 			await lesson.save();
-			return;
+			return { _id: lesson._id };
 		} catch (err) {
-			logger.error(`Failed to create a lesson: ${err}`);
+			this.app.logger.error(`Failed to create a lesson: ${err}`);
 			throw err;
 		}
 	}
@@ -124,7 +178,7 @@ class Lessons {
 				...data,
 			}).exec();
 		} catch (err) {
-			logger.error(`Failed to update the lesson ${err}`);
+			this.app.logger.error(`Failed to update the lesson ${err}`);
 			throw err;
 		}
 	}
@@ -141,7 +195,7 @@ class Lessons {
 			await lesson.save();
 			return;
 		} catch (err) {
-			logger.error(`Failed to delete the lesson ${err}`);
+			this.app.logger.error(`Failed to delete the lesson ${err}`);
 			throw err;
 		}
 	}
@@ -151,9 +205,8 @@ const joinLessonChannel = app => (user) => {
 	app.channel(`lessons/${user.lesson}`).join(user.connection);
 };
 
-
 module.exports = {
 	Lessons,
-	hooks,
+	lessonsHooks,
 	joinLessonChannel,
 };

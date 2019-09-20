@@ -5,8 +5,9 @@
 	"public": "../public/",
 	"routes": {
 		"server": {
-			"baseUrl": "http://server:3030",
-			"coursePermissionsUri": "/courses/:courseId/userPermissions"
+			"baseURL": "http://localhost:3030",
+			"coursePermissionsUri": "/courses/:courseId/userPermissions",
+			"meUri": "/me"
 		},
 		"timeout": "30000"
 	}

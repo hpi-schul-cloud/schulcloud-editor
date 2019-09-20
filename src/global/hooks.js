@@ -1,11 +1,4 @@
-const { MethodNotAllowed, Forbidden } = require('@feathersjs/errors');
-const axios = require('axios');
-
-const { server: { coursePermissions } } = require('../routes');
-
-const block = () => {
-	throw new MethodNotAllowed();
-};
+const { Forbidden } = require('@feathersjs/errors');
 
 const filterOutResults = keys => (context) => {
 	if (context.result && context.type === 'after' && context.params.provider === 'rest') {
@@ -40,8 +33,9 @@ const checkCoursePermission = permission => async (context) => {
 		},
 		app,
 	} = context;
+	const coursePermissions = app.get('routes:server:coursePermissions');
 
-	const { data: permissions } = await coursePermissions(app, courseId, user.id, authorization);
+	const { data: permissions } = await coursePermissions(courseId, { userId: user.id, authorization });
 
 	if (!permissions.includes(permission)) {
 		throw new Forbidden('Missing privileges');
@@ -51,7 +45,6 @@ const checkCoursePermission = permission => async (context) => {
 };
 
 module.exports = {
-	block,
 	filterOutResults,
 	checkCoursePermission,
 };

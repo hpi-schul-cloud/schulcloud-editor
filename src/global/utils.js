@@ -34,7 +34,7 @@ const isMemberOf = (groups, user, err = false) => {
 	return isMember;
 };
 
-/* context operations */
+/* context operations */ /*
 const getSessionUser = (context) => {
 	const { user } = context.params;
 	if (!user) {
@@ -42,7 +42,7 @@ const getSessionUser = (context) => {
 	}
 	return user;
 };
-
+*/
 const createGroupsInData = (context, lesson, keys) => {
 	if (!lesson || !keys) {
 		throw new BadRequest('The LessonId or keys are required.');
@@ -64,7 +64,7 @@ const createGroupsInData = (context, lesson, keys) => {
 	return Promise.all(forceArray(keys).map(k => createGroup(k))).then(() => context);
 };
 
-const isForced = context => context.params.force;
+// const isForced = context => context.params.force;
 
 // models after helper
 const addTypeString = name => (docs, next) => {
@@ -83,10 +83,20 @@ const addTypeString = name => (docs, next) => {
 	next();
 };
 
-const convertParamsToInternRequest = (params) => {
-	const copyParams = Object.assign({}, params);
-	copyParams.provider = undefined;
-	return copyParams;
+/**
+ * Create a copy from params with all user informations
+ * But is is marked the params as intern request.
+ * It clear the requested query and add deletedAt: { $exists: false };
+ * @param {*} params
+ * @return params
+ */
+const copyParams = (params) => {
+	const copy = Object.assign({}, params);
+	copy.query = {
+		deletedAt: undefined,
+	};
+	copy.provider = undefined;
+	return copy;
 };
 
 const emptyHook = () => ({
@@ -100,25 +110,26 @@ const emptyHook = () => ({
 });
 
 module.exports = {
-	isObject,
-	isArray,
-	isSaveDefined,
-	forceArray,
-	isGroup,
-	isString,
-	isInGroup,
-	bson,
-	sameId,
-	includeId,
-	pushId,
-	addIdIfNotExist,
-	isMemberOf,
-	getSessionUser,
-	createId,
-	createGroupsInData,
-	isForced,
-	isArrayWithElement,
-	emptyHook,
+// @deprecated
+//	isObject,
+//	isArray,
+//	isSaveDefined,
+//	forceArray,
+//	isGroup,
+//	isString,
+//	isInGroup,
+//	bson,
+//	sameId,
+//	includeId,
+//	pushId,
+//	addIdIfNotExist,
+//	isMemberOf,
+//	getSessionUser,
+// createId,
+//	createGroupsInData,
+//	isForced,
+//	isArrayWithElement,
+//	emptyHook,
 	addTypeString,
-	convertParamsToInternRequest,
+	copyParams,
 };

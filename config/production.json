@@ -5,8 +5,9 @@
 	"public": "../public/",
 	"routes": {
 		"server": {
-			"baseUrl": "SERVER_BASE_URL",
-			"coursePermissionsUri": "ROUTE_COURSE_PERMISSIONS"
+			"baseURL": "SERVER_BASE_URL",
+			"coursePermissionsUri": "ROUTE_COURSE_PERMISSIONS",
+			"meUri": "ROUTE_ME"
 		},
 		"timeout": "2000"
 	}

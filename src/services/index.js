@@ -1,4 +1,3 @@
-// Services
 const lessons = require('./lessons');
 const groups = require('./groups');
 const syncGroups = require('./syncGroups');
@@ -7,12 +6,10 @@ const viewports = require('./viewports');
 const permissionsHelper = require('./permissionsHelper');
 // Events
 
-module.exports = function setup() {
-	const app = this;
-
+module.exports = function setup(app) {
 	/** first configure all services */
 	app.configure(lessons);
-	//app.configure(permissionsHelper.bind({ baseService: 'course/:courseId/lessons' }));
+	app.configure(permissionsHelper.bind({ baseService: 'course/:courseId/lessons', doNotProtect: ['create'] }));
 	app.configure(groups);
 	app.configure(syncGroups);
 	app.configure(sections);
