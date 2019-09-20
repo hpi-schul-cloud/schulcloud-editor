@@ -1,5 +1,7 @@
-const server = require('./server');
+const { setupCoursePermissions } = require('./server.coursePermissions');
+const { setupMe } = require('./server.me');
 
 module.exports = (app) => {
-	app.configure(server);
-}
+	app.configure(setupCoursePermissions);
+	app.configure(setupMe);
+};
