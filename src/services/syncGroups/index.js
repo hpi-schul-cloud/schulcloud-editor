@@ -5,7 +5,7 @@ module.exports = (app) => {
 	app.configure(SyncGroupModelService);
 
 	const path = 'course/:courseId/lesson/:lessonId/groups';
-	app.use(path, new SyncGroupsService());
+	app.use(path, new SyncGroupsService({}));
 	const courseGroupsService = app.service(path);
 	courseGroupsService.hooks(SyncGroupsServiceHooks);
 };

@@ -2,18 +2,25 @@ const { disallow } = require('feathers-hooks-common');
 const { GeneralError } = require('@feathersjs/errors');
 const { checkCoursePermission } = require('../../global/hooks');
 const { copyParams } = require('../../global/utils');
-const { readPermission } = require('./hooks');
+const { readPermission, addLessonIdAndCourseId } = require('./hooks');
 
 // todo validation
 const SyncGroupsServiceHooks = {};
 SyncGroupsServiceHooks.before = {
 	all: [],
-	find: [readPermission],
-	get: [readPermission],
+	find: [
+		readPermission,
+	],
+	get: [
+		readPermission,
+	],
 	create: [
+		addLessonIdAndCourseId,
 		checkCoursePermission('COURSE_EDIT'),
 	],
-	update: [disallow()],
+	update: [
+		disallow(),
+	],
 	patch: [
 		checkCoursePermission('COURSE_EDIT'),
 	],
@@ -23,10 +30,12 @@ SyncGroupsServiceHooks.before = {
 };
 
 class SyncGroupsService {
-	constructor(options) {
-		this.options = options || {};
-		this.docs = {};
+	constructor({ docs = {} }) {
+		this.docs = docs;
 		this.baseService = 'models/syncGroup';
+		this.err = {
+			softDelete: 'Can not set soft delete.',
+		};
 	}
 
 	find(params) {
@@ -52,7 +61,7 @@ class SyncGroupsService {
 				throw res;
 			})
 			.catch((err) => {
-				throw new GeneralError('Can not set soft delete.', err);
+				throw new GeneralError(this.err.softDelete, err);
 			});
 	}
 
