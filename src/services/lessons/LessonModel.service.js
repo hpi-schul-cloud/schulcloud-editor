@@ -2,7 +2,6 @@ const service = require('feathers-mongoose');
 const { disallow } = require('feathers-hooks-common');
 
 const { LessonModel } = require('./models/');
-const { setCourseId } = require('./hooks/');
 
 const hooks = {};
 hooks.before = {
@@ -10,7 +9,6 @@ hooks.before = {
 		disallow('external'),
 	],
 	create: [
-		setCourseId,
 	],
 	patch: [
 	],
