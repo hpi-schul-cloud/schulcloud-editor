@@ -9,12 +9,18 @@ const permissionsHelper = require('./permissionsHelper');
 module.exports = function setup(app) {
 	/** first configure all services */
 	app.configure(lessons);
-	app.configure(permissionsHelper.bind({ baseService: 'course/:courseId/lessons', doNotProtect: ['create'] }));
 	app.configure(groups);
 	app.configure(syncGroups);
 	app.configure(sections);
-	app.configure(permissionsHelper.bind({ baseService: 'sections' }));
 	app.configure(viewports);
+
+	app.configure(permissionsHelper.bind({ 
+		modelService: 'models/LessonModel',
+		baseService: 'course/:courseId/lessons',
+		doNotProtect: ['create'],
+	}));
+	app.configure(permissionsHelper.bind({ baseService: 'sections' }));
 	app.configure(permissionsHelper.bind({ baseService: 'viewports' }));
+
 	/** then configure all event listener */
 };

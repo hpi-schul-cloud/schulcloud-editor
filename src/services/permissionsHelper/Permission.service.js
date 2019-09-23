@@ -1,5 +1,6 @@
 /* eslint-disable class-methods-use-this */
 const { GeneralError, BadRequest } = require('@feathersjs/errors');
+const { disallow } = require('feathers-hooks-common');
 
 const { copyParams } = require('../../global/utils');
 const { PermissionModel } = require('./models');
@@ -7,28 +8,72 @@ const { PermissionModel } = require('./models');
 const {
 	limitDataViewForReadAccess,
 	restictedAndAddAccess,
+	addReferencedData,
 } = require('./hooks');
 
 const permissionServiceHooks = {};
 permissionServiceHooks.before = {
-	all: [restictedAndAddAccess, limitDataViewForReadAccess],
-	find: [],
-	get: [],
+	all: [restictedAndAddAccess],
+	find: [limitDataViewForReadAccess],
+	get: [limitDataViewForReadAccess],
 	create: [],
-	update: [],
-	patch: [],
-	remove: [],
+	update: [disallow()],
+	patch: [limitDataViewForReadAccess],
+	remove: [limitDataViewForReadAccess],
 };
 
 
 class PermissionService {
-	constructor({ baseService, docs = {}, permissionKey }) {
+	constructor({
+		baseService, docs = {}, permissionKey, modelService, permissionUri,
+	}) {
 		this.docs = docs;
 		this.baseServiceName = baseService;
 		this.permissionKey = permissionKey;
+		this.modelService = modelService;
+		this.permissionUri = permissionUri;
+
 		this.err = {
 			create: 'Can not create new permission.',
+			createObject: 'Can not create new permission object.',
+			createDefault: 'Can not create default permissions.',
 		};
+
+		permissionServiceHooks.before.all.unshift(addReferencedData(this.modelService, this.permissionKey));
+	}
+
+	/**
+	 * @public
+	 */
+	async createDefaultPermissionsData(defaultGroups = []) {
+		try {
+			const promises = defaultGroups.map(({ _id, permission }) => this.createPermissionObject({
+				group: _id,
+				[permission]: true,
+				activated: true,
+			}));
+			return Promise.all(promises);
+		} catch (err) {
+			const errorObj = new BadRequest(this.err.createDefault, err);
+			this.app.logger.error(errorObj);
+			throw errorObj;
+		}
+	}
+
+	/**
+		it is for intern request if the base ressource is created at same time
+		and no patch operation can execute
+		(bescouse ressource do not exist in this moment)
+	*	@public
+	*/
+	async createPermissionObject(data) {
+		const { _doc: newPermission, errors } = new PermissionModel(data);
+		if (errors || !newPermission) {
+			const errorObj = new BadRequest(this.err.createObject, errors || {});
+			this.app.logger.error(errorObj);
+			throw errorObj;
+		}
+		return newPermission;
 	}
 
 	/**
@@ -37,19 +82,20 @@ class PermissionService {
 	 * @param {*} params
 	 */
 	async create(data, params) {
-		const { _doc: newPermission, errors } = new PermissionModel(data);
-		if (errors || !newPermission) {
-			throw new BadRequest(this.err.create, errors || {});
-		}
+		const { ressourceId } = params.route;
+		const newPermission = await PermissionService.createPermissionObject(data);
+		const patchData = {
+			$push: {
+				[this.permissionKey]: newPermission,
+			},
+		};
 
-		const { baseService, baseId, basePermissions } = params;
-		basePermissions.push(newPermission);
-		await baseService.patch(baseId, { [this.permissionKey]: basePermissions },
-			copyParams(params))
+		return this.app.service(this.modelServiceName)
+			.patch(ressourceId, patchData, copyParams(params))
+			.then(() => newPermission)
 			.catch((err) => {
 				throw new GeneralError(this.err.create, err);
 			});
-		return newPermission;
 	}
 
 	/**
@@ -78,13 +124,17 @@ class PermissionService {
 	}
 
 	async remove(permissionId, params) {
-		const { baseService, baseId, basePermissions } = params;
-		const newPermissions = basePermissions.filter(
-			perm => perm._id.toString() !== permissionId.toString(),
-		);
-		// todo slice mongoose operations
-		await baseService.patch(baseId, { [this.permissionKey]: newPermissions },
-			copyParams(params))
+		const { ressourceId } = params.route;
+
+		const query = {
+			$pull: {
+				[`${this.permissionKey}._id`]: permissionId,
+			},
+		};
+		const internParams = copyParams(params);
+		internParams.query.$select._id = 1;
+		// todo soft delete ?
+		return this.app.service(this.modelServiceName).patch(ressourceId, query, internParams)
 			.catch((err) => {
 				throw new GeneralError(this.err.create, err);
 			});
