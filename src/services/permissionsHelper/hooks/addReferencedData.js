@@ -1,21 +1,21 @@
 const { Forbidden } = require('@feathersjs/errors');
 const { copyParams } = require('../../../global/utils');
 
-const addReferencedData = (baseService, permissionKey) => async (context) => {
+const addReferencedData = (baseModelService, permissionKey) => async (context) => {
 	const { params, app } = context;
 	const { ressourceId } = params.route;
+	const internParams = copyParams(params);
 
-	if (params.query.disabledPatch === true) {
-		params.basePermissions = [];
-		return context;
-	}
+	const goupPath = `${permissionKey}.group`;
 
-  //todo do not override $select
-	params.query.$select = { [permissionKey]: 1 };
-	params.query.$populate = { path: 'group' };
+	internParams.query.$select = {
+		[permissionKey]: 1,
+	};
+	internParams.query.$populate = [
+		{ path: goupPath, select: 'users' },
+	];
 
-	const baseData = await app.service(baseService).get(ressourceId,
-		copyParams(params))
+	const baseData = await app.service(baseModelService).get(ressourceId, internParams)
 		.catch((err) => {
 			throw new Forbidden('You have no access.', err);
 		});

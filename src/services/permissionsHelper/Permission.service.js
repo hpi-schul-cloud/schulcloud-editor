@@ -39,7 +39,7 @@ class PermissionService {
 			createDefault: 'Can not create default permissions.',
 		};
 
-		permissionServiceHooks.before.all.unshift(addReferencedData(this.modelServiceName, this.permissionKey));
+		permissionServiceHooks.before.all.unshift(addReferencedData(this.modelService, this.permissionKey));
 	}
 
 	/**

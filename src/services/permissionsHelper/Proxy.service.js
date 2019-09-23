@@ -12,8 +12,14 @@ class ProxyService {
 		};
 	}
 
+	checkPermission(_access) {
+		const access = _access.write === true ? true : _access.read;
+		return { access };
+	}
+
 	async get(userId, params) {
-		const requestOther = params.user !== userId;
+		const { user } = params;
+		const requestOther = user.id !== userId;
 		try {
 			const {
 				data: permissions, access,
@@ -27,14 +33,14 @@ class ProxyService {
 				const { params: { access: accessOther } } = restictedAndAddAccess({
 					params: {
 						basePermissions: permissions,
-						user: userId,
+						user,
 						provider: 'rest',
 					},
 				});
-				return { access: accessOther[this.permission] };
+				return this.checkPermission(accessOther); // { access: accessOther[this.permission] };
 			}
 
-			return { access: access[this.permission] };
+			return this.checkPermission(access); // { access: access[this.permission] };
 		} catch (error) {
 			return { access: false, error };
 		}
