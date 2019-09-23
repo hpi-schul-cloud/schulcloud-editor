@@ -33,13 +33,18 @@ const lessonsHooks = {
 class Lessons {
 	constructor({ docs = {} }) {
 		this.docs = docs;
+
+		this.err = {
+			create: 'Failed to create the lesson.',
+			get: 'Failed to get the lesson',
+			find: 'Failed to find lessons.',
+			update: 'Failed to update the lesson.',
+			remove: 'Failed to delete the lesson.',
+		}
 	}
 
 	setup(app) {
 		this.app = app;
-		this.err = {
-			noAccess: 'You have no access',
-		};
 	}
 
 	async find(params) {
@@ -60,8 +65,7 @@ class Lessons {
 
 			return lessons || [];
 		} catch (err) {
-			this.app.logger.error(`Failed to find lessons: ${err}`);
-			throw err;
+			throw new BadRequest(this.err.find, err);
 		}
 	}
 
@@ -89,15 +93,19 @@ class Lessons {
 		try {
 			lesson = await mRequest.lean().exec();
 		} catch (err) {
-			this.app.logger.error(`Failed to get the lesson: ${err}`);
-			throw err;
+			throw new BadRequest(this.err.get, err);
 		}
 		if (!lesson) throw new NotFound();
 
 		return lesson;
 	}
 
-	async createDefaultGroups(params, lesson) {
+	async createDefaultGroups(lesson, _params) {
+		const lessonId = lesson._id;
+		const params = copyParams(_params);
+		params.route.ressourceId = lessonId;
+		params.route.lessonId = lessonId;
+
 		const { authorization, route: { courseId } } = params;
 		const coursePermissions = this.app.get('routes:server:coursePermissions');
 		const users = {
@@ -128,20 +136,6 @@ class Lessons {
 		}
 	}
 
-	async createDefaultPermissionsData(params, defaultGroups) {
-		// todo write intern permission services?
-		const service = this.app.service('course/:courseId/lessons/:ressourceId/permission');
-		params.query.disabledPatch = true;
-		const promises = defaultGroups.map(({ _id, permission }) => service.create({
-			group: _id,
-			[permission]: true,
-			activated: true,
-		}, params));
-		return Promise.all(promises).catch((err) => {
-			throw new Forbidden(this.err.noAccess, err);
-		});
-	}
-
 	async create(data, params) {
 		const { user } = params;
 		try {
@@ -150,18 +144,16 @@ class Lessons {
 				createdBy: user.id,
 			});
 
-			const lessonId = lesson._id;
-			const internParams = copyParams(params);
-			internParams.route.ressourceId = lessonId;
-			internParams.route.lessonId = lessonId;
+			const defaultGroups = await this.createDefaultGroups(lesson, params);
+			const permissionService = this.app.service('course/:courseId/lessons/:ressourceId/permission');
+			const key = permissionService.permissionKey;
+			lesson[key] = await permissionService.createDefaultPermissionsData(defaultGroups);
 
-			const defaultGroups = await this.createDefaultGroups(internParams, lesson);
-			lesson.permissions = await this.createDefaultPermissionsData(internParams, defaultGroups);
 
 			await lesson.save();
 			return { _id: lesson._id };
 		} catch (err) {
-			throw new BadRequest('Failed to create a lesson.', err);
+			throw new BadRequest(this.err.create, err);
 		}
 	}
 
@@ -177,8 +169,7 @@ class Lessons {
 				...data,
 			}).exec();
 		} catch (err) {
-			this.app.logger.error(`Failed to update the lesson ${err}`);
-			throw err;
+			throw new BadRequest(this.err.update, err);
 		}
 	}
 
@@ -194,8 +185,7 @@ class Lessons {
 			await lesson.save();
 			return;
 		} catch (err) {
-			this.app.logger.error(`Failed to delete the lesson ${err}`);
-			throw err;
+			throw new BadRequest(this.err.remove, err);
 		}
 	}
 }

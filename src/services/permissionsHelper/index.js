@@ -12,21 +12,24 @@ module.exports = function setup(app) {
 		modelService,
 	} = this;
 
-	const pathMin = `${baseService}/:ressourceId`;
-	const path = `${pathMin}/permission`;
+	const permissionUri = '/:ressourceId/permission';
+	const path = `${baseService}${permissionUri}`;
 
 	app.use(path, new PermissionService({
 		baseService,
 		modelService,
 		permissionKey,
+		permissionUri,
 	}));
 
-	app.use(`${pathMin}/write`, new ProxyService({
+	const writeShortPath = path.replace('permission', 'write');
+	app.use(writeShortPath, new ProxyService({
 		path,
 		permission: 'write',
 	}));
 
-	app.use(`${pathMin}/read`, new ProxyService({
+	const readShortPath = path.replace('permission', 'read');
+	app.use(readShortPath, new ProxyService({
 		path,
 		permission: 'read',
 	}));
@@ -41,7 +44,8 @@ module.exports = function setup(app) {
 		// add access check in baseServices as first place in before all
 		if (!doNotProtect.includes(method)) {
 			const access = ['get', 'find'].includes(method) ? 'read' : 'write';
-			serviceToModified.__hooks.before[method].unshift(baseServicesAccess(pathMin, access));
+			const permissionShortPath = path.replace('permission', access);
+			serviceToModified.__hooks.before[method].unshift(baseServicesAccess(permissionShortPath));
 		}
 	});
 

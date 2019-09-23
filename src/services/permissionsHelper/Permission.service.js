@@ -8,7 +8,6 @@ const { PermissionModel } = require('./models');
 const {
 	limitDataViewForReadAccess,
 	restictedAndAddAccess,
-	restrictedPermWithoutPatch,
 	addReferencedData,
 } = require('./hooks');
 
@@ -17,7 +16,7 @@ permissionServiceHooks.before = {
 	all: [restictedAndAddAccess],
 	find: [limitDataViewForReadAccess],
 	get: [limitDataViewForReadAccess],
-	create: [restrictedPermWithoutPatch],
+	create: [],
 	update: [disallow()],
 	patch: [limitDataViewForReadAccess],
 	remove: [limitDataViewForReadAccess],
@@ -25,17 +24,56 @@ permissionServiceHooks.before = {
 
 
 class PermissionService {
-	constructor({ baseService, docs = {}, permissionKey, modelService }) {
+	constructor({
+		baseService, docs = {}, permissionKey, modelService, permissionUri,
+	}) {
 		this.docs = docs;
 		this.baseServiceName = baseService;
 		this.permissionKey = permissionKey;
-    this.modelService = modelService;
+		this.modelService = modelService;
+		this.permissionUri = permissionUri;
 
 		this.err = {
 			create: 'Can not create new permission.',
+			createObject: 'Can not create new permission object.',
+			createDefault: 'Can not create default permissions.',
 		};
 
 		permissionServiceHooks.before.all.unshift(addReferencedData(this.modelServiceName, this.permissionKey));
+	}
+
+	/**
+	 * @public
+	 */
+	async createDefaultPermissionsData(defaultGroups = []) {
+		try {
+			const promises = defaultGroups.map(({ _id, permission }) => this.createPermissionObject({
+				group: _id,
+				[permission]: true,
+				activated: true,
+			}));
+			return Promise.all(promises);
+		} catch (err) {
+			const errorObj = new BadRequest(this.err.createDefault, err);
+			this.app.logger.error(errorObj);
+			throw errorObj;
+		}
+	}
+
+	/**
+		it is for intern request if the base ressource is created at same time
+		and no patch operation can execute
+		(bescouse ressource do not exist in this moment)
+	*	@public
+	*/
+	async createPermissionObject(data) {
+		const { _doc: newPermission, errors } = new PermissionModel(data);
+		if (errors || !newPermission) {
+			const errorObj = new BadRequest(this.err.createObject, errors || {});
+			this.app.logger.error(errorObj);
+			throw errorObj;
+		}
+		return newPermission;
 	}
 
 	/**
@@ -45,20 +83,7 @@ class PermissionService {
 	 */
 	async create(data, params) {
 		const { ressourceId } = params.route;
-		const { _doc: newPermission, errors } = new PermissionModel(data);
-		if (errors || !newPermission) {
-			throw new BadRequest(this.err.create, errors || {});
-		}
-
-		/*
-			it is for intern request if the base ressource is created at same time
-			 and no patch operation can execute
-			 (bescouse ressource do not exist in this moment)
-		*/
-		if (params.query.disabledPatch === true) {
-			return newPermission;
-		}
-
+		const newPermission = await PermissionService.createPermissionObject(data);
 		const patchData = {
 			$push: {
 				[this.permissionKey]: newPermission,
