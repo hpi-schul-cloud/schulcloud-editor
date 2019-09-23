@@ -12,6 +12,7 @@ const lessonSchema = new Schema({
 	deletedAt: { type: Date, expires: (60 * 60 * 24 * 30) },
 	createdBy: { type: Schema.Types.ObjectId },
 	updatedBy: { type: Schema.Types.ObjectId },
+	// @deprecated
 	// todo first step for imigrate old data, second move it to activated = true / false in permissions group
 	visible: { type: Boolean, default: true }, 
 	position: { type: Number, default: Date.now },
