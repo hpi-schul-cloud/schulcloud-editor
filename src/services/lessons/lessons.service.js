@@ -149,7 +149,6 @@ class Lessons {
 			const key = permissionService.permissionKey;
 			lesson[key] = await permissionService.createDefaultPermissionsData(defaultGroups);
 
-
 			await lesson.save();
 			return { _id: lesson._id };
 		} catch (err) {
