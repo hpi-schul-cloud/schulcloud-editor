@@ -7,9 +7,10 @@ const baseServicesAccess = path => async (context) => {
 		return context;
 	}
 
+	const copyParamsWithQuerys = Object.assign({}, params);
 
 	if (method === 'find') {
-		const { data: ressources } = await app.service(path).find(Object.assign({}, params));
+		const { data: ressources } = await app.service(path).find(copyParamsWithQuerys);
 		const newParams = copyParams(params);
 		if (!(Array.isArray(params.query.$or))) { // todo move to validate query or force array
 			newParams.query.$or = [];
@@ -21,8 +22,8 @@ const baseServicesAccess = path => async (context) => {
 		return context;
 	}
 
-	copyParams.route.ressourceId = context.id;
-	const { access } = await app.service(path).get(params.user.id, Object.assign({}, params));
+	params.route.ressourceId = context.id;
+	const { access } = await app.service(path).get(params.user.id, copyParamsWithQuerys);
 	if (access === true) {
 		return context;
 	}
