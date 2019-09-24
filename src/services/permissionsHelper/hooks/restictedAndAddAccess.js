@@ -13,13 +13,12 @@ const isActivated = ({ endDate, publishDate, activated }) => {
 	&& (date > publishDate || publishDate === null);
 };
 
-const access = (context, permission) => {
-	const { basePermissions, user } = context.params;
+const access = (basePermissions, user, permissionTyp) => {
 	const validPermissions = basePermissions.filter(
-		perm => perm[permission] === true && isActivated(perm),
+		perm => perm[permissionTyp] === true && isActivated(perm),
 	);
 
-	return userIsInGroupOrUsers(validPermissions, user);
+	return userIsInGroupOrUsers(validPermissions, user.id);
 };
 
 /**
@@ -28,6 +27,8 @@ const access = (context, permission) => {
  */
 const restictedAndAddAccess = (context) => {
 	const { params } = context;
+	const { basePermissions, user } = params;
+
 	if (!(params.provider === 'rest')) {
 		params.access = {
 			write: true,
@@ -35,9 +36,13 @@ const restictedAndAddAccess = (context) => {
 		};
 		return context;
 	}
+
+	if (!user) {
+		throw new Forbidden('You have no access.', { message: 'User not exist' });
+	}
 	params.access = {
-		write: access(context, 'write'),
-		read: access(context, 'read'),
+		write: access(basePermissions, user, 'write'),
+		read: access(basePermissions, user, 'read'),
 	};
 
 	if (params.access.write || params.access.read) {

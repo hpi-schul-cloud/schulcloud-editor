@@ -2,34 +2,40 @@
 const { PermissionService, permissionServiceHooks } = require('./Permission.service');
 const { ProxyService } = require('./Proxy.service');
 const { filterOutResults } = require('../../global/hooks');
-const {
-	addReferencedData, baseServicesAccess,
-} = require('./hooks');
+const { baseServicesAccess } = require('./hooks');
 
 module.exports = function setup(app) {
-	const { baseService, permissionKey = 'permissions', doNotProtect = [] } = this;
-	const pathMin = `${baseService}/:ressourceId`;
-	const path = `${pathMin}/permission`;
+	const {
+		baseService,
+		permissionKey = 'permissions',
+		doNotProtect = [],
+		modelService,
+	} = this;
+
+	const permissionUri = '/:ressourceId/permission';
+	const path = `${baseService}${permissionUri}`;
 
 	app.use(path, new PermissionService({
 		baseService,
+		modelService,
 		permissionKey,
+		permissionUri,
 	}));
 
-	permissionServiceHooks.before.all.unshift(addReferencedData(baseService, permissionKey));
-
-	const permissionService = app.service(path);
-	permissionService.hooks(permissionServiceHooks);
-
-	app.use(`${pathMin}/write`, new ProxyService({
+	const writeShortPath = path.replace('permission', 'write');
+	app.use(writeShortPath, new ProxyService({
 		path,
 		permission: 'write',
 	}));
 
-	app.use(`${pathMin}/read`, new ProxyService({
+	const readShortPath = path.replace('permission', 'read');
+	app.use(readShortPath, new ProxyService({
 		path,
 		permission: 'read',
 	}));
+
+	const permissionService = app.service(path);
+	permissionService.hooks(permissionServiceHooks);
 
 	const serviceToModified = app.service(baseService);
 	['create', 'find', 'get', 'patch', 'remove', 'update'].forEach((method) => {
@@ -45,7 +51,8 @@ module.exports = function setup(app) {
 		// add access check in baseServices as first place in before all, exclude all not protected methods
 		if (!doNotProtect.includes(method)) {
 			const access = ['get', 'find'].includes(method) ? 'read' : 'write';
-			serviceToModified.__hooks.before[method].unshift(baseServicesAccess(pathMin, access));
+			const permissionShortPath = path.replace('permission', access);
+			serviceToModified.__hooks.before[method].unshift(baseServicesAccess(permissionShortPath));
 		}
 	});
 

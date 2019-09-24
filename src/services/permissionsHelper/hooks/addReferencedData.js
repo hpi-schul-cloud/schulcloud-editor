@@ -1,22 +1,25 @@
 const { Forbidden } = require('@feathersjs/errors');
 const { copyParams } = require('../../../global/utils');
 
-const addReferencedData = (baseService, permissionKey) => async (context) => {
+const addReferencedData = (baseModelService, permissionKey) => async (context) => {
 	const { params, app } = context;
 	const { ressourceId } = params.route;
+	const internParams = copyParams(params);
 
-	params.query.$select = { [permissionKey]: 1 };
-	params.query.$populate = { path: 'group' };
+	const goupPath = `${permissionKey}.group`;
 
-	const baseData = await app.service(baseService).get(ressourceId,
-		copyParams(params))
+	internParams.query.$select = {
+		[permissionKey]: 1,
+	};
+	internParams.query.$populate = [
+		{ path: goupPath, select: 'users' },
+	];
+
+	const baseData = await app.service(baseModelService).get(ressourceId, internParams)
 		.catch((err) => {
 			throw new Forbidden('You have no access.', err);
 		});
-	
-	params.baseId = ressourceId;
-	params.baseService = app.service(baseService);
-	// context.params.baseData = baseData;
+
 	params.basePermissions = baseData[permissionKey]; // todo generic over settings
 	return context;
 };
