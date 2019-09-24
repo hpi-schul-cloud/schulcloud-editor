@@ -10,7 +10,7 @@ hooks.before = {
 		disallow('external'),
 	],
 	create: [
-  ],
+	],
 	patch: [
 		modifiedQueryToTarget,
 	],
@@ -34,8 +34,9 @@ const SyncGroupModelService = (app) => {
 			max: 150,
 		},
 	};
-	app.use('models/syncGroup', service(option));
-	const syncGroupModelService = app.service('models/syncGroup');
+	const path = 'models/syncGroup';
+	app.use(path, service(option));
+	const syncGroupModelService = app.service(path);
 	syncGroupModelService.hooks(hooks);
 };
 

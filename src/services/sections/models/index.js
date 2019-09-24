@@ -1,11 +1,12 @@
 const mongoose = require('mongoose');
 
 const { addTypeString } = require('../../../global/utils');
+// const { } = require('../../permissionsHelper/models');
 
 const { Schema } = mongoose;
 
 const sectionSchema = new Schema({
-	parent: [{ type: Schema.Types.ObjectId, ref: 'lesson', default: null }], // todo: required ?
+	parent: [{ type: Schema.Types.ObjectId, ref: 'lesson', default: null }],
 	title: { type: String, default: '' },
 	state: { type: Object, default: {} },
 	permissions: [{ type: Object }],
