@@ -1,17 +1,44 @@
 const mongoose = require('mongoose');
 
 const { addTypeString } = require('../../../global/utils');
-// const { } = require('../../permissionsHelper/models');
+const { permissionSchema } = require('../../permissionsHelper/models');
 
 const { Schema } = mongoose;
 
+const targets = ['course', 'lesson', 'group'];
+
+const ref = new Schema({
+	target: {
+		type: Schema.Types.ObjectId,
+		refPath: 'targetModel',
+		required: function requiredTarget() {
+			return !!this.targetModel;
+		},
+	},
+	targetModel: {
+		type: String,
+		enum: targets,
+		required: function requiredTargetModel() {
+			return !!this.target;
+		},
+	},
+}, {
+	_id: false,
+});
+
 const sectionSchema = new Schema({
-	parent: [{ type: Schema.Types.ObjectId, ref: 'lesson', default: null }],
+	ref: { type: ref },
+	context: {
+		type: String,
+		enum: ['task', 'section'],
+		default: 'section',
+		immutable: true,
+	},
 	title: { type: String, default: '' },
 	state: { type: Object, default: {} },
-	permissions: [{ type: Object }],
+	permissions: [{ type: permissionSchema }],
 	deletedAt: { type: Date, expires: (60 * 60 * 24 * 30) },
-	createdBy: { type: Schema.Types.ObjectId },
+	createdBy: { type: Schema.Types.ObjectId, immutable: true },
 	updatedBy: { type: Schema.Types.ObjectId },
 }, {
 	timestamps: true,

@@ -1,5 +1,5 @@
 /* eslint-disable class-methods-use-this */
-const { GeneralError, BadRequest } = require('@feathersjs/errors');
+const { GeneralError, BadRequest, NotImplemented } = require('@feathersjs/errors');
 const { disallow } = require('feathers-hooks-common');
 
 const { copyParams } = require('../../global/utils');
@@ -141,8 +141,7 @@ class PermissionService {
 	}
 
 	async patch(params) {
-		// todo 
-		return {};
+		throw new NotImplemented();
 	}
 
 	setup(app) {

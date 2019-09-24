@@ -23,7 +23,7 @@ const SectionModelService = (app) => {
 			max: 150,
 		},
 	};
-	const path = 'models/section';
+	const path = 'models/SectionModel';
 	app.use(path, service(option));
 	const sectionServices = app.service(path);
 	sectionServices.hooks(SectionModelServiceHooks);

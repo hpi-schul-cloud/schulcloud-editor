@@ -26,12 +26,16 @@ module.exports = function setup(app) {
 	app.use(writeShortPath, new ProxyService({
 		path,
 		permission: 'write',
+		modelService,
+		permissionKey,
 	}));
 
 	const readShortPath = path.replace('permission', 'read');
 	app.use(readShortPath, new ProxyService({
 		path,
 		permission: 'read',
+		modelService,
+		permissionKey,
 	}));
 
 	const permissionService = app.service(path);

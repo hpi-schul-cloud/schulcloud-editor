@@ -2,7 +2,6 @@ const service = require('feathers-mongoose');
 const { disallow } = require('feathers-hooks-common');
 
 const { SyncGroupModel } = require('./models/');
-const { modifiedQueryToTarget } = require('./hooks/');
 
 const hooks = {};
 hooks.before = {
@@ -12,16 +11,12 @@ hooks.before = {
 	create: [
 	],
 	patch: [
-		modifiedQueryToTarget,
 	],
 	remove: [
-		modifiedQueryToTarget,
 	],
 	get: [
-		modifiedQueryToTarget,
 	],
 	find: [
-		modifiedQueryToTarget,
 	],
 };
 

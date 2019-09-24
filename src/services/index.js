@@ -14,12 +14,16 @@ module.exports = function setup(app) {
 	app.configure(sections);
 	app.configure(viewports);
 
-	app.configure(permissionsHelper.bind({ 
+	app.configure(permissionsHelper.bind({
 		modelService: 'models/LessonModel',
 		baseService: 'course/:courseId/lessons',
 		doNotProtect: ['create'],
 	}));
-	app.configure(permissionsHelper.bind({ baseService: 'sections' }));
+	app.configure(permissionsHelper.bind({
+		modelService: 'models/SectionModel',
+		baseService: 'lesson/:lessonId/sections',
+		doNotProtect: ['create'],
+	}));
 	app.configure(permissionsHelper.bind({ baseService: 'viewports' }));
 
 	/** then configure all event listener */

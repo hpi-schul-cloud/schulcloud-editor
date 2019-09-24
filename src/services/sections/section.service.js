@@ -1,4 +1,4 @@
-const { GeneralError } = require('@feathersjs/errors');
+const { GeneralError, NotImplemented, BadRequest } = require('@feathersjs/errors');
 const { disallow } = require('feathers-hooks-common');
 
 const { copyParams } = require('../../global/utils');
@@ -25,24 +25,35 @@ SectionServiceHooks.before = {
 class SectionService {
 	constructor({ docs = {} }) {
 		this.docs = docs;
-		this.baseService = 'models/section';
+		this.baseService = 'models/SectionModel';
 		this.err = {
 			softDelete: 'Can not set soft delete.',
 		};
 	}
 
-	find(params) {
-		return this.app.service(this.baseService)
-			.find(copyParams(params));
+	setScope(params) {
+		params.query.context = 'section';
+		return params;
 	}
 
-	get(id, params) {
+	find(_params) {
+		const params = this.setScope(copyParams(_params));
+
 		return this.app.service(this.baseService)
-			.get(id, copyParams(params));
+			.find(_params)
+			.then(x => {
+				return x;
+			});
+	}
+
+	get(id, _params) {
+		const params = this.setScope(copyParams(_params));
+		return this.app.service(this.baseService)
+			.get(id, params);
 	}
 
 	remove(id, _params) {
-		const params = copyParams(_params);
+		const params = this.setScope(copyParams(_params));
 		params.mongoose = { writeResult: true };
 		const deletedAt = new Date();
 		return this.app.service(this.baseService)
@@ -58,14 +69,29 @@ class SectionService {
 			});
 	}
 
-	create(data, params) {
-		return this.app.service(this.baseService)
-			.create(data, copyParams(params));
+	async create(data, _params) {
+		const { lessonId } = _params.route;
+		const { app } = this;
+
+		data.ref = {
+			target: lessonId,
+			targetModel: 'lesson',
+		};
+		data.context = 'section';
+
+		const params = copyParams(_params);
+		params.query.lessonId = lessonId;
+		const { data: defaultGroups } = await app.service('models/syncGroup').find(params);
+		const permService = app.service('lesson/:lessonId/sections/:ressourceId/permission');
+		const key = permService.permissionKey;
+		data[key] = await permService.createDefaultPermissionsData(defaultGroups);
+		return this.app.service(this.baseService).create(data, copyParams(_params));
 	}
 
-	patch(id, data, params) {
+	patch(id, data, _params) {
+		const params = this.setScope(copyParams(_params));
 		return this.app.service(this.baseService)
-			.patch(id, data, copyParams(params));
+			.patch(id, data, params);
 	}
 
 	setup(app) {
