@@ -10,7 +10,7 @@ class ProxyService {
 		this.docs = docs;
 		this.permissionServicesName = path;
 		this.permission = permission;
-		this.modelService = modelService;
+		this.modelServiceName = modelService;
 		this.err = {
 			others: 'You have no access to request other users.',
 		};
@@ -89,7 +89,7 @@ class ProxyService {
 
 		// show if user is in group or users, 
 		// that is implicit a read condition, becouse only active permission rules are fetched
-		const { data: allRessources } = await this.app.service(this.modelService).find(params);
+		const { data: allRessources } = await this.app.service(this.modelServiceName).find(params);
 		const userRessource = allRessources.filter(r => userIsInGroupOrUsers(r.permissions, user.id));
 		const data = userRessource.map(r => ({
 			_id: r._id,
