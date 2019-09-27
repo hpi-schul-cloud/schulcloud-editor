@@ -1,5 +1,5 @@
 /* eslint-disable class-methods-use-this */
-const { GeneralError, BadRequest } = require('@feathersjs/errors');
+const { GeneralError, BadRequest, NotImplemented } = require('@feathersjs/errors');
 const { disallow } = require('feathers-hooks-common');
 
 const { copyParams } = require('../../global/utils');
@@ -30,16 +30,18 @@ class PermissionService {
 		this.docs = docs;
 		this.baseServiceName = baseService;
 		this.permissionKey = permissionKey;
-		this.modelService = modelService;
+		this.modelServiceName = modelService;
 		this.permissionUri = permissionUri;
 
 		this.err = {
 			create: 'Can not create new permission.',
-			createObject: 'Can not create new permission object.',
+			createObject: 'Can not create new permission.',
 			createDefault: 'Can not create default permissions.',
+			patch: 'Can not patch permission.',
+			remove: 'Can not remove permission.',
 		};
 
-		permissionServiceHooks.before.all.unshift(addReferencedData(this.modelService, this.permissionKey));
+		permissionServiceHooks.before.all.unshift(addReferencedData(this.modelServiceName, this.permissionKey));
 	}
 
 	/**
@@ -83,7 +85,7 @@ class PermissionService {
 	 */
 	async create(data, params) {
 		const { ressourceId } = params.route;
-		const newPermission = await PermissionService.createPermissionObject(data);
+		const newPermission = await this.createPermissionObject(data);
 		const patchData = {
 			$push: {
 				[this.permissionKey]: newPermission,
@@ -94,7 +96,7 @@ class PermissionService {
 			.patch(ressourceId, patchData, copyParams(params))
 			.then(() => newPermission)
 			.catch((err) => {
-				throw new GeneralError(this.err.create, err);
+				throw new BadRequest(this.err.create, err);
 			});
 	}
 
@@ -125,24 +127,38 @@ class PermissionService {
 
 	async remove(permissionId, params) {
 		const { ressourceId } = params.route;
-
-		const query = {
-			$pull: {
-				[`${this.permissionKey}._id`]: permissionId,
-			},
-		};
 		const internParams = copyParams(params);
-		internParams.query.$select._id = 1;
-		// todo soft delete ?
-		return this.app.service(this.modelServiceName).patch(ressourceId, query, internParams)
+
+		const $pull = {
+			[this.permissionKey]: { _id: permissionId },
+		};
+
+		return this.app.service(this.modelServiceName).patch(ressourceId, { $pull }, internParams)
 			.catch((err) => {
-				throw new GeneralError(this.err.create, err);
+				throw new BadRequest(this.err.remove, err);
 			});
 	}
 
-	async patch(params) {
-		// todo 
-		return {};
+	async patch(permissionId, _data, params) {
+		const { ressourceId } = params.route;
+		const internParams = this.setScope(copyParams(params), permissionId);
+
+		internParams.query = {
+			[`${this.permissionKey}._id`]: permissionId,
+			$select: { [this.permissionKey]: 1 },
+		};
+
+		const $set = {};
+		Object.entries(_data).forEach(([key, value]) => {
+			$set[`${this.permissionKey}.$.${key}`] = value;
+		});
+
+		return this.app.service(this.modelServiceName)
+			.patch(ressourceId, { $set }, internParams)
+			.then(({ permissions }) => permissions.filter(perm => perm._id.toString() === permissionId)[0])
+			.catch((err) => {
+				throw new BadRequest(this.err.patch, err);
+			});
 	}
 
 	setup(app) {

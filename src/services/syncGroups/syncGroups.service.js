@@ -2,7 +2,11 @@ const { disallow } = require('feathers-hooks-common');
 const { GeneralError } = require('@feathersjs/errors');
 const { checkCoursePermission } = require('../../global/hooks');
 const { copyParams } = require('../../global/utils');
-const { readPermission, addLessonIdAndCourseId } = require('./hooks');
+const {
+	readPermission,
+	addLessonIdAndCourseId,
+	modifiedQueryToTarget,
+} = require('./hooks');
 
 // todo validation
 const SyncGroupsServiceHooks = {};
@@ -10,9 +14,11 @@ SyncGroupsServiceHooks.before = {
 	all: [],
 	find: [
 		readPermission,
+		modifiedQueryToTarget,
 	],
 	get: [
 		readPermission,
+		modifiedQueryToTarget,
 	],
 	create: [
 		addLessonIdAndCourseId,
@@ -23,9 +29,11 @@ SyncGroupsServiceHooks.before = {
 	],
 	patch: [
 		checkCoursePermission('COURSE_EDIT'),
+		modifiedQueryToTarget,
 	],
 	remove: [
 		checkCoursePermission('COURSE_EDIT'),
+		modifiedQueryToTarget,
 	],
 };
 

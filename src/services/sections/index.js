@@ -1,19 +1,11 @@
-const service = require('feathers-mongoose');
+const { SectionServiceHooks, SectionService } = require('./section.service');
+const { SectionModelService } = require('./SectionModel.service');
 
-const { SectionModel } = require('./models/');
-const hooks = require('./hooks/');
+module.exports = (app) => {
+	app.configure(SectionModelService);
 
-module.exports = function setup() {
-	const app = this;
-	const option = {
-		Model: SectionModel,
-		lean: true, // set to false if you want Mongoose documents returned
-		paginate: {
-			default: 50,
-			max: 150,
-		},
-	};
-	app.use('sections', service(option));
-	const sectionServices = app.service('sections');
-	sectionServices.hooks(hooks);
+	const path = 'lesson/:lessonId/sections';
+	app.use(path, new SectionService({}));
+	const courseGroupsService = app.service(path);
+	courseGroupsService.hooks(SectionServiceHooks);
 };

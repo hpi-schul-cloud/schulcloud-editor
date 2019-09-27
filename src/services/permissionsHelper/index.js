@@ -26,12 +26,16 @@ module.exports = function setup(app) {
 	app.use(writeShortPath, new ProxyService({
 		path,
 		permission: 'write',
+		modelService,
+		permissionKey,
 	}));
 
 	const readShortPath = path.replace('permission', 'read');
 	app.use(readShortPath, new ProxyService({
 		path,
 		permission: 'read',
+		modelService,
+		permissionKey,
 	}));
 
 	const permissionService = app.service(path);
@@ -39,9 +43,16 @@ module.exports = function setup(app) {
 
 	const serviceToModified = app.service(baseService);
 	['create', 'find', 'get', 'patch', 'remove', 'update'].forEach((method) => {
+		// validate and persist service hooks stucture
+		if (!Array.isArray(serviceToModified.__hooks.after[method])) {
+			serviceToModified.__hooks.after[method] = [];
+		}
+		if (!Array.isArray(serviceToModified.__hooks.before[method])) {
+			serviceToModified.__hooks.after[method] = [];
+		}
 		// add after filter that remove the embedded permissions in baseServices
 		serviceToModified.__hooks.after[method].push(filterOutResults(permissionKey));
-		// add access check in baseServices as first place in before all
+		// add access check in baseServices as first place in before all, exclude all not protected methods
 		if (!doNotProtect.includes(method)) {
 			const access = ['get', 'find'].includes(method) ? 'read' : 'write';
 			const permissionShortPath = path.replace('permission', access);
