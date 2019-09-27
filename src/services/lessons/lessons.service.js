@@ -120,14 +120,14 @@ class Lessons {
 				users: users.read,
 				permission: 'read',
 				courseId,
-				lessonId: lesson._id,
+				lessonId,
 			}, params);
 
 			const writeGroupPromise = this.app.service('models/syncGroup').create({
 				users: users.write,
 				permission: 'write',
 				courseId,
-				lessonId: lesson._id,
+				lessonId,
 			}, params);
 
 			return Promise.all([readGroupPromise, writeGroupPromise]);
