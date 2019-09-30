@@ -2,7 +2,7 @@
 const { GeneralError, BadRequest, NotImplemented } = require('@feathersjs/errors');
 const { disallow } = require('feathers-hooks-common');
 
-const { copyParams } = require('../../global/utils');
+const { copyParams, dataToSetQuery } = require('../../global/utils');
 const { PermissionModel } = require('./models');
 
 const {
@@ -148,13 +148,8 @@ class PermissionService {
 			$select: { [this.permissionKey]: 1 },
 		};
 
-		const $set = {};
-		Object.entries(_data).forEach(([key, value]) => {
-			$set[`${this.permissionKey}.$.${key}`] = value;
-		});
-
 		return this.app.service(this.modelServiceName)
-			.patch(ressourceId, { $set }, internParams)
+			.patch(ressourceId, dataToSetQuery(_data, `${this.permissionKey}.$.`), internParams)
 			.then(({ permissions }) => permissions.filter(perm => perm._id.toString() === permissionId)[0])
 			.catch((err) => {
 				throw new BadRequest(this.err.patch, err);

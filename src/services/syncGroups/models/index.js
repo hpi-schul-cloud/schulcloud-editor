@@ -15,11 +15,11 @@ const syncGroupSchema = new Schema({
 }, {
 	timestamps: true,
 });
-
+/*
 syncGroupSchema
 	.post('find', addTypeString('syncGroup'))
 	.post('findOne', addTypeString('syncGroup'));
-
+*/
 module.exports = {
 	SyncGroupModel: mongoose.model('syncGroup', syncGroupSchema),
 };

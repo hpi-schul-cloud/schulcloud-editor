@@ -8,7 +8,7 @@ module.exports = function setup(app) {
 	const {
 		baseService,
 		permissionKey = 'permissions',
-		doNotProtect = [],
+	//	doNotProtect = [],
 		modelService,
 	} = this;
 
@@ -22,6 +22,7 @@ module.exports = function setup(app) {
 		permissionUri,
 	}));
 
+	/*
 	const writeShortPath = path.replace('permission', 'write');
 	app.use(writeShortPath, new ProxyService({
 		path,
@@ -37,10 +38,11 @@ module.exports = function setup(app) {
 		modelService,
 		permissionKey,
 	}));
-
+*/
 	const permissionService = app.service(path);
 	permissionService.hooks(permissionServiceHooks);
 
+	/*
 	const serviceToModified = app.service(baseService);
 	['create', 'find', 'get', 'patch', 'remove', 'update'].forEach((method) => {
 		// validate and persist service hooks stucture
@@ -59,6 +61,6 @@ module.exports = function setup(app) {
 			serviceToModified.__hooks.before[method].unshift(baseServicesAccess(permissionShortPath));
 		}
 	});
-
+*/
 	app.logger.info(`Permission services is adding add ${path} with key ${permissionKey}.`);
 };

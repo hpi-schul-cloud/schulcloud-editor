@@ -4,7 +4,12 @@ const { validateSchema } = require('feathers-hooks-common');
 const Ajv = require('ajv');
 
 const { checkCoursePermission } = require('../../global/hooks');
-const { copyParams } = require('../../global/utils');
+const { 
+	copyParams,
+	testAccess,
+	dataToSetQuery,
+	convertSuccessMongoPatchResponse,
+} = require('../../global/utils');
 const { create: createSchema, patch: patchSchema } = require('./schemes');
 const { LessonModel } = require('./models/');
 const { setCourseId } = require('./hooks/');
@@ -38,53 +43,77 @@ class Lessons {
 			create: 'Failed to create the lesson.',
 			get: 'Failed to get the lesson',
 			find: 'Failed to find lessons.',
-			update: 'Failed to update the lesson.',
+			patch: 'Failed to patch the lesson.',
 			remove: 'Failed to delete the lesson.',
-		}
+			noAccess: 'You have no access.',
+		};
 	}
 
 	setup(app) {
 		this.app = app;
 	}
 
+	clearPermission(lessons) {
+		if (!Array.isArray(lessons)) {
+			lessons = [lessons];
+		}
+		lessons.forEach(l => delete l.permissions);
+		return lessons;
+	}
+
 	async find(params) {
-		const { route } = params;
+		const { route: { courseId }, user } = params;
 
 		try {
 			const lessons = await LessonModel.find({
-				courseId: route.courseId,
+				courseId,
 				deletedAt: { $exists: false },
+			}).populate({
+				path: 'permissions.group',
+				select: 'users',
 			}).select({
 				_id: 1,
 				title: 1,
 				note: 1,
 				visible: 1,
+				permissions: 1,
 				courseId: 1,
 				position: 1,
-			}).lean().exec();
+			}).lean()
+				.exec();
 
-			return lessons || [];
+			// todo pagination
+			const lessonsWithAccess = (lessons || []).filter(
+				l => testAccess(l.permissions, user, 'read')
+				|| testAccess(l.permissions, user, 'write'),
+			);
+
+
+			return this.clearPermission(lessonsWithAccess);
 		} catch (err) {
 			throw new BadRequest(this.err.find, err);
 		}
 	}
 
-	async get(id, params) {
-		const { route } = params;
+	async get(_id, params) {
+		const { route: { courseId }, user } = params;
 		let lesson;
 		const mRequest = LessonModel
 			.findOne({
-				_id: id,
-				courseId: route.courseId,
+				_id,
+				courseId,
 				deletedAt: { $exists: false },
-			}).populate('sections')
-			.select({
+			}).populate({
+				path: 'permissions.group',
+				select: 'users',
+			}).select({
 				_id: 1,
 				title: 1,
 				note: 1,
+				permissions: 1,
 				sections: 1,
 				courseId: 1,
-			});
+			}).lean();
 
 		if (params.all === 'true') {
 			mRequest.populate('sections');
@@ -97,7 +126,14 @@ class Lessons {
 		}
 		if (!lesson) throw new NotFound();
 
-		return lesson;
+		const access = testAccess(lesson.permissions, user, 'read')
+			|| testAccess(lesson.permissions, user, 'write');
+
+		if (!access) {
+			throw new Forbidden(this.err.noAccess);
+		}
+
+		return this.clearPermission(lesson);
 	}
 
 	async createDefaultGroups(lesson, _params) {
@@ -156,33 +192,57 @@ class Lessons {
 		}
 	}
 
-	async patch(id, data, params) {
-		const { route } = params;
+	async patch(_id, data, params) {
+		const { route: { courseId }, user } = params;
+
+		const lesson = await LessonModel.findOne({
+			_id,
+			courseId,
+		}).populate({
+			path: 'permissions.group',
+			select: 'users',
+		}).lean().exec()
+			.catch((err) => {
+				throw new BadRequest(this.err.patch, err);
+			});
+
+		if (!testAccess(lesson.permissions, user, 'write')) {
+			throw new Forbidden(this.err.noAccess);
+		}
 
 		try {
-			return await LessonModel.updateOne({
-				_id: id,
-				courseId: route.courseId,
+			const patchStatus = await LessonModel.updateOne({
+				_id,
+				courseId,
 				deletedAt: { $exists: false },
-			}, {
-				...data,
-			}).exec();
+			}, dataToSetQuery(data)).exec();
+			return convertSuccessMongoPatchResponse(patchStatus, { _id }, true);
 		} catch (err) {
-			throw new BadRequest(this.err.update, err);
+			throw new BadRequest(this.err.patch, err);
 		}
 	}
 
-	async remove(id, params) {
-		const { route } = params;
-		try {
-			const lesson = await LessonModel.findOne({
-				_id: id,
-				courseId: route.courseId,
-			}).exec();
+	async remove(_id, params) {
+		const { route: { courseId }, user } = params;
 
+		const lesson = await LessonModel.findOne({
+			_id,
+			courseId,
+		}).populate({
+			path: 'permissions.group',
+			select: 'users',
+		}).exec().catch((err) => {
+			throw new BadRequest(this.err.remove, err);
+		});
+
+		if (!testAccess(lesson.permissions, user, 'write')) {
+			throw new Forbidden(this.err.noAccess);
+		}
+
+		try {
 			lesson.deletedAt = new Date();
 			await lesson.save();
-			return;
+			return { _id };
 		} catch (err) {
 			throw new BadRequest(this.err.remove, err);
 		}

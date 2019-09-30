@@ -1,7 +1,7 @@
 const { disallow } = require('feathers-hooks-common');
 const { GeneralError } = require('@feathersjs/errors');
 const { checkCoursePermission } = require('../../global/hooks');
-const { copyParams } = require('../../global/utils');
+const { copyParams, convertSuccessMongoPatchResponse } = require('../../global/utils');
 const {
 	readPermission,
 	addLessonIdAndCourseId,
@@ -62,12 +62,7 @@ class SyncGroupsService {
 		const deletedAt = new Date();
 		return this.app.service(this.baseService)
 			.patch(id, { deletedAt }, params)
-			.then((res) => {
-				if (res.n === 1 && res.nModified === 1 && res.ok === 1) {
-					return { id, deletedAt };
-				}
-				throw res;
-			})
+			.then(res => convertSuccessMongoPatchResponse(res, { id, deletedAt }, true))
 			.catch((err) => {
 				throw new GeneralError(this.err.softDelete, err);
 			});

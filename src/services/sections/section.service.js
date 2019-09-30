@@ -32,7 +32,12 @@ class SectionService {
 	}
 
 	setScope(params) {
+		const { lessonId } = params.route;
 		params.query.context = 'section';
+		params.query.ref = {
+			target: lessonId,
+			targetModel: 'lesson',
+		};
 		return params;
 	}
 
@@ -40,10 +45,7 @@ class SectionService {
 		const params = this.setScope(copyParams(_params));
 
 		return this.app.service(this.baseService)
-			.find(_params)
-			.then(x => {
-				return x;
-			});
+			.find(params);
 	}
 
 	get(id, _params) {
@@ -80,11 +82,13 @@ class SectionService {
 		data.context = 'section';
 
 		const params = copyParams(_params);
-		params.query.lessonId = lessonId;
-		const { data: defaultGroups } = await app.service('models/syncGroup').find(params);
+		// params.query.lessonId = lessonId;
+		const syncGroups = await app.service('models/syncGroup').find(params);
+
 		const permService = app.service('lesson/:lessonId/sections/:ressourceId/permission');
 		const key = permService.permissionKey;
-		data[key] = await permService.createDefaultPermissionsData(defaultGroups);
+		data[key] = await permService.createDefaultPermissionsData(syncGroups.data);
+
 		return this.app.service(this.baseService).create(data, copyParams(_params));
 	}
 
