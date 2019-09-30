@@ -1,4 +1,4 @@
-const { GeneralError, NotImplemented, BadRequest } = require('@feathersjs/errors');
+const { BadRequest } = require('@feathersjs/errors');
 const { disallow } = require('feathers-hooks-common');
 
 const { copyParams } = require('../../global/utils');
@@ -41,7 +41,7 @@ class SectionService {
 		return params;
 	}
 
-	find(_params) {
+	async find(_params) {
 		const params = this.setScope(copyParams(_params));
 
 		return this.app.service(this.baseService)
@@ -67,7 +67,7 @@ class SectionService {
 				throw res;
 			})
 			.catch((err) => {
-				throw new GeneralError(this.err.softDelete, err);
+				throw new BadRequest(this.err.softDelete, err);
 			});
 	}
 

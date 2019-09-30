@@ -46,6 +46,7 @@ class Lessons {
 			patch: 'Failed to patch the lesson.',
 			remove: 'Failed to delete the lesson.',
 			noAccess: 'You have no access.',
+			notFound: 'Ressource not found.',
 		};
 	}
 
@@ -121,7 +122,7 @@ class Lessons {
 		}
 		if (!lesson) throw new NotFound();
 
-		if (!permissions.filterHasRead(lesson.permissions, user)) {
+		if (!permissions.hasRead(lesson.permissions, user)) {
 			throw new Forbidden(this.err.noAccess);
 		}
 
@@ -167,7 +168,7 @@ class Lessons {
 	async create(data, params) {
 		const { user } = params;
 		try {
-			const lesson = new LessonModel({
+			const $lesson = new LessonModel({
 				...data,
 				createdBy: user.id,
 			});
@@ -175,10 +176,10 @@ class Lessons {
 			const defaultGroups = await this.createDefaultGroups(lesson, params);
 			const permissionService = this.app.service('course/:courseId/lessons/:ressourceId/permission');
 			const key = permissionService.permissionKey;
-			lesson[key] = await permissionService.createDefaultPermissionsData(defaultGroups);
+			$lesson[key] = await permissionService.createDefaultPermissionsData(defaultGroups);
 
-			await lesson.save();
-			return { _id: lesson._id };
+			await $lesson.save();
+			return { _id: $lesson._id };
 		} catch (err) {
 			throw new BadRequest(this.err.create, err);
 		}
@@ -187,28 +188,34 @@ class Lessons {
 	async patch(_id, data, params) {
 		const { route: { courseId }, user } = params;
 
-		const lesson = await LessonModel.findOne({
+		const $lesson = await LessonModel.findOne({
 			_id,
 			courseId,
+			deletedAt: { $exists: false },
 		}).populate({
 			path: 'permissions.group',
 			select: 'users',
-		}).lean().exec()
+		}).select('permissions').exec()
+			.then((res) => {
+				if (res === null) {
+					throw new NotFound(this.err.notFound);
+				}
+				return res;
+			})
 			.catch((err) => {
 				throw new BadRequest(this.err.patch, err);
 			});
 
-		if (!permissions.hasWrite(lesson.permissions, user)) {
+		if (!permissions.hasWrite($lesson.permissions, user)) {
 			throw new Forbidden(this.err.noAccess);
 		}
 
 		try {
-			const patchStatus = await LessonModel.updateOne({
-				_id,
-				courseId,
-				deletedAt: { $exists: false },
-			}, dataToSetQuery(data)).exec();
-			return convertSuccessMongoPatchResponse(patchStatus, { _id }, true);
+			Object.entries(data).forEach(([key, value]) => {
+				$lesson[key] = value;
+			});
+			await $lesson.save();
+			return { _id };
 		} catch (err) {
 			throw new BadRequest(this.err.patch, err);
 		}
@@ -217,23 +224,31 @@ class Lessons {
 	async remove(_id, params) {
 		const { route: { courseId }, user } = params;
 
-		const lesson = await LessonModel.findOne({
+		const $lesson = await LessonModel.findOne({
 			_id,
 			courseId,
+			deletedAt: { $exists: false },
 		}).populate({
 			path: 'permissions.group',
 			select: 'users',
-		}).exec().catch((err) => {
-			throw new BadRequest(this.err.remove, err);
-		});
+		}).exec()
+			.then((res) => {
+				if (res === null) {
+					throw new NotFound(this.err.notFound);
+				}
+				return res;
+			})
+			.catch((err) => {
+				throw new BadRequest(this.err.remove, err);
+			});
 
-		if (!permissions.hasWrite(lesson.permissions, user)) {
+		if (!permissions.hasWrite($lesson.permissions, user)) {
 			throw new Forbidden(this.err.noAccess);
 		}
 
 		try {
-			lesson.deletedAt = new Date();
-			await lesson.save();
+			$lesson.deletedAt = new Date();
+			await $lesson.save();
 			return { _id };
 		} catch (err) {
 			throw new BadRequest(this.err.remove, err);
