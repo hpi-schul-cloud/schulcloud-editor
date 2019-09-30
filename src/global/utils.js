@@ -84,7 +84,6 @@ const filterHasWrite = (ressources = [], user, key = 'permissions') => {
 	return ressources.filter(r => hasWrite(r[key], user));
 };
 
-
 module.exports = {
 	addTypeString,
 	copyParams,

@@ -3,12 +3,10 @@ const { NotFound, Forbidden, BadRequest } = require('@feathersjs/errors');
 const { validateSchema } = require('feathers-hooks-common');
 const Ajv = require('ajv');
 
-const { checkCoursePermission } = require('../../global/hooks');
+const { checkCoursePermission, filterOutResults } = require('../../global/hooks');
 const {
 	copyParams,
 	permissions,
-	dataToSetQuery,
-	convertSuccessMongoPatchResponse,
 } = require('../../global/utils');
 const { create: createSchema, patch: patchSchema } = require('./schemes');
 const { LessonModel } = require('./models/');
@@ -30,7 +28,14 @@ const lessonsHooks = {
 
 		],
 	},
-	after: {},
+	after: {
+		get: [
+			filterOutResults('permissions'),
+		],
+		find: [
+			filterOutResults('permissions'),
+		],
+	},
 };
 
 
@@ -52,14 +57,6 @@ class Lessons {
 
 	setup(app) {
 		this.app = app;
-	}
-
-	clearPermission(lessons) {
-		if (!Array.isArray(lessons)) {
-			lessons = [lessons];
-		}
-		lessons.forEach(l => delete l.permissions);
-		return lessons;
 	}
 
 	async find(params) {
@@ -84,8 +81,7 @@ class Lessons {
 				.exec();
 
 			// todo pagination
-			const lessonsWithAccess = permissions.filterHasRead(lessons, user);
-			return this.clearPermission(lessonsWithAccess);
+			return permissions.filterHasRead(lessons, user);
 		} catch (err) {
 			throw new BadRequest(this.err.find, err);
 		}
@@ -126,7 +122,7 @@ class Lessons {
 			throw new Forbidden(this.err.noAccess);
 		}
 
-		return this.clearPermission(lesson);
+		return lesson;
 	}
 
 	async createDefaultGroups(lesson, _params) {
