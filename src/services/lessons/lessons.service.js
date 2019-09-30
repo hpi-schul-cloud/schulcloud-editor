@@ -6,8 +6,7 @@ const Ajv = require('ajv');
 const { checkCoursePermission } = require('../../global/hooks');
 const {
 	copyParams,
-	hasReadPermissions,
-	hasWritePermissions,
+	permissions,
 	dataToSetQuery,
 	convertSuccessMongoPatchResponse,
 } = require('../../global/utils');
@@ -84,9 +83,7 @@ class Lessons {
 				.exec();
 
 			// todo pagination
-			const lessonsWithAccess = (lessons || []).filter(l => hasReadPermissions(l.permissions, user));
-
-
+			const lessonsWithAccess = permissions.filterHasRead(lessons, user);
 			return this.clearPermission(lessonsWithAccess);
 		} catch (err) {
 			throw new BadRequest(this.err.find, err);
@@ -124,7 +121,7 @@ class Lessons {
 		}
 		if (!lesson) throw new NotFound();
 
-		if (!hasReadPermissions(lesson.permissions, user)) {
+		if (!permissions.filterHasRead(lesson.permissions, user)) {
 			throw new Forbidden(this.err.noAccess);
 		}
 
@@ -201,7 +198,7 @@ class Lessons {
 				throw new BadRequest(this.err.patch, err);
 			});
 
-		if (!hasWritePermissions(lesson.permissions, user)) {
+		if (!permissions.hasWrite(lesson.permissions, user)) {
 			throw new Forbidden(this.err.noAccess);
 		}
 
@@ -230,7 +227,7 @@ class Lessons {
 			throw new BadRequest(this.err.remove, err);
 		});
 
-		if (!hasWritePermissions(lesson.permissions, user)) {
+		if (!permissions.hasWrite(lesson.permissions, user)) {
 			throw new Forbidden(this.err.noAccess);
 		}
 

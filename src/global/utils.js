@@ -1,3 +1,4 @@
+/* eslint-disable arrow-body-style */
 const { testAccess } = require('../services/permissionsHelper/utils');
 
 // models after
@@ -57,18 +58,42 @@ const convertSuccessMongoPatchResponse = (res, outputData, throwError = false) =
 	return false;
 };
 
-// eslint-disable-next-line arrow-body-style
-const hasReadPermissions = (permissions, user) => {
+/**
+ * @ref permissions
+ */
+const hasRead = (permissions, user) => {
 	return testAccess(permissions, user, 'read') || testAccess(permissions, user, 'write');
 };
 
-const hasWritePermissions = (permissions, user) => testAccess(permissions, user, 'write');
+/**
+ * @ref permissions
+ */
+const hasWrite = (permissions, user) => testAccess(permissions, user, 'write');
+
+/**
+ * @ref permissions
+ */
+const filterHasRead = (ressources = [], user, key = 'permissions') => {
+	return ressources.filter(r => hasRead(r[key], user));
+};
+
+/**
+ * @ref permissions
+ */
+const filterHasWrite = (ressources = [], user, key = 'permissions') => {
+	return ressources.filter(r => hasWrite(r[key], user));
+};
+
 
 module.exports = {
 	addTypeString,
 	copyParams,
 	dataToSetQuery,
 	convertSuccessMongoPatchResponse,
-	hasWritePermissions,
-	hasReadPermissions,
+	permissions: {
+		hasRead,
+		hasWrite,
+		filterHasRead,
+		filterHasWrite,
+	},
 };
