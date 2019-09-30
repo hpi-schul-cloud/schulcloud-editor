@@ -58,6 +58,14 @@ const convertSuccessMongoPatchResponse = (res, outputData, throwError = false) =
 	return false;
 };
 
+const paginate = (data, params) => ({
+	total: data.length,
+	limit: params.query.$limit || 1000,
+	skip: params.query.$skip || 0,
+	data,
+});
+
+
 /**
  * @ref permissions
  */
@@ -88,6 +96,7 @@ module.exports = {
 	addTypeString,
 	copyParams,
 	dataToSetQuery,
+	paginate,
 	convertSuccessMongoPatchResponse,
 	permissions: {
 		hasRead,

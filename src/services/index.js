@@ -6,7 +6,7 @@ const viewports = require('./viewports');
 const permissionsHelper = require('./permissionsHelper');
 // Events
 
-module.exports = function setup(app) {
+module.exports = (app) => {
 	/** first configure all services */
 	app.configure(lessons);
 	app.configure(groups);
@@ -17,12 +17,10 @@ module.exports = function setup(app) {
 	app.configure(permissionsHelper.bind({
 		modelService: 'models/LessonModel',
 		baseService: 'course/:courseId/lessons',
-		doNotProtect: ['create'],
 	}));
 	app.configure(permissionsHelper.bind({
 		modelService: 'models/SectionModel',
 		baseService: 'lesson/:lessonId/sections',
-		doNotProtect: ['create'],
 	}));
 	app.configure(permissionsHelper.bind({ baseService: 'viewports' }));
 

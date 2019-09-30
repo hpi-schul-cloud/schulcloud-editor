@@ -1,8 +1,8 @@
 /* eslint-disable class-methods-use-this */
-const { GeneralError, BadRequest, NotImplemented } = require('@feathersjs/errors');
+const { BadRequest } = require('@feathersjs/errors');
 const { disallow } = require('feathers-hooks-common');
 
-const { copyParams, dataToSetQuery } = require('../../global/utils');
+const { copyParams, dataToSetQuery, paginate } = require('../../global/utils');
 const { PermissionModel } = require('./models');
 
 const {
@@ -115,14 +115,9 @@ class PermissionService {
 	 */
 	async find(params) {
 		const { basePermissions, access } = params;
-		// paginate and add additional information over access for proxy service
-		return {
-			total: basePermissions.length,
-			limit: params.$limit || 1000,
-			skip: params.$skip || 0,
-			data: basePermissions,
-			access,
-		};
+		const result = paginate(basePermissions, params);
+		result.access = access;
+		return result;
 	}
 
 	async remove(permissionId, params) {
