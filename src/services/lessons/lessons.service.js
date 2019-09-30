@@ -4,9 +4,10 @@ const { validateSchema } = require('feathers-hooks-common');
 const Ajv = require('ajv');
 
 const { checkCoursePermission } = require('../../global/hooks');
-const { 
+const {
 	copyParams,
-	testAccess,
+	hasReadPermissions,
+	hasWritePermissions,
 	dataToSetQuery,
 	convertSuccessMongoPatchResponse,
 } = require('../../global/utils');
@@ -83,10 +84,7 @@ class Lessons {
 				.exec();
 
 			// todo pagination
-			const lessonsWithAccess = (lessons || []).filter(
-				l => testAccess(l.permissions, user, 'read')
-				|| testAccess(l.permissions, user, 'write'),
-			);
+			const lessonsWithAccess = (lessons || []).filter(l => hasReadPermissions(l.permissions, user));
 
 
 			return this.clearPermission(lessonsWithAccess);
@@ -126,10 +124,7 @@ class Lessons {
 		}
 		if (!lesson) throw new NotFound();
 
-		const access = testAccess(lesson.permissions, user, 'read')
-			|| testAccess(lesson.permissions, user, 'write');
-
-		if (!access) {
+		if (!hasReadPermissions(lesson.permissions, user)) {
 			throw new Forbidden(this.err.noAccess);
 		}
 
@@ -206,7 +201,7 @@ class Lessons {
 				throw new BadRequest(this.err.patch, err);
 			});
 
-		if (!testAccess(lesson.permissions, user, 'write')) {
+		if (!hasWritePermissions(lesson.permissions, user)) {
 			throw new Forbidden(this.err.noAccess);
 		}
 
@@ -235,7 +230,7 @@ class Lessons {
 			throw new BadRequest(this.err.remove, err);
 		});
 
-		if (!testAccess(lesson.permissions, user, 'write')) {
+		if (!hasWritePermissions(lesson.permissions, user)) {
 			throw new Forbidden(this.err.noAccess);
 		}
 

@@ -57,10 +57,18 @@ const convertSuccessMongoPatchResponse = (res, outputData, throwError = false) =
 	return false;
 };
 
+// eslint-disable-next-line arrow-body-style
+const hasReadPermissions = (permissions, user) => {
+	return testAccess(permissions, user, 'read') || testAccess(permissions, user, 'write');
+};
+
+const hasWritePermissions = (permissions, user) => testAccess(permissions, user, 'write');
+
 module.exports = {
 	addTypeString,
 	copyParams,
-	testAccess,
 	dataToSetQuery,
 	convertSuccessMongoPatchResponse,
+	hasWritePermissions,
+	hasReadPermissions,
 };
