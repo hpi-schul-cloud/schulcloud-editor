@@ -34,7 +34,6 @@ const app = express(feathers())
 	.use(cors())
 	// todo "handleResponseType" test it, maybe no effect see express.json() @deprecated
 	.configure(express.rest(handleResponseType))
-	// .use('/', express.static('public'))
 	.use(favicon(path.join(__dirname, '..', 'public', 'favicon.ico')))
 	// .use(defaultHeaders) // todo test it, position,  if we need it? @deprecated
 	.configure(swagger)

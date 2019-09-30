@@ -109,7 +109,7 @@ class Lessons {
 				permissions: 1,
 				sections: 1,
 				courseId: 1,
-			}).lean();
+			});
 
 		if (params.all === 'true') {
 			mRequest.populate('sections');
@@ -173,7 +173,7 @@ class Lessons {
 				createdBy: user.id,
 			});
 
-			const defaultGroups = await this.createDefaultGroups(lesson, params);
+			const defaultGroups = await this.createDefaultGroups($lesson, params);
 			const permissionService = this.app.service('course/:courseId/lessons/:ressourceId/permission');
 			const key = permissionService.permissionKey;
 			$lesson[key] = await permissionService.createDefaultPermissionsData(defaultGroups);
@@ -196,16 +196,11 @@ class Lessons {
 			path: 'permissions.group',
 			select: 'users',
 		}).select('permissions').exec()
-			.then((res) => {
-				if (res === null) {
-					throw new NotFound(this.err.notFound);
-				}
-				return res;
-			})
 			.catch((err) => {
 				throw new BadRequest(this.err.patch, err);
 			});
 
+		if (!$lesson) throw new NotFound();
 		if (!permissions.hasWrite($lesson.permissions, user)) {
 			throw new Forbidden(this.err.noAccess);
 		}
@@ -232,16 +227,11 @@ class Lessons {
 			path: 'permissions.group',
 			select: 'users',
 		}).exec()
-			.then((res) => {
-				if (res === null) {
-					throw new NotFound(this.err.notFound);
-				}
-				return res;
-			})
 			.catch((err) => {
 				throw new BadRequest(this.err.remove, err);
 			});
 
+		if (!$lesson) throw new NotFound();
 		if (!permissions.hasWrite($lesson.permissions, user)) {
 			throw new Forbidden(this.err.noAccess);
 		}
