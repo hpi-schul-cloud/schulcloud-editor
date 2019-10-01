@@ -3,7 +3,7 @@ const { disallow } = require('feathers-hooks-common');
 
 const { filterOutResults } = require('../../global/hooks');
 const {
-	copyParams,
+	prepareParams,
 	permissions,
 	convertSuccessMongoPatchResponse,
 	modifiedParamsToReturnPatchResponse,
@@ -68,14 +68,14 @@ class SectionService {
 	}
 
 	find(params) {
-		const internParams = this.setScope(copyParams(params));
+		const internParams = this.setScope(prepareParams(params));
 		return this.app.service(this.baseService)
 			.find(internParams)
 			.then(sections => permissions.filterHasRead(sections.data, params.user));
 	}
 
 	get(id, params) {
-		const internParams = this.setScope(copyParams(params));
+		const internParams = this.setScope(prepareParams(params));
 		return this.app.service(this.baseService)
 			.get(id, internParams)
 			.then((section) => {
@@ -87,7 +87,7 @@ class SectionService {
 	}
 
 	async remove(_id, params) {
-		const internParams = this.setScope(copyParams(params));
+		const internParams = this.setScope(prepareParams(params));
 		internParams.query.$select = ['permissions'];
 
 		const service = this.app.service(this.baseService);
@@ -99,7 +99,7 @@ class SectionService {
 		// The query operation is also execute in mongoose after it is patched.
 		// But deletedAt exist as select and without mongoose.writeResult = true it return nothing.
 		const deletedAt = new Date();
-		const patchParams = modifiedParamsToReturnPatchResponse(copyParams(params));
+		const patchParams = modifiedParamsToReturnPatchResponse(prepareParams(params));
 		return service.patch(_id, { deletedAt }, patchParams)
 			.then(res => convertSuccessMongoPatchResponse(res, { _id, deletedAt }, true));
 	}
@@ -114,7 +114,7 @@ class SectionService {
 		};
 		data.context = 'section';
 
-		const internParams = copyParams(params);
+		const internParams = prepareParams(params);
 		internParams.query.lessonId = lessonId;
 		// todo only write group as default?
 		const syncGroups = await app.service('models/syncGroup').find(internParams);
@@ -124,12 +124,12 @@ class SectionService {
 		data[key] = await permService.createDefaultPermissionsData(syncGroups.data);
 
 		return this.app.service(this.baseService)
-			.create(data, copyParams(params))
+			.create(data, prepareParams(params))
 			.then(({ _id }) => ({ _id }));
 	}
 
 	async patch(id, data, params) {
-		const internParams = this.setScope(copyParams(params));
+		const internParams = this.setScope(prepareParams(params));
 		internParams.query.$select = ['permissions'];
 
 		const service = this.app.service(this.baseService);

@@ -1,10 +1,9 @@
 /* eslint-disable class-methods-use-this */
 const { BadRequest, Forbidden, NotFound } = require('@feathersjs/errors');
 const { disallow } = require('feathers-hooks-common');
-const { testAccess } = require('./utils');
 
 const {
-	copyParams,
+	prepareParams,
 	dataToSetQuery,
 	paginate,
 	modifiedParamsToReturnPatchResponse,
@@ -78,8 +77,7 @@ class PermissionService {
 		return newPermission;
 	}
 
-	setScope(_params) {
-		const params = copyParams(_params);
+	setScope(params) {
 		params.query.$select = [this.permissionKey];
 		params.query.$populate = [{
 			path: `${this.permissionKey}.group`,
@@ -98,7 +96,7 @@ class PermissionService {
 
 	async getAndCheckPermission(params, permissionId) {
 		const { route: { ressourceId }, user } = params;
-		const internParams = this.setScope(copyParams(params));
+		const internParams = this.setScope(prepareParams(params));
 		// all permissions
 		const result = await this.app.service(this.modelServiceName)
 			.get(ressourceId, internParams);
@@ -134,7 +132,7 @@ class PermissionService {
 		};
 
 		return this.app.service(this.modelServiceName)
-			.patch(ressourceId, patchData, copyParams(params))
+			.patch(ressourceId, patchData, prepareParams(params))
 			.then(() => newPermission)
 			.catch((err) => {
 				throw new BadRequest(this.err.create, err);
@@ -163,7 +161,7 @@ class PermissionService {
 		await this.getAndCheckPermission(params, _id);
 
 		const { ressourceId } = params.route;
-		const patchParams = modifiedParamsToReturnPatchResponse(copyParams(params));
+		const patchParams = modifiedParamsToReturnPatchResponse(prepareParams(params));
 
 		const $pull = {
 			[this.permissionKey]: { _id },
@@ -180,7 +178,7 @@ class PermissionService {
 		await this.getAndCheckPermission(params, _id);
 
 		const { ressourceId } = params.route;
-		const patchParams = modifiedParamsToReturnPatchResponse(copyParams(params));
+		const patchParams = modifiedParamsToReturnPatchResponse(prepareParams(params));
 
 		// It is important to map the patch operation in combination with
 		// dataToSetQuery(data, `${this.permissionKey}.$.`)

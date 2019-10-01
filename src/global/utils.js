@@ -25,7 +25,7 @@ const addTypeString = name => (docs, next) => {
  * @param {*} params
  * @return params
  */
-const copyParams = (params) => {
+const prepareParams = (params) => {
 	const copy = Object.assign({}, params);
 	copy.query = {
 		deletedAt: undefined,
@@ -101,7 +101,7 @@ const filterHasWrite = (ressources = [], user, key = 'permissions') => {
 
 module.exports = {
 	addTypeString,
-	copyParams,
+	prepareParams,
 	dataToSetQuery,
 	paginate,
 	convertSuccessMongoPatchResponse,
