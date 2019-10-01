@@ -1,8 +1,8 @@
 /* eslint-disable class-methods-use-this */
-const { GeneralError, BadRequest, NotImplemented } = require('@feathersjs/errors');
+const { BadRequest } = require('@feathersjs/errors');
 const { disallow } = require('feathers-hooks-common');
 
-const { copyParams } = require('../../global/utils');
+const { copyParams, dataToSetQuery, paginate } = require('../../global/utils');
 const { PermissionModel } = require('./models');
 
 const {
@@ -115,14 +115,9 @@ class PermissionService {
 	 */
 	async find(params) {
 		const { basePermissions, access } = params;
-		// paginate and add additional information over access for proxy service
-		return {
-			total: basePermissions.length,
-			limit: params.$limit || 1000,
-			skip: params.$skip || 0,
-			data: basePermissions,
-			access,
-		};
+		const result = paginate(basePermissions, params);
+		result.access = access;
+		return result;
 	}
 
 	async remove(permissionId, params) {
@@ -148,13 +143,8 @@ class PermissionService {
 			$select: { [this.permissionKey]: 1 },
 		};
 
-		const $set = {};
-		Object.entries(_data).forEach(([key, value]) => {
-			$set[`${this.permissionKey}.$.${key}`] = value;
-		});
-
 		return this.app.service(this.modelServiceName)
-			.patch(ressourceId, { $set }, internParams)
+			.patch(ressourceId, dataToSetQuery(_data, `${this.permissionKey}.$.`), internParams)
 			.then(({ permissions }) => permissions.filter(perm => perm._id.toString() === permissionId)[0])
 			.catch((err) => {
 				throw new BadRequest(this.err.patch, err);

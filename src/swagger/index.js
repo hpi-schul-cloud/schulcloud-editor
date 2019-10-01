@@ -1,13 +1,13 @@
 const feathersSwagger = require('feathers-swagger');
 const path = require('path');
 
-module.exports = function setup(app) {
+module.exports = (app) => {
 	app.configure(feathersSwagger({
-		/* example configuration */
-		docsPath: '/docs',
-		version: '0.0.1',
+		docsPath: '/',
+		// version: '0.0.1',
+		// versionPrefix: 'editor',
 		basePath: '/',
-		host: '',
+		host: 'localhost:4001',
 		uiIndex: path.join(__dirname, 'index.html'),
 		schemes: ['http', 'https'],
 		securityDefinitions: {
@@ -22,13 +22,21 @@ module.exports = function setup(app) {
 				bearer: [],
 			},
 		],
-		info: {
-			title: 'Schul-Cloud Editor',
-			description: 'This is the Schul-Cloud Editor.',
-			termsOfServiceUrl: 'https://github.com/schul-cloud/schulcloud-editor/blob/master/LICENSE',
-			contact: 'info@schul-cloud.org',
-			license: 'GPL-3.0',
-			licenseUrl: 'https://github.com/schul-cloud/schulcloud-editor/blob/master/LICENSE',
+		specs: {
+			info: {
+				title: 'Schul-Cloud Editor',
+				description: 'This is the Schul-Cloud Editor.',
+				version: '0.0.1',
+			//	termsOfServiceUrl: 'https://github.com/schul-cloud/schulcloud-editor/blob/master/LICENSE',
+				contact: {
+					name: 'support',
+					email: 'info@schul-cloud.org',
+				},
+				license: {
+					name: 'GPL-3.0',
+					url: 'https://github.com/schul-cloud/schulcloud-editor/blob/master/LICENSE',
+				},
+			},
 		},
 	}));
 };

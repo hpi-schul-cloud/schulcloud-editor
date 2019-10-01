@@ -5,8 +5,9 @@ const filterOutResults = keys => (context) => {
 		if (!Array.isArray(keys)) {
 			keys = [keys];
 		}
-		if (context.method === 'find' && Array.isArray(context.result.data)) {
-			context.result.data.forEach((ele) => {
+		// todo pagination test and switch to context.result.data
+		if (context.method === 'find' && Array.isArray(context.result)) {
+			context.result.forEach((ele) => {
 				keys.forEach((key) => {
 					delete ele[key];
 				});

@@ -15,7 +15,8 @@ const addReferencedData = (baseModelService, permissionKey) => async (context) =
 		{ path: goupPath, select: 'users' },
 	];
 
-	const baseData = await app.service(baseModelService).get(ressourceId, internParams)
+	const baseData = await app.service(baseModelService)
+		.get(ressourceId, internParams)
 		.catch((err) => {
 			throw new Forbidden('You have no access.', err);
 		});

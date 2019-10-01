@@ -1,5 +1,3 @@
-const userIsInGroupOrUsers = require('./userIsInGroupOrUsers');
-
-module.exports = {
-	userIsInGroupOrUsers,
-};
+exports.userIsInGroupOrUsers = require('./userIsInGroupOrUsers');
+exports.isActivated = require('./isActivated');
+exports.testAccess = require('./testAccess');

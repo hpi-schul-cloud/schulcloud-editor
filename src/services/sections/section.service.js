@@ -1,7 +1,8 @@
-const { GeneralError, NotImplemented, BadRequest } = require('@feathersjs/errors');
+const { BadRequest, Forbidden } = require('@feathersjs/errors');
 const { disallow } = require('feathers-hooks-common');
 
-const { copyParams } = require('../../global/utils');
+const { filterOutResults } = require('../../global/hooks');
+const { copyParams, permissions, convertSuccessMongoPatchResponse } = require('../../global/utils');
 
 // todo validation
 const SectionServiceHooks = {};
@@ -22,55 +23,85 @@ SectionServiceHooks.before = {
 	],
 };
 
+SectionServiceHooks.after = {
+	all: [
+		filterOutResults('permissions'),
+	],
+};
+
+SectionServiceHooks.error = {
+	all: [
+	/*	(context) => {
+			if (context.error) {
+				throw new Forbidden('Can not execute', context.error);
+			}
+		}, */
+	],
+};
+
 class SectionService {
 	constructor({ docs = {} }) {
 		this.docs = docs;
 		this.baseService = 'models/SectionModel';
 		this.err = {
 			softDelete: 'Can not set soft delete.',
+			noAccess: 'You have no access.',
 		};
 	}
 
 	setScope(params) {
+		const { lessonId } = params.route;
 		params.query.context = 'section';
+		params.query.ref = {
+			target: lessonId,
+			targetModel: 'lesson',
+		};
+		params.query.$populate = [
+			{ path: 'permissions.group', select: 'users' },
+		];
 		return params;
 	}
 
-	find(_params) {
-		const params = this.setScope(copyParams(_params));
-
+	find(params) {
+		const internParams = this.setScope(copyParams(params));
 		return this.app.service(this.baseService)
-			.find(_params)
-			.then(x => {
-				return x;
-			});
+			.find(internParams)
+			.then(sections => permissions.filterHasRead(sections.data, params.user));
 	}
 
-	get(id, _params) {
-		const params = this.setScope(copyParams(_params));
+	get(id, params) {
+		const internParams = this.setScope(copyParams(params));
 		return this.app.service(this.baseService)
-			.get(id, params);
-	}
-
-	remove(id, _params) {
-		const params = this.setScope(copyParams(_params));
-		params.mongoose = { writeResult: true };
-		const deletedAt = new Date();
-		return this.app.service(this.baseService)
-			.patch(id, { deletedAt }, params)
-			.then((res) => {
-				if (res.n === 1 && res.nModified === 1 && res.ok === 1) {
-					return { id, deletedAt };
+			.get(id, internParams)
+			.then((section) => {
+				if (!permissions.hasRead(section.permissions, params.user)) {
+					throw new Forbidden(this.err.noAccess);
 				}
-				throw res;
-			})
-			.catch((err) => {
-				throw new GeneralError(this.err.softDelete, err);
+				return section;
 			});
 	}
 
-	async create(data, _params) {
-		const { lessonId } = _params.route;
+	async remove(_id, params) {
+		const internParams = this.setScope(copyParams(params));
+		internParams.query.$select = ['permissions'];
+
+		const service = this.app.service(this.baseService);
+		const section = await service.get(_id, internParams);
+
+		if (!permissions.hasRead(section.permissions, params.user)) {
+			throw new Forbidden(this.err.noAccess);
+		}
+		// The query operation is also execute in mongoose after it is patched.
+		// But deletedAt exist as select and without mongoose.writeResult = true it return nothing.
+		const deletedAt = new Date();
+		const patchParams = copyParams(params);
+		patchParams.mongoose = { writeResult: true };
+		return service.patch(_id, { deletedAt }, patchParams)
+			.then(res => convertSuccessMongoPatchResponse(res, { _id, deletedAt }, true));
+	}
+
+	async create(data, params) {
+		const { lessonId } = params.route;
 		const { app } = this;
 
 		data.ref = {
@@ -79,19 +110,32 @@ class SectionService {
 		};
 		data.context = 'section';
 
-		const params = copyParams(_params);
-		params.query.lessonId = lessonId;
-		const { data: defaultGroups } = await app.service('models/syncGroup').find(params);
+		const internParams = copyParams(params);
+		internParams.query.lessonId = lessonId;
+		// todo only write group as default?
+		const syncGroups = await app.service('models/syncGroup').find(internParams);
+
 		const permService = app.service('lesson/:lessonId/sections/:ressourceId/permission');
 		const key = permService.permissionKey;
-		data[key] = await permService.createDefaultPermissionsData(defaultGroups);
-		return this.app.service(this.baseService).create(data, copyParams(_params));
+		data[key] = await permService.createDefaultPermissionsData(syncGroups.data);
+
+		return this.app.service(this.baseService)
+			.create(data, copyParams(params))
+			.then(({ _id }) => ({ _id }));
 	}
 
-	patch(id, data, _params) {
-		const params = this.setScope(copyParams(_params));
-		return this.app.service(this.baseService)
-			.patch(id, data, params);
+	async patch(id, data, params) {
+		const internParams = this.setScope(copyParams(params));
+		internParams.query.$select = ['permissions'];
+
+		const service = this.app.service(this.baseService);
+		const section = await service.get(id, internParams);
+
+		if (!permissions.hasRead(section.permissions, params.user)) {
+			throw new Forbidden(this.err.noAccess);
+		}
+
+		return service.patch(id, data, internParams);
 	}
 
 	setup(app) {

@@ -1,25 +1,5 @@
 const { Forbidden } = require('@feathersjs/errors');
-const { userIsInGroupOrUsers } = require('../utils/');
-
-// todo it is fetch all permission data and select then,
-// to reduce traffic it should select only permissions in time.
-// add a before hook for it
-
-
-const isActivated = ({ endDate, publishDate, activated }) => {
-	const date = Date.now();
-	return activated === true
-	&& (date < endDate || endDate === null)
-	&& (date > publishDate || publishDate === null);
-};
-
-const access = (basePermissions, user, permissionTyp) => {
-	const validPermissions = basePermissions.filter(
-		perm => perm[permissionTyp] === true && isActivated(perm),
-	);
-
-	return userIsInGroupOrUsers(validPermissions, user.id);
-};
+const { testAccess } = require('../utils/');
 
 /**
  * Intern request can pass.
@@ -41,8 +21,8 @@ const restictedAndAddAccess = (context) => {
 		throw new Forbidden('You have no access.', { message: 'User not exist' });
 	}
 	params.access = {
-		write: access(basePermissions, user, 'write'),
-		read: access(basePermissions, user, 'read'),
+		write: testAccess(basePermissions, user, 'write'),
+		read: testAccess(basePermissions, user, 'read'),
 	};
 
 	if (params.access.write || params.access.read) {
