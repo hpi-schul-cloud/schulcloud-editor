@@ -65,6 +65,13 @@ const paginate = (data, params) => ({
 	data,
 });
 
+const modifiedParamsToReturnPatchResponse = (params) => {
+	if (!(typeof params.mongoose === 'object')) {
+		params.mongoose = {};
+	}
+	params.mongoose.writeResult = true;
+	return params;
+};
 
 /**
  * @ref permissions
@@ -98,6 +105,7 @@ module.exports = {
 	dataToSetQuery,
 	paginate,
 	convertSuccessMongoPatchResponse,
+	modifiedParamsToReturnPatchResponse,
 	permissions: {
 		hasRead,
 		hasWrite,

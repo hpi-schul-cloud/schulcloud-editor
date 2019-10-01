@@ -1,27 +1,28 @@
 /* eslint-disable class-methods-use-this */
-const { BadRequest } = require('@feathersjs/errors');
+const { BadRequest, Forbidden, NotFound } = require('@feathersjs/errors');
 const { disallow } = require('feathers-hooks-common');
-
-const { copyParams, dataToSetQuery, paginate } = require('../../global/utils');
-const { PermissionModel } = require('./models');
+const { testAccess } = require('./utils');
 
 const {
-	limitDataViewForReadAccess,
-	restictedAndAddAccess,
-	addReferencedData,
-} = require('./hooks');
+	copyParams,
+	dataToSetQuery,
+	paginate,
+	modifiedParamsToReturnPatchResponse,
+	convertSuccessMongoPatchResponse,
+	permissions,
+} = require('../../global/utils');
+const { PermissionModel } = require('./models');
 
 const permissionServiceHooks = {};
 permissionServiceHooks.before = {
-	all: [restictedAndAddAccess],
-	find: [limitDataViewForReadAccess],
-	get: [limitDataViewForReadAccess],
+	all: [],
+	find: [],
+	get: [],
 	create: [],
 	update: [disallow()],
-	patch: [limitDataViewForReadAccess],
-	remove: [limitDataViewForReadAccess],
+	patch: [],
+	remove: [],
 };
-
 
 class PermissionService {
 	constructor({
@@ -39,9 +40,8 @@ class PermissionService {
 			createDefault: 'Can not create default permissions.',
 			patch: 'Can not patch permission.',
 			remove: 'Can not remove permission.',
+			noAccess: 'You have no accesss.',
 		};
-
-		permissionServiceHooks.before.all.unshift(addReferencedData(this.modelServiceName, this.permissionKey));
 	}
 
 	/**
@@ -78,6 +78,44 @@ class PermissionService {
 		return newPermission;
 	}
 
+	setScope(_params) {
+		const params = copyParams(_params);
+		params.query.$select = [this.permissionKey];
+		params.query.$populate = [{
+			path: `${this.permissionKey}.group`,
+			select: 'users',
+		}];
+		return params;
+	}
+
+	getOne(permissionList = [], permissionId = '') {
+		const perms = permissionList.filter(perm => perm._id.toString() === permissionId);
+		if (perms.length <= 0) {
+			throw new NotFound();
+		}
+		return perms[0];
+	}
+
+	async getAndCheckPermission(params, permissionId) {
+		const { route: { ressourceId }, user } = params;
+		const internParams = this.setScope(copyParams(params));
+		// all permissions
+		const result = await this.app.service(this.modelServiceName)
+			.get(ressourceId, internParams);
+
+		const basePermissions = result[this.permissionKey];
+
+		if (permissions.hasWrite(basePermissions, user)) {
+			return permissionId ? this.getOne(basePermissions, permissionId) : basePermissions;
+		}
+
+		if (!permissions.hasRead(basePermissions)) {
+			throw new Forbidden(this.err.noAccess);
+		}
+
+		return permissionId ? this.getOne(basePermissions, permissionId) : basePermissions;
+	}
+
 	/**
 	 * Create new embedded permissions for a user, or group.
 	 * @param {*} data
@@ -85,6 +123,9 @@ class PermissionService {
 	 */
 	async create(data, params) {
 		const { ressourceId } = params.route;
+
+		await this.getAndCheckPermission(params);
+
 		const newPermission = await this.createPermissionObject(data);
 		const patchData = {
 			$push: {
@@ -106,7 +147,7 @@ class PermissionService {
 	 * @param {*} params
 	 */
 	async get(permissionId, params) {
-		return params.basePermissions.filter(perm => perm._id.toString() === permissionId);
+		return this.getAndCheckPermission(params, permissionId);
 	}
 
 	/**
@@ -114,38 +155,43 @@ class PermissionService {
 	 * @param {*} params
 	 */
 	async find(params) {
-		const { basePermissions, access } = params;
-		const result = paginate(basePermissions, params);
-		result.access = access;
-		return result;
+		const perms = await this.getAndCheckPermission(params);
+		return paginate(perms, params);
 	}
 
-	async remove(permissionId, params) {
+	async remove(_id, params) {
+		await this.getAndCheckPermission(params, _id);
+
 		const { ressourceId } = params.route;
-		const internParams = copyParams(params);
+		const patchParams = modifiedParamsToReturnPatchResponse(copyParams(params));
 
 		const $pull = {
-			[this.permissionKey]: { _id: permissionId },
+			[this.permissionKey]: { _id },
 		};
 
-		return this.app.service(this.modelServiceName).patch(ressourceId, { $pull }, internParams)
+		return this.app.service(this.modelServiceName).patch(ressourceId, { $pull }, patchParams)
+			.then(patchStatus => convertSuccessMongoPatchResponse(patchStatus, { _id }, true))
 			.catch((err) => {
 				throw new BadRequest(this.err.remove, err);
 			});
 	}
 
-	async patch(permissionId, _data, params) {
-		const { ressourceId } = params.route;
-		const internParams = this.setScope(copyParams(params), permissionId);
+	async patch(_id, data, params) {
+		await this.getAndCheckPermission(params, _id);
 
-		internParams.query = {
-			[`${this.permissionKey}._id`]: permissionId,
+		const { ressourceId } = params.route;
+		const patchParams = modifiedParamsToReturnPatchResponse(copyParams(params));
+
+		// It is important to map the patch operation in combination with
+		// dataToSetQuery(data, `${this.permissionKey}.$.`)
+		patchParams.query = {
+			[`${this.permissionKey}._id`]: _id,
 			$select: { [this.permissionKey]: 1 },
 		};
 
 		return this.app.service(this.modelServiceName)
-			.patch(ressourceId, dataToSetQuery(_data, `${this.permissionKey}.$.`), internParams)
-			.then(({ permissions }) => permissions.filter(perm => perm._id.toString() === permissionId)[0])
+			.patch(ressourceId, dataToSetQuery(data, `${this.permissionKey}.$.`), patchParams)
+			.then(patchStatus => convertSuccessMongoPatchResponse(patchStatus, { _id }, true))
 			.catch((err) => {
 				throw new BadRequest(this.err.patch, err);
 			});
