@@ -5,8 +5,9 @@ const Ajv = require('ajv');
 
 const { checkCoursePermission, filterOutResults } = require('../../global/hooks');
 const {
-	copyParams,
+	prepareParams,
 	permissions,
+	paginate,
 } = require('../../global/utils');
 const { create: createSchema, patch: patchSchema } = require('./schemes');
 const { LessonModel } = require('./models/');
@@ -80,8 +81,7 @@ class Lessons {
 			}).lean()
 				.exec();
 
-			// todo pagination
-			return permissions.filterHasRead(lessons, user);
+			return paginate(permissions.filterHasRead(lessons, user), params);
 		} catch (err) {
 			throw new BadRequest(this.err.find, err);
 		}
@@ -127,7 +127,7 @@ class Lessons {
 
 	async createDefaultGroups(lesson, _params) {
 		const lessonId = lesson._id;
-		const params = copyParams(_params);
+		const params = prepareParams(_params);
 		params.route.ressourceId = lessonId;
 		params.route.lessonId = lessonId;
 

@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 /* eslint-disable no-param-reassign */
 const saveSelect = (base, key, fallbackValue) => {
 	try {

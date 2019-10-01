@@ -1,7 +1,7 @@
 const { disallow } = require('feathers-hooks-common');
 const { GeneralError } = require('@feathersjs/errors');
 const { checkCoursePermission } = require('../../global/hooks');
-const { copyParams, convertSuccessMongoPatchResponse } = require('../../global/utils');
+const { prepareParams, convertSuccessMongoPatchResponse } = require('../../global/utils');
 const {
 	readPermission,
 	addLessonIdAndCourseId,
@@ -48,16 +48,16 @@ class SyncGroupsService {
 
 	find(params) {
 		return this.app.service(this.baseService)
-			.find(copyParams(params));
+			.find(prepareParams(params));
 	}
 
 	get(id, params) {
 		return this.app.service(this.baseService)
-			.get(id, copyParams(params));
+			.get(id, prepareParams(params));
 	}
 
 	remove(id, _params) {
-		const params = copyParams(_params);
+		const params = prepareParams(_params);
 		params.mongoose = { writeResult: true };
 		const deletedAt = new Date();
 		return this.app.service(this.baseService)
@@ -70,12 +70,12 @@ class SyncGroupsService {
 
 	create(data, params) {
 		return this.app.service(this.baseService)
-			.create(data, copyParams(params));
+			.create(data, prepareParams(params));
 	}
 
 	patch(id, data, params) {
 		return this.app.service(this.baseService)
-			.patch(id, data, copyParams(params));
+			.patch(id, data, prepareParams(params));
 	}
 
 	setup(app) {

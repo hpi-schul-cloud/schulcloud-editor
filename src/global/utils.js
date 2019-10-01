@@ -25,7 +25,7 @@ const addTypeString = name => (docs, next) => {
  * @param {*} params
  * @return params
  */
-const copyParams = (params) => {
+const prepareParams = (params) => {
 	const copy = Object.assign({}, params);
 	copy.query = {
 		deletedAt: undefined,
@@ -65,6 +65,13 @@ const paginate = (data, params) => ({
 	data,
 });
 
+const modifiedParamsToReturnPatchResponse = (params) => {
+	if (!(typeof params.mongoose === 'object')) {
+		params.mongoose = {};
+	}
+	params.mongoose.writeResult = true;
+	return params;
+};
 
 /**
  * @ref permissions
@@ -94,10 +101,11 @@ const filterHasWrite = (ressources = [], user, key = 'permissions') => {
 
 module.exports = {
 	addTypeString,
-	copyParams,
+	prepareParams,
 	dataToSetQuery,
 	paginate,
 	convertSuccessMongoPatchResponse,
+	modifiedParamsToReturnPatchResponse,
 	permissions: {
 		hasRead,
 		hasWrite,
