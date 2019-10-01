@@ -2,5 +2,13 @@
 	"host": "localhost",
 	"port": "PORT",
 	"mongodb": "MONGO_URI",
-	"public": "../public/"
+	"public": "../public/",
+	"routes": {
+		"server": {
+			"baseURL": "SERVER_BASE_URL",
+			"coursePermissionsUri": "ROUTE_COURSE_PERMISSIONS",
+			"meUri": "ROUTE_ME"
+		},
+		"timeout": "2000"
+	}
 }

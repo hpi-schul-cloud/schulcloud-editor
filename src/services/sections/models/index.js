@@ -1,65 +1,54 @@
-/* eslint-disable no-param-reassign */
 const mongoose = require('mongoose');
 
-const { after } = require('../../../global/helpers');
+const { addTypeString } = require('../../../global/utils');
+const { permissionSchema } = require('../../permissionsHelper/models');
 
 const { Schema } = mongoose;
 
-/**
- * @param read Can read a section.
- * @param write Can edit a section, but can not modified the structure. Example: student answer a question.
- * @param create Can edit a section structure. Example: teacher can create and edit new answers.
- * @example {read:false, write:true, create:true} will allow you create new answers AND edit this answers. Read is override by the higher permissions.
- */
-const permissionGroupSchema = new Schema({
-	group: { type: Schema.Types.ObjectId, ref: 'group', required: true },
-	read: { type: Boolean, default: false },
-	write: { type: Boolean, default: false },
-	create: { type: Boolean, default: false },
+const targets = ['course', 'lesson', 'group'];
+
+const ref = new Schema({
+	target: {
+		type: Schema.Types.ObjectId,
+		refPath: 'targetModel',
+		required: function requiredTarget() {
+			return !!this.targetModel;
+		},
+	},
+	targetModel: {
+		type: String,
+		enum: targets,
+		required: function requiredTargetModel() {
+			return !!this.target;
+		},
+	},
+}, {
+	_id: false,
 });
 
 const sectionSchema = new Schema({
-	lesson: { type: Schema.Types.ObjectId, ref: 'lesson', required: true },
-	visible: { type: Boolean, default: true },
-	note: { type: String, default: '' },
-	// type: { type: String, default: 'section', enum: ['section'] },
-	owner: { type: Schema.Types.ObjectId, ref: 'group', required: true },
-	parent: { type: Schema.Types.ObjectId, ref: 'section', default: null },
-	permissions: [{ type: permissionGroupSchema }],
+	ref: { type: ref },
+	context: {
+		type: String,
+		enum: ['task', 'section'],
+		default: 'section',
+		immutable: true,
+	},
 	title: { type: String, default: '' },
 	state: { type: Object, default: {} },
-	flag: { type: String, enum: ['isFromStudent', 'isTemplate'], default: 'isTemplate' },
+	permissions: [{ type: permissionSchema }],
+	deletedAt: { type: Date, expires: (60 * 60 * 24 * 30) },
+	createdBy: { type: Schema.Types.ObjectId, immutable: true },
+	updatedBy: { type: Schema.Types.ObjectId },
 }, {
 	timestamps: true,
-	minimize: false,
+	minimize: false, // to return empty objects
 });
 
-function autoPopulate(next) {
-	this.populate('permissions.group');
-	this.populate('owner');
-	next();
-}
-
-
 sectionSchema
-	.pre('findOne', autoPopulate)
-	.pre('find', autoPopulate)
-	.post('find', after('section'))
-	.post('findOne', after('section'));
-
-function autoSelect(next) {
-	this.select('-createdAt -updatedAt -__v');
-	next();
-}
-
-sectionSchema
-	.pre('findOne', autoSelect)
-	.pre('find', autoSelect);
-
-const SectionModel = mongoose.model('section', sectionSchema);
+	.post('find', addTypeString('section'))
+	.post('findOne', addTypeString('section'));
 
 module.exports = {
-	SectionModel,
-	sectionSchema,
-	permissionGroupSchema,
+	SectionModel: mongoose.model('section', sectionSchema),
 };

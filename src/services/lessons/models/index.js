@@ -1,45 +1,37 @@
 const mongoose = require('mongoose');
 
-const { after } = require('../../../global/helpers');
+const { addTypeString } = require('../../../global/utils');
+const { permissionSchema } = require('../../permissionsHelper/models');
 
 const { Schema } = mongoose;
 
 const lessonSchema = new Schema({
 	title: { type: String, default: '' },
-	note: { type: String, default: '' },
+	courseId: { type: Schema.Types.ObjectId, required: true },
 	sections: [{ type: Schema.Types.ObjectId, ref: 'section' }],
-	owner: { type: Schema.Types.ObjectId, ref: 'group', required: true },
-	users: { type: Schema.Types.ObjectId, ref: 'group' },
-	type: { type: String, default: 'lesson', enum: ['lesson'] },
+	permissions: [{ type: permissionSchema }],
+	deletedAt: { type: Date, expires: (60 * 60 * 24 * 30) },
+	createdBy: { type: Schema.Types.ObjectId },
+	updatedBy: { type: Schema.Types.ObjectId },
+	// @deprecated
+	// todo first step for imigrate old data, second move it to activated = true / false in permissions group
+	visible: { type: Boolean, default: true },
+	position: { type: Number, default: Date.now },
+	fork: { type: Schema.Types.ObjectId }, // is forked from
 }, {
 	timestamps: true,
 });
 
-function autoPopulate(next) {
-	this.populate('sections');
-	this.populate('owner');
-	this.populate('users');
-	next();
-}
-
-lessonSchema
-	.pre('findOne', autoPopulate)
-	.pre('find', autoPopulate)
+/* lessonSchema
 	.post('find', after('lesson'))
 	.post('findOne', after('lesson'));
+*/
 
-function autoSelect(next) {
-	this.select('-createdAt -updatedAt -__v');
-	next();
-}
-
+/* TODO: think about to be conform to the rest of the editor dokument
 lessonSchema
-	.pre('findOne', autoSelect)
-	.pre('find', autoSelect);
-
-const LessonModel = mongoose.model('lesson', lessonSchema);
+	.post('find', addTypeString('lesson')
+*/
 
 module.exports = {
-	LessonModel,
-	lessonSchema,
+	LessonModel: mongoose.model('lesson', lessonSchema),
 };

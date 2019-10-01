@@ -1,0 +1,14 @@
+{
+	"host": "localhost",
+	"port": 4001,
+	"mongodb": "mongodb://localhost:27017/schulcloud-editor",
+	"public": "../public/",
+	"routes": {
+		"server": {
+			"baseUrl": "http://locahost:3030",
+			"coursePermissionsUri": "/courses/:courseId/userPermissions",
+			"meUri": "/me"
+		},
+		"timeout": "1000"
+	}
+}

@@ -1,9 +1,7 @@
-module.exports = logger => req => logger.info({	// later log the information
-	timestamp: new Date(),
-	userId: req.headers.authorization,
+module.exports = logger => req => logger.info({
+	userId: req.feathers.userId,
+	force: req.feathers.force,
 	url: req.url,
 	data: req.body,
 	method: req.method,
-	ip: req.ip,
-	ips: req.ips,
 });

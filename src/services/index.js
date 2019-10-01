@@ -1,27 +1,28 @@
-const groups = require('./groups');
-const sections = require('./sections');
 const lessons = require('./lessons');
-const collections = require('./collections');
-const attachments = require('./attachments');
+const groups = require('./groups');
+const syncGroups = require('./syncGroups');
+const sections = require('./sections');
+const viewports = require('./viewports');
+const permissionsHelper = require('./permissionsHelper');
+// Events
 
-const groupsEvents = require('./groups/events/');
-const sectionsEvents = require('./sections/events/');
-const lessonsEvents = require('./lessons/events/');
-const collectionsEvents = require('./collections/events/');
-
-module.exports = function setup() {
-	const app = this;
-
+module.exports = (app) => {
 	/** first configure all services */
-	app.configure(groups);
-	app.configure(sections);
 	app.configure(lessons);
-	app.configure(collections);
-	app.configure(attachments);
+	app.configure(groups);
+	app.configure(syncGroups);
+	app.configure(sections);
+	app.configure(viewports);
 
-	/** then execute the attach of all event listener */
-	groupsEvents(app);
-	sectionsEvents(app);
-	lessonsEvents(app);
-	collectionsEvents(app);
+	app.configure(permissionsHelper.bind({
+		modelService: 'models/LessonModel',
+		baseService: 'course/:courseId/lessons',
+	}));
+	app.configure(permissionsHelper.bind({
+		modelService: 'models/SectionModel',
+		baseService: 'lesson/:lessonId/sections',
+	}));
+	app.configure(permissionsHelper.bind({ baseService: 'viewports' }));
+
+	/** then configure all event listener */
 };
