@@ -9,10 +9,11 @@ const logger = require('../../logger');
 const { LessonModel } = require('./models/');
 const { checkCoursePermission } = require('../../global/hooks');
 const { setCourseId } = require('./hooks/setDefaults');
+const { joinChannel } = require('./hooks/joinChannel');
 
 const hooks = {
 	before: {
-		find: [/* do some validation */checkCoursePermission('LESSON_VIEW')],
+		find: [/* do some validation checkCoursePermission('LESSON_VIEW') */],
 		get: [],
 		create: [
 			setCourseId,
@@ -29,7 +30,7 @@ const hooks = {
 	},
 
 	after: {
-
+		get: [joinChannel('lessons')],
 	},
 
 	error: {
@@ -116,13 +117,17 @@ class Lessons {
 		const { route } = params;
 
 		try {
-			return await LessonModel.updateOne({
+			await LessonModel.updateOne({
 				_id: id,
 				courseId: route.courseId,
 				deletedAt: { $exists: false },
 			}, {
 				...data,
 			}).exec();
+			return {
+				id,
+				...data,
+			};
 		} catch (err) {
 			logger.error(`Failed to update the lesson ${err}`);
 			throw err;

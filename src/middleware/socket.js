@@ -1,23 +1,26 @@
 const socketio = require('@feathersjs/socketio');
-const { socketJwtHandler } = require('./handleJWTAndAddToContext');
+const { socketJwtHandler, jwtHandler } = require('./handleJWTAndAddToContext');
 
-module.exports = app => app.configure(socketio((io) => {
-	io.on('connection', (socket) => {
+module.exports = app => app.configure(
+	socketio((io) => {
+		io.on('connection', (socket) => {
 		// do some authorization things
-		const { id } = socket;
+			const { id } = socket;
+			app.channel('anonymous').join(socket.feathers);
 
-		socket.on('authentication', (data) => {
-			const { jwt } = data;
-			app.redis.set(socket.id, jwt);
-			socket.feathers.token = jwt;
+			socket.on('authorization', (data) => {
+				const { token } = data;
+				jwtHandler(socket.feathers, token);
+				app.channel('all').join(socket.feathers);
+			});
 		});
-	});
 
-	socketJwtHandler(io);
+		// socketJwtHandler(io);
 
-	io.use((socket, next) => {
-		const { request } = socket;
-		const { redis } = app;
-		next();
-	});
-}));
+		io.use((socket, next) => {
+			const { request } = socket;
+			const { redis } = app;
+			next();
+		});
+	}),
+);
