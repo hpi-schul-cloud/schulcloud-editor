@@ -6,7 +6,8 @@
 	"routes": {
 		"server": {
 			"baseUrl": "http://locahost:3030",
-			"coursePermissionsUri": "/courses/:courseId/userPermissions"
+			"coursePermissionsUri": "/courses/:courseId/userPermissions",
+			"meUri": "/me"
 		},
 		"timeout": "1000"
 	}

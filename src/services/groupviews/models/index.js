@@ -1,13 +1,13 @@
 const mongoose = require('mongoose');
 
-const { addTypeString } = require('../../../global/helpers');
+const { addTypeString } = require('../../../global/utils');
 
 const { Schema } = mongoose;
 
-const userviewSchema = new Schema({
+const groupviewSchema = new Schema({
 	permissions: [{ type: Object }],
 	parent: { type: Schema.Types.ObjectId, ref: 'sections', required: true },
-	state: { type: Object, default: null },
+	state: { type: Object, default: null }, // pluginData array[{id, data}]
 	deletedAt: { type: Date, expires: (60 * 60 * 24 * 30) },
 	createdFrom: { type: Schema.Types.ObjectId, default: null },
 	updatedBy: { type: Schema.Types.ObjectId, default: null },
@@ -15,10 +15,10 @@ const userviewSchema = new Schema({
 	timestamps: true,
 });
 
-userviewSchema
-	.post('find', addTypeString('userview'))
-	.post('findOne', addTypeString('userview'));
+groupviewSchema
+	.post('find', addTypeString('groupview'))
+	.post('findOne', addTypeString('groupview'));
 
 module.exports = {
-	UserviewModel: mongoose.model('userview', userviewSchema),
+	GroupViewModel: mongoose.model('groupview', groupviewSchema),
 };

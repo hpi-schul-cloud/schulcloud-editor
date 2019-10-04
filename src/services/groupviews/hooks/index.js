@@ -1,12 +1,11 @@
-const restictedAndAddAccess = require('./restictedAndAddAccess');
-const limitDataViewForReadAccess = require('./limitDataViewForReadAccess');
+const { disallow } = require('feathers-hooks-common');
 
 exports.before = {
-	all: [restictedAndAddAccess, limitDataViewForReadAccess],
+	all: [],
 	find: [],
 	get: [],
 	create: [],
-	update: [],
+	update: [disallow()],
 	patch: [],
 	remove: [],
 };
