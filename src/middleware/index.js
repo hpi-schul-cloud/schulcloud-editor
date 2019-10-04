@@ -22,7 +22,7 @@ module.exports = function setup() {
 	app.configure(apiJwtHandler);
 	app.configure(addForceTest);
 	app.configure(requestLogs);
-	socket(app);
+	app.configure(socket);
 
 	console.log('_________________\n');
 };
