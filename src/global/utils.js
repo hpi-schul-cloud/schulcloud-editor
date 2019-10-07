@@ -58,6 +58,7 @@ const convertSuccessMongoPatchResponse = (res, outputData, throwError = false) =
 	return false;
 };
 
+// todo is only faked for the moment, it must be replaced with a real solution for handling the requests
 const paginate = (data, params) => ({
 	total: data.length,
 	limit: params.query.$limit || 1000,
@@ -99,6 +100,12 @@ const filterHasWrite = (ressources = [], user, key = 'permissions') => {
 	return ressources.filter(r => hasWrite(r[key], user));
 };
 
+const removeKeyFromList = (list, key) => list.map((r) => {
+	delete r[key];
+	return r;
+});
+
+
 module.exports = {
 	addTypeString,
 	prepareParams,
@@ -106,6 +113,7 @@ module.exports = {
 	paginate,
 	convertSuccessMongoPatchResponse,
 	modifiedParamsToReturnPatchResponse,
+	removeKeyFromList,
 	permissions: {
 		hasRead,
 		hasWrite,

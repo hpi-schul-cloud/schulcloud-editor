@@ -5,6 +5,7 @@ const { filterOutResults } = require('../../global/hooks');
 const {
 	prepareParams,
 	permissions,
+	removeKeyFromList,
 	convertSuccessMongoPatchResponse,
 	modifiedParamsToReturnPatchResponse,
 } = require('../../global/utils');
@@ -71,7 +72,12 @@ class SectionService {
 		const internParams = this.setScope(prepareParams(params));
 		return this.app.service(this.baseService)
 			.find(internParams)
-			.then(sections => permissions.filterHasRead(sections.data, params.user));
+			.then((sections) => {
+				const data = permissions.filterHasRead(sections.data, params.user);
+				sections.data = removeKeyFromList(data, 'permissions');
+				sections.total = sections.data.length;
+				return sections;
+			});
 	}
 
 	get(id, params) {

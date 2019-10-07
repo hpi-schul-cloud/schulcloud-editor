@@ -76,7 +76,7 @@ exports.before = {
 
 exports.after = {
 	// todo select is better but need more stable implementations
-	all: [filterOutResults(['__v', 'createdAt', 'updatedAt', 'createdBy', 'updatedBy'])],
+	all: [filterOutResults(['__v', 'createdAt', 'updatedAt', 'createdBy', 'updatedBy'], true)],
 	find: [],
 	get: [],
 	create: [],

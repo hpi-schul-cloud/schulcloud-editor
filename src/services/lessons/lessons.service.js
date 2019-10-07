@@ -8,6 +8,7 @@ const {
 	prepareParams,
 	permissions,
 	paginate,
+	removeKeyFromList,
 } = require('../../global/utils');
 const { create: createSchema, patch: patchSchema } = require('./schemes');
 const { LessonModel } = require('./models/');
@@ -81,7 +82,8 @@ class Lessons {
 			}).lean()
 				.exec();
 
-			return paginate(permissions.filterHasRead(lessons, user), params);
+			const lessonsWithAccess = permissions.filterHasRead(lessons, user);
+			return paginate(removeKeyFromList(lessonsWithAccess, 'permissions'), params);
 		} catch (err) {
 			throw new BadRequest(this.err.find, err);
 		}
