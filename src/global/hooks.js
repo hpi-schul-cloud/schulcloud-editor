@@ -1,8 +1,7 @@
 const { Forbidden } = require('@feathersjs/errors');
 
-const filterOutResults = (keys, onlyRest) => (context) => {
-	const rest = onlyRest === true ? context.params.provider === 'rest' : true;
-	if (context.result && context.type === 'after' && rest) {
+const filterOutResults = keys => (context) => {
+	if (context.result && context.type === 'after') {
 		if (!Array.isArray(keys)) {
 			keys = [keys];
 		}
