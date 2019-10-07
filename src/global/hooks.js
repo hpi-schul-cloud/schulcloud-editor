@@ -34,9 +34,9 @@ const checkCoursePermission = permission => async (context) => {
 		},
 		app,
 	} = context;
-	const coursePermissions = app.get('routes:server:coursePermissions');
 
-	const { data: permissions } = await coursePermissions(courseId, { userId: user.id, authorization });
+	const permissions = await app.serviceRoute('server/courses/userPermissions')
+		.get(user.id, authorization, { courseId });
 
 	if (!permissions.includes(permission)) {
 		throw new Forbidden('Missing privileges');

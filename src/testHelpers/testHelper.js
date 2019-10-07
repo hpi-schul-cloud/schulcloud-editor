@@ -60,13 +60,13 @@ class TestHelperService {
 		this.urlVars = urlVars.map(v => v.substr(1));
 
 		// ref every key ..todo only functions ? how to test if base function has return value?
-
+		/*
 		Object.entries(service).forEach(([keyOrMethod, executerOrValue]) => {
 			if (!this[keyOrMethod] && typeof executerOrValue === 'function') {
 				this[keyOrMethod] = (...theArgs) => service[keyOrMethod](theArgs);
 			}
 		});
-
+		*/
 		this.defaultData = defaultData[this.modelName] || {};
 		if (!this.defaultData) {
 			this.warn(`No default data for model in ./src/testHelpers/defaultData/${this.modelName}.js defined.`);
