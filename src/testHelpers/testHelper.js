@@ -1,6 +1,10 @@
 /* eslint-disable arrow-body-style */
 const mongoose = require('mongoose');
+const axios = require('axios');
+
 const defaultData = require('./defaultData');
+const jwtHelper = require('./jwtHelper');
+// const RequestHelper = require('./requestHelper');
 
 class TestHelperService {
 	constructor({
@@ -9,7 +13,6 @@ class TestHelperService {
 		modelName,
 		warn,
 		info,
-		additionalMethods,
 	}) {
 		this.app = app;
 		this.ids = [];
@@ -22,32 +25,24 @@ class TestHelperService {
 
 		// test if method is exist in service
 		const service = this.app.service(this.serviceName);
+		// eslint-disable-next-line no-underscore-dangle
+		/* const afterHooks = service.__hooks.after || {};
+		(afterHooks.remove || []).push(((context) => {
+			this.removeId(context.id);
+			return context;
+		}));
+
+		(afterHooks.create || []).push(((context) => {
+			this.extractIdAndExecute(context.result, this.ids.push);
+			return context;
+		}));
+		*/
 		this.create = async (data, params) => {
 			return service.create(data, params)
 				.then((result) => {
 					this.extractIdAndExecute(result, this.ids.push);
 					return result;
 				});
-		};
-
-		this.get = async (id, params) => {
-			this.info(` GET ${id}>`);
-			return service.get(id, params);
-		};
-
-		this.find = async (params) => {
-			this.info(' FIND>');
-			return service.find(params);
-		};
-
-		this.patch = async (id, data, params) => {
-			this.info(` PATCH ${id}>`);
-			return service.patch(id, data, params);
-		};
-
-		this.update = async (id, data, params) => {
-			this.info(` UPDATE ${id}>`);
-			return service.update(id, data, params);
 		};
 
 		this.remove = (id, params) => {
@@ -59,22 +54,81 @@ class TestHelperService {
 				});
 		};
 
-		additionalMethods.forEach((method) => {
-			if (this.method) {
-				this.warn(
-					`The method ${this.method} from serviceTestHelper ${this.serviceName},
-					is override with additionalMethods option.`,
-				);
+		this.jwt = jwtHelper(app);
+
+		const urlVars = this.serviceName.match(/(:\w+)/g);
+		this.urlVars = urlVars.map(v => v.substr(1));
+
+		// ref every key ..todo only functions ? how to test if base function has return value?
+
+		Object.entries(service).forEach(([keyOrMethod, executerOrValue]) => {
+			if (!this[keyOrMethod] && typeof executerOrValue === 'function') {
+				this[keyOrMethod] = (...theArgs) => service[keyOrMethod](theArgs);
 			}
-			this[method] = (...theArgs) => {
-				service[method](theArgs);
-			};
 		});
 
-		this.defaultData = defaultData[this.serviceName];
+		this.defaultData = defaultData[this.modelName] || {};
 		if (!this.defaultData) {
 			this.warn(`No default data for model in ./src/testHelpers/defaultData/${this.modelName}.js defined.`);
 		}
+	}
+
+	getRequestMethod(method) {
+		const overrideMethod = {
+			create: 'patch',
+			remove: 'delete',
+		};
+		return overrideMethod[method] || method;
+	}
+
+	/**
+	 * @param {String} method
+	 * @param {Object} settings
+	 */
+	async sendRequestToThisService(method, settings) {
+		const {
+			id, userId, query = '', data,
+		} = settings;
+
+		let url = this.serviceName;
+		this.urlVars.forEach((key) => {
+			const value = settings[key];
+			if (!value) {
+				this.warn(`No settings for url value ${key} exist. Please add it into settings.`);
+			}
+			url = url.replace(`:${key}`, value);
+		});
+
+		if (id) { url += `/${id}`; }
+		if (typeof query === 'object') {
+			// todo convert to query
+		}
+		url += query;
+
+		const requestParams = {
+			method: this.getRequestMethod(method),
+			url,
+			timeout: 4000,
+			baseURL: this.app.get('fullhost'),
+			headers: {
+				Authorization: this.jwt.create(userId),
+			},
+		};
+
+		if (data) {
+			requestParams.data = data;
+		}
+
+		return axios(requestParams)
+			.then((res) => {
+				return { status: res.status, data: res.data };
+			})
+			.catch((err) => {
+				if (err.response) {
+					return { status: err.response.status, data: err.response.data };
+				}
+				return err;
+			});
 	}
 
 	async createDefault() {
@@ -95,7 +149,7 @@ class TestHelperService {
 		this.ids.push(id);
 	}
 
-	extractIdAndExecute(result, executer) {
+	extractIdAndExecute(result = {}, executer) {
 		const { _id } = result;
 		if (!_id) {
 			this.warn(
@@ -142,13 +196,13 @@ class TestHelper {
 			console.info(`TestHelper :${messsage}`);
 		};
 
-		this.app.testService = (serviceName) => {
+		this.app.serviceHelper = (serviceName) => {
 			return this.getServiceHelper(serviceName);
 		};
 	}
 
 
-	registerServiceHelper({ serviceName, modelName, additionalMethods = [] }) {
+	registerServiceHelper({ serviceName, modelName }) {
 		const warn = (messsage) => {
 			this.warn(`${serviceName} ${messsage}`);
 		};
@@ -165,9 +219,6 @@ class TestHelper {
 		if (!this.app.service(serviceName)) {
 			warn('Services do not exist in app.');
 		}
-		if (!Array.isArray(additionalMethods)) {
-			warn('The param additionalMethods must be from type array.');
-		}
 
 		this.services[serviceName] = new TestHelperService({
 			serviceName,
@@ -175,7 +226,6 @@ class TestHelper {
 			warn,
 			info,
 			modelName,
-			additionalMethods,
 		});
 	}
 

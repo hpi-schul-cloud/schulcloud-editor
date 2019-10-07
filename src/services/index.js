@@ -7,7 +7,7 @@ const permissionsHelper = require('./permissionsHelper');
 // Events
 
 //Tests
-const testSetup = require('../testHelpers');
+const testSetup = require('../testHelpers/setup');
 module.exports = (app) => {
 	/** first configure all services */
 	app.configure(lessons);

@@ -1,11 +1,4 @@
-const TestHelper = require('./testHelper');
-
-module.exports = (app) => {
-	app.logger.info('<<< test setup is added >>>');
-	const testHelper = new TestHelper(app);
-	testHelper.registerServiceHelper({
-		serviceName: '/course/:courseId/lessons',
-		modelName: 'lesson',
-	});
-	// app.testService('lesson').get('');
-};
+exports.jwtHelper = require('./jwtHelper');
+exports.requestHelper = require('./requestHelper');
+exports.ServerMock = require('./ServerMock');
+exports.defaultData = require('./defaultData/');
