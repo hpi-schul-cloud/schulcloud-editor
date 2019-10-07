@@ -1,6 +1,7 @@
 {
 	"host": "localhost",
 	"port": 4001,
+	"protocol": "http",
 	"mongodb": "mongodb://localhost:27017/schulcloud-editor",
 	"public": "../public/",
 	"routes": {
@@ -10,5 +11,6 @@
 			"meUri": "/me"
 		},
 		"timeout": "30000"
-	}
+	},
+	"testsecret": "secret"
 }
