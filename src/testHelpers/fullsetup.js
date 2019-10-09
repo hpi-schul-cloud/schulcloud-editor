@@ -1,9 +1,10 @@
+/*
 const TestHelper = require('./testHelper');
 const ServerMock = require('./ServerMock');
 
 module.exports = (app) => {
-	app.logger.info('<<< test setup is added >>>');
 	const testHelper = new TestHelper(app);
+
 	testHelper.registerServiceHelper({
 		serviceName: '/course/:courseId/lessons',
 		modelName: 'lesson',
@@ -13,8 +14,8 @@ module.exports = (app) => {
 		serviceName: '/lesson/:lessonId/sections',
 		modelName: 'section',
 	});
-
-	setTimeout(async () => {
+*/
+/*
 		const server = new ServerMock(app);
 
 		await app.serviceHelper('/course/:courseId/lessons')
@@ -65,7 +66,6 @@ module.exports = (app) => {
 			}).then((res) => {
 				console.log(res);
 			});
-
-		const a = 123;
-	}, 2000);
+	
 };
+*/

@@ -40,15 +40,16 @@ class TestHelperService {
 		this.create = async (data, params) => {
 			return service.create(data, params)
 				.then((result) => {
-					this.extractIdAndExecute(result, this.ids.push);
+					const id = this.extractId(data, this.ids.push);
+					this.ids.push(id);
 					return result;
 				});
 		};
 
-		this.remove = (id, params) => {
-			this.info(` REMOVE ${id}>`);
+		this.remove = (id, params) => {		
 			return service.remove(id, params)
 				.then((result) => {
+					this.info(` REMOVE ${id}>`);
 					this.removeId(id);
 					return result;
 				});
@@ -75,7 +76,7 @@ class TestHelperService {
 
 	getRequestMethod(method) {
 		const overrideMethod = {
-			create: 'patch',
+			create: 'post',
 			remove: 'delete',
 		};
 		return overrideMethod[method] || method;
@@ -87,8 +88,9 @@ class TestHelperService {
 	 */
 	async sendRequestToThisService(method, settings) {
 		const {
-			id, userId, query = '', data,
+			id, userId, query = '', data: sendData,
 		} = settings;
+		method = this.getRequestMethod(method);
 
 		let url = this.serviceName;
 		this.urlVars.forEach((key) => {
@@ -106,22 +108,31 @@ class TestHelperService {
 		url += query;
 
 		const requestParams = {
-			method: this.getRequestMethod(method),
+			method,
 			url,
-			timeout: 4000,
+			timeout: 30000,
 			baseURL: this.app.get('fullhost'),
 			headers: {
 				Authorization: this.jwt.create(userId),
 			},
 		};
 
-		if (data) {
-			requestParams.data = data;
+		if (sendData) {
+			requestParams.data = sendData;
 		}
 
 		return axios(requestParams)
 			.then((res) => {
-				return { status: res.status, data: res.data };
+				const { data } = res;
+
+				if (method === 'post') {
+					const _id = this.extractId(data);
+					this.ids.push(_id);
+				} else if (method === 'delete') {
+					this.removeId(data._id);
+				}
+
+				return { status: res.status, data };
 			})
 			.catch((err) => {
 				if (err.response) {
@@ -138,7 +149,8 @@ class TestHelperService {
 				this.warn(err);
 			}
 		});
-		this.extractIdAndExecute(data, this.ids.push);
+		const id = this.extractId(data, this.ids.push);
+		this.ids.push(id);
 		return data;
 	}
 
@@ -149,14 +161,12 @@ class TestHelperService {
 		this.ids.push(id);
 	}
 
-	extractIdAndExecute(result = {}, executer) {
+	extractId(result = {}) {
 		const { _id } = result;
 		if (!_id) {
 			this.warn(
 				`Execute create for serviceTestHelper ${this.serviceName}, do not create a result that includes _id.`,
 			);
-		} else if (executer) {
-			executer(_id);
 		}
 		return _id;
 	}
@@ -172,9 +182,17 @@ class TestHelperService {
 		}
 	}
 
-	async clear() {
+	async cleanup() {
+		const { ids, model, info } = this;
+		const $or = ids.map(_id => ({ _id }));
+
+		if ($or.length > 0) {
+			await model.deleteMany({ $or });
+		}
+
+		info(`Cleanup: ${ids.join(',')}`);
 		this.ids = [];
-		return this.ids;
+		return ids;
 	}
 }
 
@@ -245,12 +263,11 @@ class TestHelper {
 		return this.services[serviceName];
 	}
 
-	clear() {
-		const promises = [];
-		Object.keys(this.services).forEach((serviceName) => {
-			const promise = this.services(serviceName).clear();
-			promises.push(promise);
-		});
+	async cleanup() {
+		const { services } = this;
+		const promises = Object.keys(services).map(
+			serviceName => services[serviceName].cleanup(),
+		);
 		return Promise.all(promises);
 	}
 }

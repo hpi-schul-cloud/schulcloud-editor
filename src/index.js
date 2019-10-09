@@ -7,7 +7,7 @@ const server = app.listen(port);
 
 server.on('listening', () => {
 	console.log(`Feathers REST API started at ${app.get('fullhost')}`);
-	console.log(os.hostname());
-	console.log(os.networkInterfaces());
-	console.log(server.address());
+	// console.log(os.hostname());
+	// console.log(os.networkInterfaces());
+	// console.log(server.address());
 });

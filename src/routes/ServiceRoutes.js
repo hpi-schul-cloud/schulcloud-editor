@@ -134,6 +134,7 @@ class ServiceRouteApplication {
 				);
 			}
 			this.routes[path] = serviceRoute;
+			this.app.logger.info(`Register service route ${path}.`);
 			return serviceRoute.getExecuter();
 		};
 	}

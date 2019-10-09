@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const { expect } = require('chai');
 const { connectDb, clearDb, closeDb } = require('../test');
-const { SectionModel } = require('../../services/models');
+const { SectionModel } = require('../../services/sections/models');
 
 const {
 	createSection,

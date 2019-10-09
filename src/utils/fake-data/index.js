@@ -1,5 +1,7 @@
 const { Types } = require('mongoose');
-const { LessonModel, GroupModel, SectionModel } = require('../../services/models');
+const { LessonModel } = require('../../services/lessons/models');
+const { SectionModel } = require('../../services/sections/models');
+const { GroupModel } = require('../../services/groups/models');
 const defaultSectionState = require('./section-state');
 
 async function createGroup() {

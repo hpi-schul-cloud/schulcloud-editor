@@ -1,5 +1,3 @@
-const { setupCoursePermissions } = require('./server.coursePermissions');
-const { setupMe } = require('./server.me');
 const { setupApplication, ServiceRoute } = require('./ServiceRoutes');
 
 module.exports = (app) => {
@@ -18,6 +16,4 @@ module.exports = (app) => {
 		timeout,
 		allowedMethods: ['get'],
 	}));
-	app.configure(setupCoursePermissions);
-	app.configure(setupMe);
 };
