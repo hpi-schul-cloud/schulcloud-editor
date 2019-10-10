@@ -80,6 +80,7 @@ class TestHelperService {
 			create: 'post',
 			remove: 'delete',
 			find: 'get',
+			update: 'put',
 		};
 		return overrideMethod[method] || method;
 	}

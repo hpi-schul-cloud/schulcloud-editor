@@ -147,4 +147,15 @@ describe.only('lessons/lessons.service.js', () => {
 
 		expect(status).to.equal(403);
 	});
+
+	it('update with permission should not work', async () => {
+		const writePermission = helper.createPermission({ users: [userId], write: true });
+		const lesson = await service.createWithDefaultData(writePermission, { courseId });
+
+		const { status } = await service.sendRequestToThisService('update', {
+			id: lesson._id, userId, courseId, data: lesson,
+		});
+
+		expect(status).to.equal(405);
+	});
 });
