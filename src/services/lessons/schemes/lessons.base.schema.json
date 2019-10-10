@@ -11,6 +11,9 @@
 		"courseId": {
 			"type": "string"
 		},
+		"position": {
+			"type": "number"
+		},
 		"fork": {
 			"type": "string"
 		},
