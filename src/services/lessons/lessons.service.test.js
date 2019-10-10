@@ -47,12 +47,14 @@ describe.only('lessons/lessons.service.js', () => {
 		expect(data).to.an('object');
 		expect(Object.keys(data)).to.have.lengthOf(1);
 		expect(data._id).to.a('string');
+		expect(data).to.not.have.property('permissions');
 	});
 
-	it('get should work', async () => {
-		const writePermission = service.createPermission({ users: [userId], write: true });
+	it('get with write permission should work', async () => {
+		const writePermission = helper.createPermission({ users: [userId], write: true });
 		const lesson = await service.createWithDefaultData(writePermission, { courseId });
 		const { _id: id, title } = lesson;
+
 		const { status, data } = await service.sendRequestToThisService('get', { id, userId, courseId });
 
 		expect(status).to.equal(200);
@@ -64,5 +66,40 @@ describe.only('lessons/lessons.service.js', () => {
 		expect(data).to.not.have.property('permissions');
 	});
 
+	it('get with read permission should work', async () => {
+		const writePermission = helper.createPermission({ users: [userId], read: true });
+		const lesson = await service.createWithDefaultData(writePermission, { courseId });
+		const { _id: id, title } = lesson;
+
+		const { status, data } = await service.sendRequestToThisService('get', { id, userId, courseId });
+
+		expect(status).to.equal(200);
+		expect(data).to.an('object');
+		expect(data._id).to.equal(data._id.toString());
+		expect(data.title).to.equal(title);
+		expect(data.courseId).to.equal(courseId);
+		expect(data.sections).to.have.lengthOf(0);
+		expect(data).to.not.have.property('permissions');
+	});
+
+
+	it('find should work', async () => {
+		const randomCourseId = helper.createObjectId();
+		const writePermission = helper.createPermission({ users: [userId], write: true });
+		const readPermission = helper.createPermission({ users: [userId], read: true });
+
+		await Promise.all([
+			service.createWithDefaultData(writePermission, { courseId: randomCourseId }),
+			service.createWithDefaultData(readPermission, { courseId: randomCourseId }),
+			service.createWithDefaultData([], { courseId: randomCourseId }),
+		]);
+
+		const { status, data } = await service.sendRequestToThisService('find', { userId, courseId: randomCourseId });
+
+		expect(status).to.equal(200);
+		expect(data).to.have.all.keys('total', 'limit', 'skip', 'data'); // paginated
+		expect(data.data).to.have.lengthOf(2);
+		expect(data.data[0]).to.not.have.property('permissions');
+	});
 	// todo find sortierung
 });

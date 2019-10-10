@@ -69,7 +69,6 @@ class TestHelperService {
 			}
 		});
 		*/
-		this.defaultPermissionData = defaultData.permission || {};
 		this.defaultData = defaultData[this.modelName] || {};
 		if (!this.defaultData) {
 			this.warn(`No default data for model in ./src/testHelpers/defaultData/${this.modelName}.js defined.`);
@@ -80,6 +79,7 @@ class TestHelperService {
 		const overrideMethod = {
 			create: 'post',
 			remove: 'delete',
+			find: 'get',
 		};
 		return overrideMethod[method] || method;
 	}
@@ -92,6 +92,9 @@ class TestHelperService {
 		const {
 			id, userId, query = '', data: sendData,
 		} = settings;
+		if (['remove', 'delete', 'update', 'patch'].includes(method) && !id) {
+			this.warn(`Method ${method} required to set a id. Please add it with settings.id.`);
+		}
 		method = this.getRequestMethod(method);
 
 		let url = this.serviceName;
@@ -142,15 +145,6 @@ class TestHelperService {
 				}
 				return err;
 			});
-	}
-
-	createPermission(overrideData = {}) {
-		const inputData = Object.assign({}, this.defaultPermissionData, overrideData);
-		if (!inputData.group && !Array.isArray(inputData.users)) {
-			this.warn('Permission without users or group created.');
-		}
-		const $permission = new PermissionModel(inputData);
-		return $permission.toObject({ getters: true });
 	}
 
 	async createWithDefaultData(permissions, overrideData = {}, permissionsKey = 'permissions') {
@@ -234,6 +228,8 @@ class TestHelper {
 		this.app.serviceHelper = (serviceName) => {
 			return this.getServiceHelper(serviceName);
 		};
+
+		this.defaultPermissionData = defaultData.permission || {};
 	}
 
 
@@ -278,6 +274,19 @@ class TestHelper {
 			this.warn(`Service ${serviceName} do not exist.`);
 		}
 		return this.services[serviceName];
+	}
+
+	createPermission(overrideData = {}) {
+		const inputData = Object.assign({}, this.defaultPermissionData, overrideData);
+		if (!inputData.group && !Array.isArray(inputData.users)) {
+			this.warn('Permission without users or group created.');
+		}
+		const $permission = new PermissionModel(inputData);
+		return $permission.toObject({ getters: true });
+	}
+
+	createObjectId() {
+		return mongoose.Types.ObjectId();
 	}
 
 	async cleanup() {
