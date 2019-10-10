@@ -10,7 +10,7 @@ const {
 
 const { diffToMongo } = require('./build');
 
-describe('mongo diff tests', () => {
+describe.skip('mongo diff tests', () => {
 	before(async () => {
 		const mongooseConnection = await connectDb();
 		this.context = {

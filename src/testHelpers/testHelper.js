@@ -2,6 +2,7 @@
 const mongoose = require('mongoose');
 const axios = require('axios');
 
+const { PermissionModel } = require('../services/permissionsHelper/models');
 const defaultData = require('./defaultData');
 const jwtHelper = require('./jwtHelper');
 // const RequestHelper = require('./requestHelper');
@@ -18,7 +19,7 @@ class TestHelperService {
 		this.ids = [];
 		this.serviceName = serviceName;
 		this.modelName = modelName;
-		this.model = mongoose.model(this.modelName);
+		this.Model = mongoose.model(this.modelName);
 
 		this.warn = warn;
 		this.info = info;
@@ -68,6 +69,7 @@ class TestHelperService {
 			}
 		});
 		*/
+		this.defaultPermissionData = defaultData.permission || {};
 		this.defaultData = defaultData[this.modelName] || {};
 		if (!this.defaultData) {
 			this.warn(`No default data for model in ./src/testHelpers/defaultData/${this.modelName}.js defined.`);
@@ -142,16 +144,31 @@ class TestHelperService {
 			});
 	}
 
-	async createDefault() {
-		const instance = this.model(this.defaultData);
-		const data = await instance.save((err) => {
-			if (err) {
-				this.warn(err);
-			}
+	createPermission(overrideData = {}) {
+		const inputData = Object.assign({}, this.defaultPermissionData, overrideData);
+		if (!inputData.group && !Array.isArray(inputData.users)) {
+			this.warn('Permission without users or group created.');
+		}
+		const $permission = new PermissionModel(inputData);
+		return $permission.toObject({ getters: true });
+	}
+
+	async createWithDefaultData(permissions, overrideData = {}, permissionsKey = 'permissions') {
+		const {
+			Model, defaultData: baseData, extractId, warn,
+		} = this;
+
+		const inputData = Object.assign({}, baseData, overrideData);
+		inputData[permissionsKey] = Array.isArray(permissions) ? permissions : [permissions];
+
+		const $doc = new Model(inputData);
+		await $doc.save((err) => {
+			if (err) { warn(err); }
 		});
-		const id = this.extractId(data, this.ids.push);
+		const doc = $doc.toObject({ getters: true });
+		const id = extractId(doc);
 		this.ids.push(id);
-		return data;
+		return doc;
 	}
 
 	pushId(id) {
@@ -183,11 +200,11 @@ class TestHelperService {
 	}
 
 	async cleanup() {
-		const { ids, model, info } = this;
+		const { ids, Model, info } = this;
 		const $or = ids.map(_id => ({ _id }));
 
 		if ($or.length > 0) {
-			await model.deleteMany({ $or });
+			await Model.deleteMany({ $or });
 		}
 
 		info(`Cleanup: ${ids.join(',')}`);

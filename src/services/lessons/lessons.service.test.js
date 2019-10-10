@@ -8,6 +8,9 @@ describe.only('lessons/lessons.service.js', () => {
 	let editor;
 	let server;
 	let helper;
+	let service;
+	let userId;
+	let courseId;
 
 	before((done) => {
 		editor = app.listen(app.get('port'), done);
@@ -22,6 +25,13 @@ describe.only('lessons/lessons.service.js', () => {
 			serviceName: '/course/:courseId/lessons',
 			modelName: 'lesson',
 		});
+
+		service = app.serviceHelper('/course/:courseId/lessons');
+		const teacherIds = server.getUserIdsByRole('teacher');
+		const courseIds = server.getCourseIds();
+
+		userId = teacherIds[0];
+		courseId = courseIds[0];
 	});
 
 	after(async () => {
@@ -31,20 +41,28 @@ describe.only('lessons/lessons.service.js', () => {
 	});
 
 	it('create should work', async () => {
-		const teacherIds = server.getUserIdsByRole('teacher');
-		const courseIds = server.getCourseIds();
-
-		const currentUser = teacherIds[0];
-		const currentCourse = courseIds[0];
-		const { status, data } = await app.serviceHelper('/course/:courseId/lessons')
-			.sendRequestToThisService('create', {
-				userId: currentUser,
-				courseId: currentCourse,
-			});
+		const { status, data } = await service.sendRequestToThisService('create', { userId, courseId });
 
 		expect(status).to.equal(201);
 		expect(data).to.an('object');
 		expect(Object.keys(data)).to.have.lengthOf(1);
 		expect(data._id).to.a('string');
 	});
+
+	it('get should work', async () => {
+		const writePermission = service.createPermission({ users: [userId], write: true });
+		const lesson = await service.createWithDefaultData(writePermission, { courseId });
+		const { _id: id, title } = lesson;
+		const { status, data } = await service.sendRequestToThisService('get', { id, userId, courseId });
+
+		expect(status).to.equal(200);
+		expect(data).to.an('object');
+		expect(data._id).to.equal(data._id.toString());
+		expect(data.title).to.equal(title);
+		expect(data.courseId).to.equal(courseId);
+		expect(data.sections).to.have.lengthOf(0);
+		expect(data).to.not.have.property('permissions');
+	});
+
+	// todo find sortierung
 });
