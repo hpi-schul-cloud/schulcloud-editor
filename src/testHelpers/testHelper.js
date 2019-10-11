@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const axios = require('axios');
 
 const { PermissionModel } = require('../services/permissionsHelper/models');
+
 const defaultData = require('./defaultData');
 const jwtHelper = require('./jwtHelper');
 // const RequestHelper = require('./requestHelper');
@@ -47,7 +48,7 @@ class TestHelperService {
 				});
 		};
 
-		this.remove = (id, params) => {		
+		this.remove = (id, params) => {
 			return service.remove(id, params)
 				.then((result) => {
 					this.info(` REMOVE ${id}>`);
@@ -123,8 +124,8 @@ class TestHelperService {
 			},
 		};
 
-		if (sendData) {
-			requestParams.data = sendData;
+		if (['put', 'patch', 'post'].includes(method)) {
+			requestParams.data = sendData || {};
 		}
 
 		return axios(requestParams)

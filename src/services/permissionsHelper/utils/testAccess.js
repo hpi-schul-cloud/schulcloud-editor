@@ -1,5 +1,5 @@
 const isActivated = require('./isActivated');
-const userIsInGroupOrUsers = require('./userIsInGroupOrUsers');
+const { userIsInGroupOrUsers } = require('./userIsInGroupOrUsers');
 
 const access = (basePermissions, user, permissionTyp) => {
 	const validPermissions = basePermissions.filter(

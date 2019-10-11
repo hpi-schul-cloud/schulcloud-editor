@@ -1,5 +1,5 @@
 /* eslint-disable arrow-body-style */
-const { testAccess } = require('../services/permissionsHelper/utils');
+const { testAccess, utils: permissionUtils } = require('../services/permissionsHelper/utils');
 
 // models after
 const addTypeString = name => (docs, next) => {
@@ -119,5 +119,6 @@ module.exports = {
 		hasWrite,
 		filterHasRead,
 		filterHasWrite,
+		utils: permissionUtils,
 	},
 };

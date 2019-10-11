@@ -4,7 +4,7 @@ const { TestHelper, ServerMock } = require('../../testHelpers');
 
 const { expect } = chai;
 
-describe.only('lessons/lessons.service.js', () => {
+describe('lessons/lessons.service.js', () => {
 	let editor;
 	let server;
 	let helper;
@@ -27,10 +27,11 @@ describe.only('lessons/lessons.service.js', () => {
 		});
 
 		service = app.serviceHelper('/course/:courseId/lessons');
-		const teacherIds = server.getUserIdsByRole('teacher');
-		const courseIds = server.getCourseIds();
 
+		const teacherIds = server.getUserIdsByRole('teacher');
 		userId = teacherIds[0];
+
+		const courseIds = server.getCourseIds();
 		courseId = courseIds[0];
 	});
 
@@ -43,11 +44,23 @@ describe.only('lessons/lessons.service.js', () => {
 	it('create should work', async () => {
 		const { status, data } = await service.sendRequestToThisService('create', { userId, courseId });
 
+		// todo wait if member of is worked and is implemented, after it this test should not fail
+		const { status: getStatus, data: getData } = await service.sendRequestToThisService('get', {
+			id: data._id, userId, courseId,
+		});
+
 		expect(status).to.equal(201);
 		expect(data).to.an('object');
 		expect(Object.keys(data)).to.have.lengthOf(1);
 		expect(data._id).to.a('string');
 		expect(data).to.not.have.property('permissions');
+
+		// test if permissions created
+		expect(getStatus).to.equal(200);
+		expect(getData).to.an('object');
+		expect(getData._id.toString()).to.equal(data._id.toString());
+
+		// todo test if syncGroups are created
 	});
 
 	it('get with write permission should work', async () => {

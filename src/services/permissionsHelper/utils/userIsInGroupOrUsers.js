@@ -23,4 +23,10 @@ const userIsInGroupOrUsers = (permissions, userId) => {
 	|| IsInGroup(permissions, userId);
 };
 
-module.exports = userIsInGroupOrUsers;
+module.exports = {
+	saveSelect,
+	userIsInside,
+	IsInUsers,
+	IsInGroup,
+	userIsInGroupOrUsers,
+};

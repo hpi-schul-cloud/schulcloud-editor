@@ -111,7 +111,7 @@ class SectionService {
 	}
 
 	async create(data, params) {
-		const { lessonId } = params.route;
+		const { route: { lessonId }, user } = params;
 		const { app } = this;
 
 		data.ref = {
@@ -124,6 +124,12 @@ class SectionService {
 		internParams.query.lessonId = lessonId;
 		// todo only write group as default?
 		const syncGroups = await app.service('models/syncGroup').find(internParams);
+
+		// check permissions -> userId must exist in own of the syncGroups with write permissions
+		const syncGroupWritePermission = syncGroups.filter(g => g.permissions === 'write');
+		if (!syncGroupWritePermission.some(g => permissions.utils.IsInUsers(g, user.id))) {
+			throw new Forbidden(this.err.noAccess);
+		}
 
 		const permService = app.service('lesson/:lessonId/sections/:ressourceId/permission');
 		const key = permService.permissionKey;
