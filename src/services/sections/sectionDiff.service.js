@@ -1,3 +1,5 @@
+const { diffToMongo } = require('./utils');
+
 class SectionDiffService {
 	constructor({ docs = {}, baseServiceName }) {
 		this.docs = docs;
@@ -8,8 +10,14 @@ class SectionDiffService {
 		this.app = app;
 	}
 
-	patch(id, data, params) {
-		return this.app(this.baseServiceName).patch(id, data, params);
+	/**
+	 * @param {ObjectId} id
+	 * @param {Object} diffData Convert diff data json request to mongoose query to insert it.
+	 * @param {Object:FeatherParams} params
+	 */
+	patch(id, diffData, params) {
+		params.isSectionDiffMongooseQuery = true;
+		return this.app(this.baseServiceName).patch(id, diffToMongo(diffData), params);
 	}
 }
 
