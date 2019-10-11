@@ -149,7 +149,7 @@ class TestHelperService {
 			});
 	}
 
-	async createWithDefaultData(permissions, overrideData = {}, permissionsKey = 'permissions') {
+	async createWithDefaultData(overrideData = {}, permissions = [], permissionsKey = 'permissions') {
 		const {
 			Model, defaultData: baseData, extractId, warn,
 		} = this;

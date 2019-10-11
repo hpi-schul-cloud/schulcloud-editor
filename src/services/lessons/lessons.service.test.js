@@ -65,7 +65,7 @@ describe('lessons/lessons.service.js', () => {
 
 	it('get with write permission should work', async () => {
 		const writePermission = helper.createPermission({ users: [userId], write: true });
-		const lesson = await service.createWithDefaultData(writePermission, { courseId });
+		const lesson = await service.createWithDefaultData({ courseId }, writePermission);
 		const { _id: id, title } = lesson;
 
 		const { status, data } = await service.sendRequestToThisService('get', { id, userId, courseId });
@@ -81,7 +81,7 @@ describe('lessons/lessons.service.js', () => {
 
 	it('get with read permission should work', async () => {
 		const writePermission = helper.createPermission({ users: [userId], read: true });
-		const lesson = await service.createWithDefaultData(writePermission, { courseId });
+		const lesson = await service.createWithDefaultData({ courseId }, writePermission);
 		const { _id: id, title } = lesson;
 
 		const { status, data } = await service.sendRequestToThisService('get', { id, userId, courseId });
@@ -102,9 +102,9 @@ describe('lessons/lessons.service.js', () => {
 		const readPermission = helper.createPermission({ users: [userId], read: true });
 
 		await Promise.all([
-			service.createWithDefaultData(writePermission, { courseId: randomCourseId }),
-			service.createWithDefaultData(readPermission, { courseId: randomCourseId }),
-			service.createWithDefaultData([], { courseId: randomCourseId }),
+			service.createWithDefaultData({ courseId: randomCourseId }, writePermission),
+			service.createWithDefaultData({ courseId: randomCourseId }, readPermission),
+			service.createWithDefaultData({ courseId: randomCourseId }),
 		]);
 
 		const { status, data } = await service.sendRequestToThisService('find', { userId, courseId: randomCourseId });
@@ -119,7 +119,7 @@ describe('lessons/lessons.service.js', () => {
 
 	it('patch with write permission should work', async () => {
 		const writePermission = helper.createPermission({ users: [userId], write: true });
-		const lesson = await service.createWithDefaultData(writePermission, { courseId });
+		const lesson = await service.createWithDefaultData({ courseId }, writePermission);
 		const { _id: id } = lesson;
 
 		const patchedData = {
@@ -148,7 +148,7 @@ describe('lessons/lessons.service.js', () => {
 
 	it('patch with read permission should not work', async () => {
 		const readPermission = helper.createPermission({ users: [userId], read: true });
-		const lesson = await service.createWithDefaultData(readPermission, { courseId });
+		const lesson = await service.createWithDefaultData({ courseId }, readPermission);
 		const { _id: id } = lesson;
 
 		const patchedData = {
@@ -163,7 +163,7 @@ describe('lessons/lessons.service.js', () => {
 
 	it('update with permission should not work', async () => {
 		const writePermission = helper.createPermission({ users: [userId], write: true });
-		const lesson = await service.createWithDefaultData(writePermission, { courseId });
+		const lesson = await service.createWithDefaultData({ courseId }, writePermission);
 
 		const { status } = await service.sendRequestToThisService('update', {
 			id: lesson._id, userId, courseId, data: lesson,
