@@ -11,6 +11,8 @@ describe('lessons/lessons.service.js', () => {
 	let service;
 	let userId;
 	let courseId;
+	let readPermission;
+	let writePermission;
 
 	before((done) => {
 		editor = app.listen(app.get('port'), done);
@@ -33,6 +35,9 @@ describe('lessons/lessons.service.js', () => {
 
 		const courseIds = server.getCourseIds();
 		courseId = courseIds[0];
+
+		writePermission = helper.createPermission({ users: [userId], write: true });
+		readPermission = helper.createPermission({ users: [userId], read: true });
 	});
 
 	after(async () => {
@@ -64,7 +69,6 @@ describe('lessons/lessons.service.js', () => {
 	});
 
 	it('get with write permission should work', async () => {
-		const writePermission = helper.createPermission({ users: [userId], write: true });
 		const lesson = await service.createWithDefaultData({ courseId }, writePermission);
 		const { _id: id, title } = lesson;
 
@@ -80,7 +84,6 @@ describe('lessons/lessons.service.js', () => {
 	});
 
 	it('get with read permission should work', async () => {
-		const writePermission = helper.createPermission({ users: [userId], read: true });
 		const lesson = await service.createWithDefaultData({ courseId }, writePermission);
 		const { _id: id, title } = lesson;
 
@@ -98,8 +101,6 @@ describe('lessons/lessons.service.js', () => {
 
 	it('find should work', async () => {
 		const randomCourseId = helper.createObjectId();
-		const writePermission = helper.createPermission({ users: [userId], write: true });
-		const readPermission = helper.createPermission({ users: [userId], read: true });
 
 		await Promise.all([
 			service.createWithDefaultData({ courseId: randomCourseId }, writePermission),
@@ -118,7 +119,6 @@ describe('lessons/lessons.service.js', () => {
 	// todo find sortierung and paginations
 
 	it('patch with write permission should work', async () => {
-		const writePermission = helper.createPermission({ users: [userId], write: true });
 		const lesson = await service.createWithDefaultData({ courseId }, writePermission);
 		const { _id: id } = lesson;
 
@@ -147,7 +147,6 @@ describe('lessons/lessons.service.js', () => {
 	});
 
 	it('patch with read permission should not work', async () => {
-		const readPermission = helper.createPermission({ users: [userId], read: true });
 		const lesson = await service.createWithDefaultData({ courseId }, readPermission);
 		const { _id: id } = lesson;
 
@@ -162,7 +161,6 @@ describe('lessons/lessons.service.js', () => {
 	});
 
 	it('update with permission should not work', async () => {
-		const writePermission = helper.createPermission({ users: [userId], write: true });
 		const lesson = await service.createWithDefaultData({ courseId }, writePermission);
 
 		const { status } = await service.sendRequestToThisService('update', {
@@ -170,5 +168,44 @@ describe('lessons/lessons.service.js', () => {
 		});
 
 		expect(status).to.equal(405);
+	});
+
+	it('remove with write permissions should work', async () => {
+		const { _id: lessonId } = await service.createWithDefaultData({ courseId }, writePermission);
+
+		const { status, data } = await service.sendRequestToThisService('remove', {
+			id: lessonId, userId, courseId,
+		});
+
+		expect(status).to.equal(200);
+		expect(data).to.an('object');
+		expect(data._id.toString()).to.equal(lessonId.toString());
+		expect(data.deletedAt).to.not.be.undefined;
+
+		const { status: statusRemoved } = await service.sendRequestToThisService('remove', {
+			id: lessonId, userId, courseId,
+		});
+
+		const { status: statusGet } = await service.sendRequestToThisService('get', {
+			id: lessonId, userId, courseId,
+		});
+
+		const { status: statusPatch } = await service.sendRequestToThisService('patch', {
+			id: lessonId, userId, courseId,
+		});
+
+		const { status: statusFind, data: dataFind } = await service.sendRequestToThisService('find', {
+			userId, courseId,
+		});
+
+		const $modelData = await service.Model.findOne({ _id: lessonId });
+		const modelData = $modelData.toObject();
+		// is removed and can not found over methods but exist in DB
+		expect(statusRemoved).to.equal(404);
+		expect(statusGet).to.equal(404);
+		expect(statusPatch).to.equal(404);
+		expect(statusFind).to.equal(200);
+		expect(dataFind.data).to.have.lengthOf(0);
+		expect(modelData._id.toString()).to.equal(lessonId.toString());
 	});
 });

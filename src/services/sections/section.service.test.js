@@ -102,7 +102,9 @@ describe('sections/section.service.js', () => {
 
 		expect(lessonId.toString()).to.equal(section.ref.target.toString());
 
-		const { status, data } = await sectionService.sendRequestToThisService('get', { id: section._id, userId, lessonId });
+		const {
+			status, data,
+		} = await sectionService.sendRequestToThisService('get', { id: section._id, userId, lessonId });
 
 		expect(status).to.equal(200);
 		expect(data).to.an('object');
@@ -122,7 +124,9 @@ describe('sections/section.service.js', () => {
 
 		expect(lessonId.toString()).to.equal(section.ref.target.toString());
 
-		const { status, data } = await sectionService.sendRequestToThisService('get', { id: section._id, userId, lessonId });
+		const {
+			status, data,
+		} = await sectionService.sendRequestToThisService('get', { id: section._id, userId, lessonId });
 
 		expect(status).to.equal(200);
 		expect(data).to.an('object');
@@ -166,5 +170,149 @@ describe('sections/section.service.js', () => {
 		expect(data.data).to.have.lengthOf(2);
 		expect(data.data[0]).to.not.have.property('permissions');
 		expect(data.data[0].ref.target.toString()).to.equal(lessonId.toString());
+	});
+
+
+	it('patch with write permissions should work', async () => {
+		const { _id: lessonId } = await lessonService.createWithDefaultData({ courseId }, writePermission);
+		const state = { abc: 123, x: [] };
+		const ref = {
+			target: lessonId,
+			targetModel: 'lesson',
+		};
+		const section = await sectionService.createWithDefaultData({ state, ref }, writePermission);
+
+		expect(lessonId.toString()).to.equal(section.ref.target.toString());
+
+		state.isPatched = true;
+		const { status, data } = await sectionService.sendRequestToThisService('patch', {
+			id: section._id, userId, lessonId, data: { state },
+		});
+
+		expect(status).to.equal(200);
+		expect(data).to.an('object');
+		expect(data._id.toString()).to.equal(section._id.toString());
+		expect(Object.keys(data)).to.have.lengthOf(1);
+
+		const {
+			status: getStatus, data: getData,
+		} = await sectionService.sendRequestToThisService('get', { id: section._id, userId, lessonId });
+
+		expect(getStatus).to.equal(200);
+		expect(getData.state).to.deep.equal(state);
+	});
+
+	it('patch with read permissions should not work', async () => {
+		const { _id: lessonId } = await lessonService.createWithDefaultData({ courseId }, readPermission);
+		const state = { abc: 123, x: [] };
+		const ref = {
+			target: lessonId,
+			targetModel: 'lesson',
+		};
+		const section = await sectionService.createWithDefaultData({ state, ref }, readPermission);
+
+		expect(lessonId.toString()).to.equal(section.ref.target.toString());
+
+		state.isPatched = true;
+		const { status } = await sectionService.sendRequestToThisService('patch', {
+			id: section._id, userId, lessonId, data: { state },
+		});
+
+		expect(status).to.equal(403);
+	});
+
+	it('patch ref with write permissions should not work', async () => {
+		const { _id: lessonId } = await lessonService.createWithDefaultData({ courseId }, writePermission);
+		const ref = {
+			target: lessonId,
+			targetModel: 'lesson',
+		};
+		const section = await sectionService.createWithDefaultData({ ref }, writePermission);
+
+		expect(lessonId.toString()).to.equal(section.ref.target.toString());
+
+		const refNew = {
+			target: helper.createObjectId(),
+			targetModel: 'lesson',
+		};
+		const { status } = await sectionService.sendRequestToThisService('patch', {
+			id: section._id, userId, lessonId, data: { ref: refNew },
+		});
+
+		expect(status).to.equal(404);
+	});
+
+	it('remove with write permissions should work', async () => {
+		const { _id: lessonId } = await lessonService.createWithDefaultData({ courseId }, writePermission);
+		const ref = {
+			target: lessonId,
+			targetModel: 'lesson',
+		};
+		const section = await sectionService.createWithDefaultData({ ref }, writePermission);
+
+		const { status, data } = await sectionService.sendRequestToThisService('remove', {
+			id: section._id, userId, lessonId,
+		});
+
+		expect(status).to.equal(200);
+		expect(data).to.an('object');
+		expect(data._id.toString()).to.equal(section._id.toString());
+		expect(data.deletedAt).to.not.be.undefined;
+
+		const { status: statusRemoved } = await sectionService.sendRequestToThisService('remove', {
+			id: section._id, userId, lessonId,
+		});
+
+		const { status: statusGet } = await sectionService.sendRequestToThisService('get', {
+			id: section._id, userId, lessonId,
+		});
+
+		const { status: statusPatch } = await sectionService.sendRequestToThisService('patch', {
+			id: section._id, userId, lessonId,
+		});
+
+		const { status: statusFind, data: dataFind } = await sectionService.sendRequestToThisService('find', {
+			userId, lessonId,
+		});
+
+		const $modelData = await sectionService.Model.findOne({ _id: section._id });
+		const modelData = $modelData.toObject();
+		// is removed and can not found over methods but exist in DB
+		expect(statusRemoved).to.equal(404);
+		expect(statusGet).to.equal(404);
+		expect(statusPatch).to.equal(404);
+		expect(statusFind).to.equal(200);
+		expect(dataFind.data).to.have.lengthOf(0);
+		expect(modelData._id.toString()).to.equal(section._id.toString());
+	});
+
+	it('remove with read permissions should work', async () => {
+		const { _id: lessonId } = await lessonService.createWithDefaultData({ courseId }, readPermission);
+		const ref = {
+			target: lessonId,
+			targetModel: 'lesson',
+		};
+		const section = await sectionService.createWithDefaultData({ ref }, readPermission);
+
+		const { status } = await sectionService.sendRequestToThisService('remove', {
+			id: section._id, userId, lessonId,
+		});
+
+		expect(status).to.equal(403);
+	});
+
+	it('update with permission should not work', async () => {
+		const { _id: lessonId } = await lessonService.createWithDefaultData({ courseId }, writePermission);
+		const ref = {
+			target: lessonId,
+			targetModel: 'lesson',
+		};
+		const section = await sectionService.createWithDefaultData({ ref }, writePermission);
+
+		const { status } = await sectionService.sendRequestToThisService('update', {
+			id: section._id, userId, lessonId, data: section,
+		});
+
+		expect(status).to.equal(405);
 	});
 });

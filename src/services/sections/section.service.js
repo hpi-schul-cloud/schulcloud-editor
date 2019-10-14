@@ -99,7 +99,7 @@ class SectionService {
 		const service = this.app.service(this.baseService);
 		const section = await service.get(_id, internParams);
 
-		if (!permissions.hasRead(section.permissions, params.user)) {
+		if (!permissions.hasWrite(section.permissions, params.user)) {
 			throw new Forbidden(this.err.noAccess);
 		}
 		// The query operation is also execute in mongoose after it is patched.
@@ -147,7 +147,7 @@ class SectionService {
 		const service = this.app.service(this.baseService);
 		const section = await service.get(id, internParams);
 
-		if (!permissions.hasRead(section.permissions, params.user)) {
+		if (!permissions.hasWrite(section.permissions, params.user)) {
 			throw new Forbidden(this.err.noAccess);
 		}
 
