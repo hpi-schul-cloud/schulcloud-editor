@@ -127,7 +127,7 @@ class SectionService {
 
 		// check permissions -> userId must exist in own of the syncGroups with write permissions
 		const syncGroupWritePermission = syncGroups.filter(g => g.permission === 'write');
-		if (!permissions.utils.IsInUsers(syncGroupWritePermission, user.id)) {
+		if (!permissions.isInUsers(syncGroupWritePermission, user.id)) {
 			throw new Forbidden(this.err.noAccess);
 		}
 

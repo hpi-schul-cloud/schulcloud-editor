@@ -10,8 +10,8 @@ const saveSelect = (base, key, fallbackValue) => {
 };
 
 const userIsInside = (users = [], userId) => users.some(id => id.toString() === userId.toString());
-const IsInUsers = (permissions, userId) => permissions.some(perm => userIsInside(perm.users, userId));
-const IsInGroup = (permissions, userId) => permissions.some(perm => userIsInside(saveSelect(perm.group, 'users', []), userId));
+const isInUsers = (permissions, userId) => permissions.some(perm => userIsInside(perm.users, userId));
+const isInGroup = (permissions, userId) => permissions.some(perm => userIsInside(saveSelect(perm.group, 'users', []), userId));
 const userIsInGroupOrUsers = (permissions, userId) => {
 	if (!userId) {
 		return false;
@@ -19,14 +19,14 @@ const userIsInGroupOrUsers = (permissions, userId) => {
 	if (!Array.isArray(permissions)) {
 		permissions = [permissions];
 	}
-	return IsInUsers(permissions, userId)
-	|| IsInGroup(permissions, userId);
+	return isInUsers(permissions, userId)
+	|| isInGroup(permissions, userId);
 };
 
 module.exports = {
 	saveSelect,
 	userIsInside,
-	IsInUsers,
-	IsInGroup,
+	isInUsers,
+	isInGroup,
 	userIsInGroupOrUsers,
 };
