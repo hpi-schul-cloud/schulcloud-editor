@@ -235,9 +235,10 @@ class Lessons {
 		}
 
 		try {
-			$lesson.deletedAt = new Date();
+			const deletedAt = new Date();
+			$lesson.deletedAt = deletedAt;
 			await $lesson.save();
-			return { _id };
+			return { _id, deletedAt };
 		} catch (err) {
 			throw new BadRequest(this.err.remove, err);
 		}

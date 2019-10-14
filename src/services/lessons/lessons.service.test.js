@@ -171,10 +171,11 @@ describe('lessons/lessons.service.js', () => {
 	});
 
 	it('remove with write permissions should work', async () => {
-		const { _id: lessonId } = await service.createWithDefaultData({ courseId }, writePermission);
+		const localCourseId = helper.createObjectId();
+		const { _id: lessonId } = await service.createWithDefaultData({ courseId: localCourseId }, writePermission);
 
 		const { status, data } = await service.sendRequestToThisService('remove', {
-			id: lessonId, userId, courseId,
+			id: lessonId, userId, courseId: localCourseId,
 		});
 
 		expect(status).to.equal(200);
@@ -183,19 +184,19 @@ describe('lessons/lessons.service.js', () => {
 		expect(data.deletedAt).to.not.be.undefined;
 
 		const { status: statusRemoved } = await service.sendRequestToThisService('remove', {
-			id: lessonId, userId, courseId,
+			id: lessonId, userId, courseId: localCourseId,
 		});
 
 		const { status: statusGet } = await service.sendRequestToThisService('get', {
-			id: lessonId, userId, courseId,
+			id: lessonId, userId, courseId: localCourseId,
 		});
 
 		const { status: statusPatch } = await service.sendRequestToThisService('patch', {
-			id: lessonId, userId, courseId,
+			id: lessonId, userId, courseId: localCourseId,
 		});
 
 		const { status: statusFind, data: dataFind } = await service.sendRequestToThisService('find', {
-			userId, courseId,
+			userId, courseId: localCourseId,
 		});
 
 		const $modelData = await service.Model.findOne({ _id: lessonId });
@@ -207,5 +208,15 @@ describe('lessons/lessons.service.js', () => {
 		expect(statusFind).to.equal(200);
 		expect(dataFind.data).to.have.lengthOf(0);
 		expect(modelData._id.toString()).to.equal(lessonId.toString());
+	});
+
+	it('remove with read permissions should not work', async () => {
+		const { _id: lessonId } = await service.createWithDefaultData({ courseId }, readPermission);
+
+		const { status } = await service.sendRequestToThisService('remove', {
+			id: lessonId, userId, courseId,
+		});
+
+		expect(status).to.equal(403);
 	});
 });
