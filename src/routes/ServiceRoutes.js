@@ -19,50 +19,50 @@ class ServiceRoute {
 		}
 
 		if (allowedMethods.includes('get')) {
-			this.wrap.get = (id, authorization, settings) => this.clearResult(
+			this.wrap.get = (id, authorization, settings = {}) => this.clearResult(
 				this.serviceRoute.get(
 					this.getRealUrl(settings, id),
-					this.getHeader(authorization),
+					settings.config || this.getDefaultConfig(authorization),
 				),
 			);
 		}
 		if (allowedMethods.includes('find')) {
-			this.wrap.find = (settings, authorization) => this.clearResult(
+			this.wrap.find = (authorization, settings = {}) => this.clearResult(
 				this.serviceRoute.get(
 					this.getRealUrl(settings),
-					this.getHeader(authorization),
+					settings.config || this.getDefaultConfig(authorization),
 				),
 			);
 		}
 		if (allowedMethods.includes('create')) {
-			this.wrap.create = (data, authorization, settings) => this.clearResult(
+			this.wrap.create = (data, authorization, settings = {}) => this.clearResult(
 				this.serviceRoute.post(
 					this.getRealUrl(settings),
 					data,
-					this.getHeader(authorization),
+					settings.config || this.getDefaultConfig(authorization),
 				),
 			);
 		}
 		if (allowedMethods.includes('remove')) {
-			this.wrap.remove = (id, authorization, settings) => this.clearResult(
+			this.wrap.remove = (id, authorization, settings = {}) => this.clearResult(
 				this.serviceRoute.delete(
 					this.getRealUrl(settings, id),
-					this.getHeader(authorization),
+					settings.config || this.getDefaultConfig(authorization),
 				),
 			);
 		}
 		if (allowedMethods.includes('patch')) {
-			this.wrap.patch = (id, data, authorization, settings) => this.clearResult(
+			this.wrap.patch = (id, data, authorization, settings = {}) => this.clearResult(
 				this.serviceRoute.patch(
 					this.getRealUrl(settings, id),
 					data,
-					this.getHeader(authorization),
+					settings.config || this.getDefaultConfig(authorization),
 				),
 			);
 		}
 	}
 
-	getHeader(authorization) {
+	getDefaultConfig(authorization) {
 		return {
 			headers: {
 				Authorization: authorization,
