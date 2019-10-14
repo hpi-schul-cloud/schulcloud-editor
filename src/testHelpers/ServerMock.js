@@ -19,7 +19,7 @@ class ServerMock {
 	overrideRoutes(app) {
 		const testUri = '/test';
 		const IDSuffix = '/:id';
-		const baseURL = `${app.get('fullhost')}${testUri}`;
+		const baseURL = `${app.get('baseEditorUrl')}${testUri}`;
 		const { server: { meUri, coursePermissionsUri } } = app.get('routes');
 
 		const timeout = 30000;

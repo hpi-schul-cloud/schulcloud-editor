@@ -107,7 +107,7 @@ class TestHelperService {
 			method,
 			url,
 			timeout: 30000,
-			baseURL: this.app.get('fullhost'),
+			baseURL: this.app.get('baseEditorUrl'),
 			headers: {
 				Authorization: this.jwt.create(userId),
 			},
