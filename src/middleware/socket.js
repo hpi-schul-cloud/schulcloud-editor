@@ -18,8 +18,6 @@ module.exports = app => app.configure(
 		// socketJwtHandler(io);
 
 		io.use((socket, next) => {
-			const { request } = socket;
-			const { redis } = app;
 			next();
 		});
 	}),

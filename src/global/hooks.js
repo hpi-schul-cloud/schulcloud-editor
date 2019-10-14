@@ -1,13 +1,10 @@
 const { Forbidden } = require('@feathersjs/errors');
 
-const filterOutResults = keys => (context) => {
-	if (context.result && context.type === 'after' && context.params.provider === 'rest') {
-		if (!Array.isArray(keys)) {
-			keys = [keys];
-		}
+const filterOutResults = (...keys) => (context) => {
+	if (context.result && context.type === 'after') {
 		// todo pagination test and switch to context.result.data
-		if (context.method === 'find' && Array.isArray(context.result)) {
-			context.result.forEach((ele) => {
+		if (context.method === 'find' && Array.isArray(context.result.data)) {
+			context.result.data.forEach((ele) => {
 				keys.forEach((key) => {
 					delete ele[key];
 				});
@@ -45,7 +42,34 @@ const checkCoursePermission = permission => async (context) => {
 	return context;
 };
 
+const joinChannel = (prefix, sufixId = '_id') => (context) => {
+	const { app, result, params } = context;
+
+	if (params.provider !== 'socketio') { return context; }
+	const all = app.channel(app.channels);
+	const { connections } = app
+		.channel(app.channels)
+		.filter(connection => connection.userId === params.user.id);
+
+	connections.forEach(connection => app.channel(`${prefix}/${result[sufixId]}`).join(connection));
+
+	return context;
+};
+
+const createChannel = (prefix, { from, prefixId }) => (context) => {
+	const { app, result, params } = context;
+
+	if (params.provider !== 'socketio') { return context; }
+	const { connections } = app.channel(`${from}/${result[prefixId]}`);
+
+	connections.forEach(connection => app.channel(`${prefix}/${result._id}`).join(connection));
+
+	return context;
+};
+
 module.exports = {
 	filterOutResults,
 	checkCoursePermission,
+	joinChannel,
+	createChannel,
 };

@@ -6,7 +6,7 @@ const ping = require('./ping');
 const { apiJwtHandler } = require('./handleJWTAndAddToContext');
 const addHeaderToContext = require('./addHeaderToContext');
 const addForceTest = require('./addForceTest');
-const redis = require('../database/redis');
+// const redis = require('../database/redis');
 const socket = require('./socket');
 
 module.exports = function setup() {
@@ -15,7 +15,7 @@ module.exports = function setup() {
 	const app = this;
 	// important that logger is add as first
 	app.configure(loggerAddHandler);
-	app.configure(redis);
+	// app.configure(redis);
 	app.configure(addHeaderToContext);
 	app.configure(getForceKey);
 	app.configure(ping);

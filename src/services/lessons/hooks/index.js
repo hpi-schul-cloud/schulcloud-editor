@@ -1,1 +1,5 @@
-exports.setCourseId = require('./setCourseId');
+const setCourseId = require('./setCourseId');
+
+module.exports = {
+	setCourseId,
+};

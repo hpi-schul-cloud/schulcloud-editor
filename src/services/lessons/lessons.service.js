@@ -3,7 +3,7 @@ const { NotFound, Forbidden, BadRequest } = require('@feathersjs/errors');
 const { validateSchema } = require('feathers-hooks-common');
 const Ajv = require('ajv');
 
-const { checkCoursePermission, filterOutResults } = require('../../global/hooks');
+const { checkCoursePermission, filterOutResults, joinChannel } = require('../../global/hooks');
 const {
 	prepareParams,
 	permissions,
@@ -11,9 +11,6 @@ const {
 } = require('../../global/utils');
 const { create: createSchema, patch: patchSchema } = require('./schemes');
 const { LessonModel } = require('./models/');
-const { checkCoursePermission } = require('../../global/hooks');
-const { setCourseId } = require('./hooks/setDefaults');
-const { joinChannel } = require('./hooks/joinChannel');
 const { setCourseId } = require('./hooks/');
 
 const lessonsHooks = {
@@ -85,7 +82,6 @@ class Lessons {
 				position: 1,
 			}).lean()
 				.exec();
-
 			return paginate(permissions.filterHasRead(lessons, user), params);
 		} catch (err) {
 			throw new BadRequest(this.err.find, err);
@@ -112,10 +108,6 @@ class Lessons {
 				courseId: 1,
 			});
 
-		if (params.all === 'true') {
-			mRequest.populate('sections');
-		}
-
 		try {
 			lesson = await mRequest.lean().exec();
 		} catch (err) {
@@ -125,6 +117,18 @@ class Lessons {
 
 		if (!permissions.hasRead(lesson.permissions, user)) {
 			throw new Forbidden(this.err.noAccess);
+		}
+
+		if (params.query.all === 'true') {
+			// call sections via route and not populate because of permission check and socket channels
+			const sections = await this.app.service('lesson/:lessonId/sections').find({
+				...prepareParams(params),
+				route: {
+					lessonId: lesson._id,
+				},
+			});
+
+			lesson.sections = sections.data;
 		}
 
 		return lesson;
@@ -140,7 +144,7 @@ class Lessons {
 		const coursePermissions = this.app.get('routes:server:coursePermissions');
 		const users = {
 			read: [],
-			write: ['0000d231816abba584714c9e'], // todo replace
+			write: ['0000d231816abba584714c9e', '59ad4c412b442b7f81810285'], // todo replace
 		};
 		try {
 			// const res = await coursePermissions(courseId, { authorization });
@@ -211,7 +215,10 @@ class Lessons {
 				$lesson[key] = value;
 			});
 			await $lesson.save();
-			return { _id };
+			return {
+				...data,
+				_id,
+			};
 		} catch (err) {
 			throw new BadRequest(this.err.patch, err);
 		}

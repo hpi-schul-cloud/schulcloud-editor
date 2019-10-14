@@ -80,6 +80,8 @@ const hasRead = (permissions, user) => {
 	return testAccess(permissions, user, 'read') || testAccess(permissions, user, 'write');
 };
 
+const couldAnyoneOnlyRead = permissions => permissions.some(permission => permission.read);
+
 /**
  * @ref permissions
  */
@@ -108,6 +110,7 @@ module.exports = {
 	modifiedParamsToReturnPatchResponse,
 	permissions: {
 		hasRead,
+		couldAnyoneOnlyRead,
 		hasWrite,
 		filterHasRead,
 		filterHasWrite,
