@@ -5,8 +5,8 @@ class ServiceRoute {
 	constructor({
 		baseURL, uri, timeout = 4000, allowedMethods,
 	}) {
-		if (!baseURL || uri) {
-			throw new Error('ServiceRoute missing params: ', { baseURL, uri });
+		if (!baseURL || !uri) {
+			throw new Error(`ServiceRoute missing params: ${JSON.stringify({ baseURL, uri })}`);
 		}
 
 		this.baseURL = baseURL;
@@ -126,11 +126,11 @@ class ServiceRouteApplication {
 		this.path = 'serviceRoute';
 	}
 
-	init() {
+	initialize() {
 		return (path, serviceRoute) => {
 			// return services handler for execute
 			if (!serviceRoute) {
-				return this.routes[path].getExecuter();
+				return this.routes[path].getWrapper();
 			}
 			// list all existing service routes;
 			if (!path) {
@@ -151,7 +151,7 @@ class ServiceRouteApplication {
 
 const setupApplication = (app) => {
 	const application = new ServiceRouteApplication(app);
-	app[application.path] = application.init();
+	app[application.path] = application.initialize();
 };
 
 module.exports = {
