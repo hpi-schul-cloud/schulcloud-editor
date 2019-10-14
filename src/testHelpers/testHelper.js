@@ -1,6 +1,7 @@
 /* eslint-disable arrow-body-style */
 const mongoose = require('mongoose');
 const axios = require('axios');
+const queryString = require('query-string');
 
 const { PermissionModel } = require('../services/permissionsHelper/models');
 
@@ -93,8 +94,12 @@ class TestHelperService {
 		});
 
 		if (id) { url += `/${id}`; }
-		if (typeof query === 'object') {
-			// todo convert to query
+		if (query) {
+			if (typeof query === 'string') {
+				url += query;
+			} else {
+				url += queryString.stringify(query, { arrayFormat: 'bracket' });
+			}
 		}
 		url += query;
 

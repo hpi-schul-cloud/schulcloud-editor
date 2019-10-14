@@ -1,4 +1,5 @@
 const axios = require('axios');
+const queryString = require('query-string');
 
 class ServiceRoute {
 	constructor({
@@ -80,7 +81,6 @@ class ServiceRoute {
 	}
 
 	getRealUrl(settings, id) {
-		// todo add query 
 		let url = this.uri;
 		this.urlVars.forEach((key) => {
 			const value = settings[key];
@@ -91,6 +91,13 @@ class ServiceRoute {
 		});
 		if (id) {
 			url += `/${id}`;
+		}
+		if (settings.query) {
+			if (typeof settings.query === 'string') {
+				url += settings.query;
+			} else {
+				url += queryString.stringify(settings.query, { arrayFormat: 'bracket' });
+			}
 		}
 		return url;
 	}
