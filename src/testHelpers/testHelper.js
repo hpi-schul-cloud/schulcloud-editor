@@ -26,21 +26,21 @@ class TestHelperService {
 		this.info = info;
 
 		// test if method is exist in service
-		const service = this.app.service(this.serviceName);
-		// eslint-disable-next-line no-underscore-dangle
-		/* const afterHooks = service.__hooks.after || {};
-		(afterHooks.remove || []).push(((context) => {
-			this.removeId(context.id);
-			return context;
-		}));
+		this.service = this.app.service(this.serviceName);
 
-		(afterHooks.create || []).push(((context) => {
-			this.extractIdAndExecute(context.result, this.ids.push);
-			return context;
-		}));
-		*/
+		const urlVars = this.serviceName.match(/(:\w+)/g);
+		this.urlVars = (urlVars || []).map(v => v.substr(1));
+
+		this.defaultData = defaultData[this.modelName] || {};
+		if (!this.defaultData) {
+			this.warn(`No default data for model in ./src/testHelpers/defaultData/${this.modelName}.js defined.`);
+		}
+		this.init(app);
+	}
+
+	init(app) {
 		this.create = async (data, params) => {
-			return service.create(data, params)
+			return this.service.create(data, params)
 				.then((result) => {
 					const id = this.extractId(data, this.ids.push);
 					this.ids.push(id);
@@ -49,31 +49,14 @@ class TestHelperService {
 		};
 
 		this.remove = (id, params) => {
-			return service.remove(id, params)
+			return this.service.remove(id, params)
 				.then((result) => {
 					this.info(` REMOVE ${id}>`);
 					this.removeId(id);
 					return result;
 				});
 		};
-
 		this.jwt = jwtHelper(app);
-
-		const urlVars = this.serviceName.match(/(:\w+)/g);
-		this.urlVars = (urlVars || []).map(v => v.substr(1));
-
-		// ref every key ..todo only functions ? how to test if base function has return value?
-		/*
-		Object.entries(service).forEach(([keyOrMethod, executerOrValue]) => {
-			if (!this[keyOrMethod] && typeof executerOrValue === 'function') {
-				this[keyOrMethod] = (...theArgs) => service[keyOrMethod](theArgs);
-			}
-		});
-		*/
-		this.defaultData = defaultData[this.modelName] || {};
-		if (!this.defaultData) {
-			this.warn(`No default data for model in ./src/testHelpers/defaultData/${this.modelName}.js defined.`);
-		}
 	}
 
 	getRequestMethod(method) {
@@ -97,6 +80,7 @@ class TestHelperService {
 		if (['remove', 'delete', 'update', 'patch'].includes(method) && !id) {
 			this.warn(`Method ${method} required to set a id. Please add it with settings.id.`);
 		}
+		// eslint-disable-next-line no-param-reassign
 		method = this.getRequestMethod(method);
 
 		let url = this.serviceName;
@@ -216,7 +200,11 @@ class TestHelper {
 		}
 		this.app = app;
 		this.services = {};
+		this.defaultPermissionData = defaultData.permission || {};
+		this.init(app);
+	}
 
+	init(app) {
 		this.warn = (messsage) => {
 			// eslint-disable-next-line no-console
 			console.warn(`TestHelper :${messsage}`);
@@ -227,11 +215,9 @@ class TestHelper {
 			console.info(`TestHelper :${messsage}`);
 		};
 
-		this.app.serviceHelper = (serviceName) => {
+		app.serviceHelper = (serviceName) => {
 			return this.getServiceHelper(serviceName);
 		};
-
-		this.defaultPermissionData = defaultData.permission || {};
 	}
 
 

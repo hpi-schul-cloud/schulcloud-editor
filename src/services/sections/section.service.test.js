@@ -116,24 +116,6 @@ describe('sections/section.service.js', () => {
 		expect(status).to.equal(403);
 	});
 
-	it('create with read permissions should not work', async () => {
-		await syncGroupService.Model.remove();
-		const { _id: lessonId } = await lessonService.createWithDefaultData({ courseId }, readPermission);
-		const syncGroup = await syncGroupService.createWithDefaultData({
-			users: [userId], permission: 'read', lessonId, courseId,
-		});
-
-		// syncGroup with right permissions for this course exist
-		expect(syncGroup).to.not.be.undefined;
-		expect(syncGroup).to.not.be.null;
-		expect(syncGroup.permission).to.equal('read');
-		expect(syncGroup.courseId.toString()).to.equal(courseId.toString());
-
-		const { status } = await sectionService.sendRequestToThisService('create', { userId, lessonId });
-
-		expect(status).to.equal(403);
-	});
-
 	it('get with read permissions should work', async () => {
 		const { _id: lessonId } = await lessonService.createWithDefaultData({ courseId }, readPermission);
 		const state = { abc: 123, x: [] };
