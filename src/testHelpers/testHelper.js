@@ -60,7 +60,7 @@ class TestHelperService {
 		this.jwt = jwtHelper(app);
 
 		const urlVars = this.serviceName.match(/(:\w+)/g);
-		this.urlVars = urlVars.map(v => v.substr(1));
+		this.urlVars = (urlVars || []).map(v => v.substr(1));
 
 		// ref every key ..todo only functions ? how to test if base function has return value?
 		/*

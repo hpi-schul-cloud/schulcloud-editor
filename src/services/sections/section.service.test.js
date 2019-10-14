@@ -3,6 +3,9 @@ const app = require('../../app');
 const { TestHelper } = require('../../testHelpers');
 
 const { expect } = chai;
+const pathLesson = '/course/:courseId/lessons';
+const pathSection = 'lesson/:lessonId/sections';
+const pathSyncGroup = 'course​/:courseId​/lesson​/:lessonId/groups';
 
 describe('sections/section.service.js', () => {
 	let editor;
@@ -23,22 +26,22 @@ describe('sections/section.service.js', () => {
 		helper = new TestHelper(app);
 
 		helper.registerServiceHelper({
-			serviceName: 'lesson/:lessonId/sections',
+			serviceName: pathSection,
 			modelName: 'section',
 		});
-		sectionService = app.serviceHelper('lesson/:lessonId/sections');
+		sectionService = app.serviceHelper(pathSection);
 
 		helper.registerServiceHelper({
-			serviceName: '/course/:courseId/lessons',
+			serviceName: pathLesson,
 			modelName: 'lesson',
 		});
-		lessonService = app.serviceHelper('/course/:courseId/lessons');
+		lessonService = app.serviceHelper(pathLesson);
 
 		helper.registerServiceHelper({
-			serviceName: 'course/:courseId/lesson/:lessonId/groups',
+			serviceName: pathSyncGroup,
 			modelName: 'syncGroup',
 		});
-		syncGroupService = app.serviceHelper('course/:courseId/lesson/:lessonId/groups');
+		syncGroupService = app.serviceHelper(pathSyncGroup);
 
 		userId = helper.createObjectId().toString();
 		courseId = helper.createObjectId().toString();
@@ -48,11 +51,13 @@ describe('sections/section.service.js', () => {
 	});
 
 	after(async () => {
+		await syncGroupService.Model.remove();
 		await helper.cleanup();
 		await editor.close();
 	});
 
 	it('create with write permissions should work', async () => {
+		await syncGroupService.Model.remove();
 		const { _id: lessonId } = await lessonService.createWithDefaultData({ courseId }, writePermission);
 		const syncGroup = await syncGroupService.createWithDefaultData({
 			users: [userId], permission: 'write', lessonId, courseId,
@@ -75,6 +80,44 @@ describe('sections/section.service.js', () => {
 	});
 
 	it('create with read permissions should not work', async () => {
+		await syncGroupService.Model.remove();
+		const { _id: lessonId } = await lessonService.createWithDefaultData({ courseId }, readPermission);
+		const syncGroup = await syncGroupService.createWithDefaultData({
+			users: [userId], permission: 'read', lessonId, courseId,
+		});
+
+		// syncGroup with right permissions for this course exist
+		expect(syncGroup).to.not.be.undefined;
+		expect(syncGroup).to.not.be.null;
+		expect(syncGroup.permission).to.equal('read');
+		expect(syncGroup.courseId.toString()).to.equal(courseId.toString());
+
+		const { status } = await sectionService.sendRequestToThisService('create', { userId, lessonId });
+
+		expect(status).to.equal(403);
+	});
+
+	it('create without permissions should not work', async () => {
+		await syncGroupService.Model.remove();
+		const { _id: lessonId } = await lessonService.createWithDefaultData({ courseId }, writePermission);
+		const syncGroup = await syncGroupService.createWithDefaultData({
+			users: [userId], permission: 'write', lessonId, courseId,
+		});
+
+		// syncGroup with right permissions for this course exist
+		expect(syncGroup).to.not.be.undefined;
+		expect(syncGroup).to.not.be.null;
+		expect(syncGroup.permission).to.equal('write');
+		expect(syncGroup.courseId.toString()).to.equal(courseId.toString());
+
+		const rndUserId = helper.createObjectId();
+		const { status } = await sectionService.sendRequestToThisService('create', { userId: rndUserId, lessonId });
+
+		expect(status).to.equal(403);
+	});
+
+	it('create with read permissions should not work', async () => {
+		await syncGroupService.Model.remove();
 		const { _id: lessonId } = await lessonService.createWithDefaultData({ courseId }, readPermission);
 		const syncGroup = await syncGroupService.createWithDefaultData({
 			users: [userId], permission: 'read', lessonId, courseId,

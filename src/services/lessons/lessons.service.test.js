@@ -3,6 +3,8 @@ let app = require('../../app');
 const { TestHelper, ServerMock } = require('../../testHelpers');
 
 const { expect } = chai;
+const pathLesson = '/course/:courseId/lessons';
+const pathSyncGroup = 'course​/:courseId​/lesson​/:lessonId/groups';
 
 describe('lessons/lessons.service.js', () => {
 	let editor;
@@ -13,6 +15,7 @@ describe('lessons/lessons.service.js', () => {
 	let courseId;
 	let readPermission;
 	let writePermission;
+	let syncGroupsService;
 
 	before((done) => {
 		editor = app.listen(app.get('port'), done);
@@ -24,11 +27,17 @@ describe('lessons/lessons.service.js', () => {
 
 		helper = new TestHelper(app);
 		helper.registerServiceHelper({
-			serviceName: '/course/:courseId/lessons',
+			serviceName: pathLesson,
 			modelName: 'lesson',
 		});
 
-		service = app.serviceHelper('/course/:courseId/lessons');
+		helper.registerServiceHelper({
+			serviceName: pathSyncGroup,
+			modelName: 'syncGroup',
+		});
+
+		service = app.serviceHelper(pathLesson);
+		syncGroupsService = app.serviceHelper(pathSyncGroup);
 
 		const teacherIds = server.getUserIdsByRole('teacher');
 		userId = teacherIds[0];
@@ -41,18 +50,22 @@ describe('lessons/lessons.service.js', () => {
 	});
 
 	after(async () => {
-		// todo cleanup sync groups
+		await syncGroupsService.Model.remove();
 		await helper.cleanup();
 		await editor.close();
 	});
 
 	it('create should work', async () => {
+		await syncGroupsService.Model.remove();
 		const { status, data } = await service.sendRequestToThisService('create', { userId, courseId });
 
 		// todo wait if member of is worked and is implemented, after it this test should not fail
 		const { status: getStatus, data: getData } = await service.sendRequestToThisService('get', {
 			id: data._id, userId, courseId,
 		});
+
+		const $syncGroups = await syncGroupsService.Model.find({ courseId });
+		const syncGroups = $syncGroups.map(doc => doc.toObject());
 
 		expect(status).to.equal(201);
 		expect(data).to.an('object');
@@ -65,7 +78,26 @@ describe('lessons/lessons.service.js', () => {
 		expect(getData).to.an('object');
 		expect(getData._id.toString()).to.equal(data._id.toString());
 
-		// todo test if syncGroups are created
+		// send from server mock
+		expect(syncGroups).to.have.lengthOf(2);
+		expect(syncGroups.some(s => s.permission === 'read')).to.be.true;
+		expect(syncGroups.some(s => s.permission === 'write')).to.be.true;
+	});
+
+	it('create without permission should not work', async () => {
+		await syncGroupsService.Model.remove();
+		const rndUserId = helper.createObjectId();
+		const { status } = await service.sendRequestToThisService('create', { userId: rndUserId, courseId });
+
+		expect(status).to.equal(403);
+	});
+
+	it('create with read permission should not work', async () => {
+		await syncGroupsService.Model.remove();
+		const studentId = server.getUserIdsByRole('student')[0];
+		const { status } = await service.sendRequestToThisService('create', { userId: studentId, courseId });
+
+		expect(status).to.equal(403);
 	});
 
 	it('get with write permission should work', async () => {
