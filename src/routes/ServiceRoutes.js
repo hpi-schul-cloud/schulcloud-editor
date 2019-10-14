@@ -5,6 +5,10 @@ class ServiceRoute {
 	constructor({
 		baseURL, uri, timeout = 4000, allowedMethods,
 	}) {
+		if (!baseURL || uri) {
+			throw new Error('ServiceRoute missing params: ', { baseURL, uri });
+		}
+
 		this.baseURL = baseURL;
 		this.uri = uri;
 		this.timeout = timeout;
@@ -12,8 +16,16 @@ class ServiceRoute {
 		const urlVars = this.uri.match(/(:\w+)/g);
 		this.urlVars = (urlVars || []).map(v => v.substr(1));
 
-		this.serviceRoute = this.init(baseURL, timeout);
+		this.serviceRoute = axios.create({
+			baseURL,
+			timeout,
+		});
+
 		this.wrap = {};
+		this.buildWrapper(allowedMethods);
+	}
+
+	buildWrapper(allowedMethods) {
 		if (!Array.isArray(allowedMethods)) {
 			throw new Error('No allowedMethods are defined.');
 		}
@@ -102,17 +114,7 @@ class ServiceRoute {
 		return url;
 	}
 
-	init(baseURL, timeout) {
-		if (!baseURL) {
-			throw new Error('No baseURL for service route is defined.');
-		}
-		return axios.create({
-			baseURL,
-			timeout,
-		});
-	}
-
-	getExecuter() {
+	getWrapper() {
 		return this.wrap;
 	}
 }
@@ -142,7 +144,7 @@ class ServiceRouteApplication {
 			}
 			this.routes[path] = serviceRoute;
 			this.app.logger.info(`Register service route ${path}.`);
-			return serviceRoute.getExecuter();
+			return serviceRoute.getWrapper();
 		};
 	}
 }
