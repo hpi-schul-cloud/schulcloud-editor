@@ -1,5 +1,5 @@
 const chai = require('chai');
-let app = require('../../app');
+const app = require('../../app');
 const { TestHelper, ServerMock } = require('../../testHelpers');
 
 const { expect } = chai;
@@ -21,9 +21,9 @@ describe('lessons/lessons.service.js', () => {
 		editor = app.listen(app.get('port'), done);
 	});
 
-	before(() => {
-		server = new ServerMock();
-		app = server.overrideRoutes(app);
+	before(async () => {
+		server = new ServerMock(app);
+		await server.initialize(app);
 
 		helper = new TestHelper(app);
 		helper.registerServiceHelper({
@@ -50,6 +50,7 @@ describe('lessons/lessons.service.js', () => {
 	});
 
 	after(async () => {
+		await server.close();
 		await syncGroupsService.Model.remove();
 		await helper.cleanup();
 		await editor.close();

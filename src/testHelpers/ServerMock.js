@@ -1,28 +1,36 @@
+const express = require('@feathersjs/express');
+const feathers = require('@feathersjs/feathers');
 const decode = require('jwt-decode');
-const { BadRequest, NotFound } = require('@feathersjs/errors');
+const { BadRequest, NotFound, Forbidden } = require('@feathersjs/errors');
 
 const { server: serverDB } = require('./defaultData');
-const { setupApplication, ServiceRoute } = require('../routes/ServiceRoutes')
+const { setupApplication, ServiceRoute } = require('../routes/ServiceRoutes');
 
 class ServerMock {
-	constructor() {
+	constructor(app) {
 		this.DB = serverDB;
-
-	//	this.init();
 	}
 
-	init(app) {
+	async close() {
+		return this.server.close();
+	}
+
+	async initialize(app) {
+		this.app = express(feathers());
+		this.port = (app.get('port') || 0) + 1;
+		this.server = await this.app.listen(this.port);
+		app.logger.info(`Mock-Server is started at port:${this.port}`);
 		// todo configure which routes should override
-		this.overrideRoutes(app);
-	}
 
-	overrideRoutes(app) {
 		const testUri = '/test';
 		const IDSuffix = '/:id';
-		const baseURL = `${app.get('baseEditorUrl')}${testUri}`;
+		const protocol = app.get('protocol');
+		const host = app.get('host');
+		const port = app.get('port');
+		const baseURL = `${protocol}://${host}:${this.port}${testUri}`;
 		const { server: { meUri, coursePermissionsUri } } = app.get('routes');
 
-		const timeout = 30000;
+		const timeout = 3000;
 		// is override existing route application
 		app.configure(setupApplication);
 		app.serviceRoute('server/me', new ServiceRoute({
@@ -32,7 +40,7 @@ class ServerMock {
 			allowedMethods: ['get'],
 		}));
 
-		app.get(testUri + meUri + IDSuffix, (req, res) => {
+		this.app.get(testUri + meUri + IDSuffix, (req, res) => {
 			const currentUserId = this.validateJWT(req);
 			const user = this.getUser(req.params.id);
 			res.json(user);
@@ -45,7 +53,7 @@ class ServerMock {
 			allowedMethods: ['get'],
 		}));
 
-		app.get(testUri + coursePermissionsUri + IDSuffix, (req, res) => {
+		this.app.get(testUri + coursePermissionsUri + IDSuffix, (req, res) => {
 			const currentUserId = this.validateJWT(req);
 			// todo requested user === current user -> test permission
 			if (!this.getCourseIds().includes(req.params.courseId)) {
@@ -68,7 +76,7 @@ class ServerMock {
 			}
 		});
 
-		return app;
+		return this.app;
 	}
 
 	copy(obj) {
@@ -114,7 +122,7 @@ class ServerMock {
 		if (this.DB.users.some(user => user._id.toString() === userId.toString())) {
 			return userId;
 		}
-		throw new BadRequest('JWT validation failed.');
+		throw new Forbidden('JWT validation failed.');
 	}
 }
 
