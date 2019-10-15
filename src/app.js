@@ -9,7 +9,6 @@ process.env.NODE_CONFIG_DIR = path.join(__dirname, '..', 'config');
 process.env.NODE_ENV = process.env.NODE_ENV || 'default';
 const configuration = require('@feathersjs/configuration');
 const favicon = require('serve-favicon');
-// const bodyParser = require('body-parser'); @deprecated
 
 const hooks = require('./global/');
 const database = require('./database/');
