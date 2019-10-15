@@ -10,10 +10,5 @@
 			"meUri": "/me"
 		},
 		"timeout": "30000"
-	},
-	"redis": {
-		"port": 6379,
-		"host": "redis",
-		"database": 3
 	}
 }

@@ -1,5 +1,1 @@
-const setCourseId = require('./setCourseId');
-
-module.exports = {
-	setCourseId,
-};
+exports.setCourseId = require('./setCourseId');

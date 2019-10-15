@@ -32,6 +32,9 @@ SectionServiceHooks.after = {
 	all: [
 		filterOutResults('permissions'),
 	],
+	find: [
+		joinChannel('sections'),
+	],
 	get: [
 		joinChannel('sections'),
 	],

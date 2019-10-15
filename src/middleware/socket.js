@@ -5,7 +5,6 @@ module.exports = app => app.configure(
 	socketio((io) => {
 		io.on('connection', (socket) => {
 		// do some authorization things
-			const { id } = socket;
 			app.channel('anonymous').join(socket.feathers);
 
 			socket.on('authorization', (data) => {

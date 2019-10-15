@@ -46,12 +46,18 @@ const joinChannel = (prefix, sufixId = '_id') => (context) => {
 	const { app, result, params } = context;
 
 	if (params.provider !== 'socketio') { return context; }
-	const all = app.channel(app.channels);
 	const { connections } = app
 		.channel(app.channels)
 		.filter(connection => connection.userId === params.user.id);
-
-	connections.forEach(connection => app.channel(`${prefix}/${result[sufixId]}`).join(connection));
+	if (result[sufixId]) {
+		connections.forEach(connection => app.channel(`${prefix}/${result[sufixId]}`).join(connection));
+	} else if (result.data && Array.isArray(result.data)) {
+		result.data.forEach(element => connections
+			.forEach(connection => app.channel(`${prefix}/${element[sufixId]}`).join(connection)));
+	} else if (Array.isArray(result)) {
+		result.forEach(element => connections
+			.forEach(connection => app.channel(`${prefix}/${element[sufixId]}`).join(connection)));
+	}
 
 	return context;
 };

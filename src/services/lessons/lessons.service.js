@@ -122,7 +122,7 @@ class Lessons {
 		if (params.query.all === 'true') {
 			// call sections via route and not populate because of permission check and socket channels
 			const sections = await this.app.service('lesson/:lessonId/sections').find({
-				...prepareParams(params),
+				...params,
 				route: {
 					lessonId: lesson._id,
 				},
