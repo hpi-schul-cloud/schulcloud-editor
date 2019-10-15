@@ -90,7 +90,8 @@ describe('lessons/lessons.service.js', () => {
 		const rndUserId = helper.createObjectId();
 		const { status } = await service.sendRequestToThisService('create', { userId: rndUserId, courseId });
 
-		expect(status).to.equal(403);
+		// todo pass Forbidden from server over this services?
+		expect(status).to.equal(400);
 	});
 
 	it('create with read permission should not work', async () => {

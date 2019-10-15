@@ -57,7 +57,7 @@ class ServerMock {
 			const currentUserId = this.validateJWT(req);
 			// todo requested user === current user -> test permission
 			if (!this.getCourseIds().includes(req.params.courseId)) {
-				throw new NotFound();
+				throw new Forbidden();
 			}
 			if (!req.params.id) {
 				throw new BadRequest('Id not exist.');
@@ -72,7 +72,7 @@ class ServerMock {
 				});
 				res.json(permissions);
 			} catch (err) {
-				throw new NotFound(`User ${req.params.id} not found.`);
+				throw new Forbidden(`User ${req.params.id} not found.`);
 			}
 		});
 
@@ -85,7 +85,7 @@ class ServerMock {
 
 	getCopyOwn(list) {
 		if (list.length !== 1) {
-			throw new NotFound(list);
+			throw new Forbidden(list);
 		}
 		return this.copy(list[0]);
 	}
