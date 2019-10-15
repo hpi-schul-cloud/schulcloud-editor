@@ -202,44 +202,61 @@ describe('lessons/lessons.service.js', () => {
 		expect(status).to.equal(405);
 	});
 
-	it('remove with write permissions should work', async () => {
-		const localCourseId = helper.createObjectId();
-		const { _id: lessonId } = await service.createWithDefaultData({ courseId: localCourseId }, writePermission);
+	describe('remove and deletedAt for any method', async () => {
+		let localCourseId;
+		let lessonId;
 
-		const { status, data } = await service.sendRequestToThisService('remove', {
-			id: lessonId, userId, courseId: localCourseId,
+		before(async () => {
+			localCourseId = helper.createObjectId();
+			const { _id } = await service.createWithDefaultData({ courseId: localCourseId }, writePermission);
+			lessonId = _id;
 		});
 
-		expect(status).to.equal(200);
-		expect(data).to.an('object');
-		expect(data._id.toString()).to.equal(lessonId.toString());
-		expect(data.deletedAt).to.not.be.undefined;
+		it('remove with write permissions should work', async () => {
+			const { status, data } = await service.sendRequestToThisService('remove', {
+				id: lessonId, userId, courseId: localCourseId,
+			});
 
-		const { status: statusRemoved } = await service.sendRequestToThisService('remove', {
-			id: lessonId, userId, courseId: localCourseId,
+			const $modelData = await service.Model.findOne({ _id: lessonId });
+			const modelData = $modelData.toObject();
+
+			expect(status).to.equal(200);
+			expect(data).to.an('object');
+			expect(data._id.toString()).to.equal(lessonId.toString());
+			expect(data.deletedAt).to.not.be.undefined;
+
+			expect(modelData._id.toString()).to.equal(lessonId.toString());
+			expect(modelData.deletedAt).to.not.be.undefined;
 		});
 
-		const { status: statusGet } = await service.sendRequestToThisService('get', {
-			id: lessonId, userId, courseId: localCourseId,
+		it('find marked with deletedAt should nothing found', async () => {
+			const { status, data } = await service.sendRequestToThisService('find', {
+				userId, courseId: localCourseId,
+			});
+			expect(status).to.equal(200);
+			expect(data.data).to.have.lengthOf(0);
 		});
 
-		const { status: statusPatch } = await service.sendRequestToThisService('patch', {
-			id: lessonId, userId, courseId: localCourseId,
+		it('get marked with deletedAt should nothing found', async () => {
+			const { status } = await service.sendRequestToThisService('get', {
+				id: lessonId, userId, courseId: localCourseId,
+			});
+			expect(status).to.equal(404);
 		});
 
-		const { status: statusFind, data: dataFind } = await service.sendRequestToThisService('find', {
-			userId, courseId: localCourseId,
+		it('patch marked with deletedAt should nothing found', async () => {
+			const { status } = await service.sendRequestToThisService('patch', {
+				id: lessonId, userId, courseId: localCourseId,
+			});
+			expect(status).to.equal(404);
 		});
 
-		const $modelData = await service.Model.findOne({ _id: lessonId });
-		const modelData = $modelData.toObject();
-		// is removed and can not found over methods but exist in DB
-		expect(statusRemoved).to.equal(404);
-		expect(statusGet).to.equal(404);
-		expect(statusPatch).to.equal(404);
-		expect(statusFind).to.equal(200);
-		expect(dataFind.data).to.have.lengthOf(0);
-		expect(modelData._id.toString()).to.equal(lessonId.toString());
+		it('remove marked with deletedAt should nothing found', async () => {
+			const { status } = await service.sendRequestToThisService('remove', {
+				id: lessonId, userId, courseId: localCourseId,
+			});
+			expect(status).to.equal(404);
+		});
 	});
 
 	it('remove with read permissions should not work', async () => {
