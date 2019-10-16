@@ -1,14 +1,16 @@
 const { expect } = require('chai');
 const { connectDb, clearDb, closeDb } = require('../test');
-const { LessonModel, GroupModel, SectionModel } = require('../../services/models');
+const { LessonModel } = require('../../../services/lessons/models');
+const { SectionModel } = require('../../../services/sections/models');
+const { GroupModel } = require('../../../services/groups/models');
 
 const {
 	createGroup,
 	createLesson,
 	createSection,
-} = require('./');
+} = require('.');
 
-describe('fake data', () => {
+describe.skip('fake data', () => {
 	before(async () => {
 		await connectDb();
 		await clearDb();

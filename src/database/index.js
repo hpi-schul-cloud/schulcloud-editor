@@ -1,8 +1,6 @@
 const mongoose = require('mongoose');
 
-module.exports = function setup() {
-	const app = this;
-
+module.exports = (app) => {
 	mongoose.connect(
 		process.env.DB_URL || app.get('mongodb'), {
 			user: process.env.DB_USERNAME,

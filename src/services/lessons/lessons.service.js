@@ -8,7 +8,8 @@ const {
 	prepareParams,
 	permissions,
 	paginate,
-} = require('../../global/utils');
+	removeKeyFromList,
+} = require('../../utils');
 const { create: createSchema, patch: patchSchema } = require('./schemes');
 const { LessonModel } = require('./models/');
 const { setCourseId } = require('./hooks/');
@@ -81,7 +82,8 @@ class Lessons {
 			}).lean()
 				.exec();
 
-			return paginate(permissions.filterHasRead(lessons, user), params);
+			const lessonsWithAccess = permissions.filterHasRead(lessons, user);
+			return paginate(removeKeyFromList(lessonsWithAccess, 'permissions'), params);
 		} catch (err) {
 			throw new BadRequest(this.err.find, err);
 		}
@@ -131,8 +133,10 @@ class Lessons {
 		params.route.ressourceId = lessonId;
 		params.route.lessonId = lessonId;
 
-		const { authorization, route: { courseId } } = params;
-		const coursePermissions = this.app.get('routes:server:coursePermissions');
+		const { authorization, route: { courseId }, user } = params;
+		const coursePermissions = await this.app.serviceRoute('server/courses/userPermissions')
+			.get(user.id, authorization, { courseId });
+
 		const users = {
 			read: [],
 			write: ['0000d231816abba584714c9e'], // todo replace
@@ -162,11 +166,9 @@ class Lessons {
 	}
 
 	async create(data, params) {
-		const { user } = params;
 		try {
 			const $lesson = new LessonModel({
 				...data,
-				createdBy: user.id,
 			});
 
 			const defaultGroups = await this.createDefaultGroups($lesson, params);
@@ -233,9 +235,10 @@ class Lessons {
 		}
 
 		try {
-			$lesson.deletedAt = new Date();
+			const deletedAt = new Date();
+			$lesson.deletedAt = deletedAt;
 			await $lesson.save();
-			return { _id };
+			return { _id, deletedAt };
 		} catch (err) {
 			throw new BadRequest(this.err.remove, err);
 		}

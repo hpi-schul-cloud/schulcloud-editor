@@ -22,7 +22,9 @@ module.exports = (app) => {
 		modelService: 'models/SectionModel',
 		baseService: 'lesson/:lessonId/sections',
 	}));
-	app.configure(permissionsHelper.bind({ baseService: 'viewports' }));
+	app.configure(permissionsHelper.bind({
+		baseService: 'viewports',
+	}));
 
-	/** then configure all event listener */
+	app.logger.info('Configure services completed!');
 };

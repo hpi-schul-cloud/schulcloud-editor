@@ -1,7 +1,7 @@
-const { Forbidden } = require('@feathersjs/errors');
+const { Forbidden, BadRequest } = require('@feathersjs/errors');
 
 const filterOutResults = keys => (context) => {
-	if (context.result && context.type === 'after' && context.params.provider === 'rest') {
+	if (context.result && context.type === 'after') {
 		if (!Array.isArray(keys)) {
 			keys = [keys];
 		}
@@ -34,9 +34,13 @@ const checkCoursePermission = permission => async (context) => {
 		},
 		app,
 	} = context;
-	const coursePermissions = app.get('routes:server:coursePermissions');
 
-	const { data: permissions } = await coursePermissions(courseId, { userId: user.id, authorization });
+	const permissions = await app.serviceRoute('server/courses/userPermissions')
+		.get(user.id, authorization, { courseId });
+
+	if (permissions.isAxiosError || !Array.isArray(permissions)) {
+		throw new BadRequest('Can not request server.', permissions);
+	}
 
 	if (!permissions.includes(permission)) {
 		throw new Forbidden('Missing privileges');

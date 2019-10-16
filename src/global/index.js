@@ -1,6 +1,6 @@
 /* eslint-disable no-param-reassign */
 const { GeneralError, Forbidden } = require('@feathersjs/errors');
-const logger = require('../logger');
+const { iff, isProvider } = require('feathers-hooks-common');
 const { filterOutResults } = require('./hooks');
 
 const addUserId = (context) => {
@@ -50,7 +50,7 @@ const errorHandler = (ctx) => {
 			ctx.error = new GeneralError(ctx.error.message || 'server error', ctx.error.stack || '');
 		}
 
-		logger.error(ctx.error);
+		ctx.app.logger.error(ctx.error);
 
 		if (process.env.NODE_ENV === 'production') {
 			ctx.error.stack = null;
@@ -59,7 +59,7 @@ const errorHandler = (ctx) => {
 
 		return ctx;
 	}
-	logger.warning('Error with no error key is throw. Error logic can not handle it.');
+	ctx.app.logger.warning('Error with no error key is throw. Error logic can not handle it.');
 
 	throw new GeneralError('server error');
 };
@@ -76,7 +76,9 @@ exports.before = {
 
 exports.after = {
 	// todo select is better but need more stable implementations
-	all: [filterOutResults(['__v', 'createdAt', 'updatedAt', 'createdBy', 'updatedBy'])],
+	all: [iff(isProvider('external'),
+		filterOutResults(['__v', 'createdAt', 'updatedAt', 'createdBy', 'updatedBy'])),
+	],
 	find: [],
 	get: [],
 	create: [],

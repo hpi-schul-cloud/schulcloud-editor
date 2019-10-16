@@ -9,7 +9,7 @@ const {
 	modifiedParamsToReturnPatchResponse,
 	convertSuccessMongoPatchResponse,
 	permissions,
-} = require('../../global/utils');
+} = require('../../utils');
 const { PermissionModel } = require('./models');
 
 const permissionServiceHooks = {};
