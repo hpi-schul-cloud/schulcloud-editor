@@ -1,7 +1,7 @@
 const { expect } = require('chai');
 const { connectDb, clearDb, closeDb } = require('.');
-const { LessonModel } = require('../../services/lessons/models');
-const { GroupModel } = require('../../services/groups/models');
+const { LessonModel } = require('../../../services/lessons/models');
+const { GroupModel } = require('../../../services/groups/models');
 const { createGroup, createLesson } = require('../fake-data');
 
 describe.skip('db connection and clearing', () => {
