@@ -9,7 +9,7 @@ const {
 	permissions,
 	paginate,
 	removeKeyFromList,
-} = require('../../global/utils');
+} = require('../../utils');
 const { create: createSchema, patch: patchSchema } = require('./schemes');
 const { LessonModel } = require('./models/');
 const { setCourseId } = require('./hooks/');

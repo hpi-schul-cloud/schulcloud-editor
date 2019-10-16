@@ -8,7 +8,7 @@ const {
 	removeKeyFromList,
 	convertSuccessMongoPatchResponse,
 	modifiedParamsToReturnPatchResponse,
-} = require('../../global/utils');
+} = require('../../utils');
 
 // todo validation
 const SectionServiceHooks = {};
