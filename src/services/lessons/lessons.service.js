@@ -93,6 +93,8 @@ class Lessons {
 	async get(_id, params) {
 		const { route: { courseId }, user } = params;
 		let lesson;
+		let sections;
+		const parallelRequest = [];
 		const mRequest = LessonModel
 			.findOne({
 				_id,
@@ -110,8 +112,22 @@ class Lessons {
 				courseId: 1,
 			});
 
+
+		parallelRequest.push(mRequest.lean().exec());
+
+		if (params.query.all === 'true') {
+			// call sections via route and not populate because of permission check and socket channels
+			parallelRequest.push(this.app.service('lesson/:lessonId/sections').find({
+				...params,
+				route: {
+					lessonId: lesson._id,
+				},
+			}));
+		}
+
+
 		try {
-			lesson = await mRequest.lean().exec();
+			[lesson, sections] = await Promise.all(parallelRequest);
 		} catch (err) {
 			throw new BadRequest(this.err.get, err);
 		}
@@ -121,15 +137,7 @@ class Lessons {
 			throw new Forbidden(this.err.noAccess);
 		}
 
-		if (params.query.all === 'true') {
-			// call sections via route and not populate because of permission check and socket channels
-			const sections = await this.app.service('lesson/:lessonId/sections').find({
-				...params,
-				route: {
-					lessonId: lesson._id,
-				},
-			});
-
+		if (sections) {
 			lesson.sections = sections.data;
 		}
 
