@@ -6,7 +6,7 @@ const ping = require('./ping');
 const { apiJwtHandler } = require('./handleJWTAndAddToContext');
 const addHeaderToContext = require('./addHeaderToContext');
 const addForceTest = require('./addForceTest');
-// const redis = require('../database/redis');
+const aggregateAppVars = require('./aggregateAppVars');
 const socket = require('./socket');
 
 module.exports = function setup() {
@@ -22,6 +22,7 @@ module.exports = function setup() {
 	app.configure(apiJwtHandler);
 	app.configure(addForceTest);
 	app.configure(requestLogs);
+	app.configure(aggregateAppVars);
 	app.configure(socket);
 
 	console.log('_________________\n');

@@ -15,10 +15,6 @@
         "$id": "#/properties/visible",
         "type": "boolean"
       },
-      "note": {
-        "$id": "#/properties/note",
-        "type": "string"
-      },
       "updatedBy": {
         "$id": "#/properties/updatedBy",
         "type": "string",
@@ -26,4 +22,8 @@
       }
     },
     "additionalProperties": false
+		"position": {
+			"$id": "#/properties/position",
+			"type": "number"
+		},
 }

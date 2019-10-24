@@ -1,7 +1,7 @@
 const { disallow } = require('feathers-hooks-common');
 const { GeneralError } = require('@feathersjs/errors');
 const { checkCoursePermission } = require('../../global/hooks');
-const { prepareParams, convertSuccessMongoPatchResponse } = require('../../global/utils');
+const { prepareParams, convertSuccessMongoPatchResponse } = require('../../utils');
 const {
 	readPermission,
 	addLessonIdAndCourseId,

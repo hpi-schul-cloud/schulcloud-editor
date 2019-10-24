@@ -5,9 +5,10 @@ const { filterOutResults, joinChannel, createChannel } = require('../../global/h
 const {
 	prepareParams,
 	permissions,
+	removeKeyFromList,
 	convertSuccessMongoPatchResponse,
 	modifiedParamsToReturnPatchResponse,
-} = require('../../global/utils');
+} = require('../../utils');
 
 // todo validation
 const SectionServiceHooks = {};
@@ -114,7 +115,7 @@ class SectionService {
 		const service = this.app.service(this.baseService);
 		const section = await service.get(_id, internParams);
 
-		if (!permissions.hasRead(section.permissions, params.user)) {
+		if (!permissions.hasWrite(section.permissions, params.user)) {
 			throw new Forbidden(this.err.noAccess);
 		}
 		// The query operation is also execute in mongoose after it is patched.
@@ -132,7 +133,7 @@ class SectionService {
 	}
 
 	async create(data, params) {
-		const { lessonId } = params.route;
+		const { route: { lessonId }, user } = params;
 		const { app } = this;
 
 		data.ref = {
@@ -144,11 +145,17 @@ class SectionService {
 		const internParams = prepareParams(params);
 		internParams.query.lessonId = lessonId;
 		// todo only write group as default?
-		const syncGroups = await app.service('models/syncGroup').find(internParams);
+		const { data: syncGroups } = await app.service('models/syncGroup').find(internParams);
+
+		// check permissions -> userId must exist in own of the syncGroups with write permissions
+		const syncGroupWritePermission = syncGroups.filter(g => g.permission === 'write');
+		if (!permissions.isInUsers(syncGroupWritePermission, user.id)) {
+			throw new Forbidden(this.err.noAccess);
+		}
 
 		const permService = app.service('lesson/:lessonId/sections/:ressourceId/permission');
 		const key = permService.permissionKey;
-		data[key] = await permService.createDefaultPermissionsData(syncGroups.data);
+		data[key] = await permService.createDefaultPermissionsData(syncGroups);
 
 		// TODO: add try catch
 		const section = await this.app.service(this.baseService)
@@ -171,7 +178,7 @@ class SectionService {
 		const service = this.app.service(this.baseService);
 		const section = await service.get(id, internParams);
 
-		if (!permissions.hasRead(section.permissions, params.user)) {
+		if (!permissions.hasWrite(section.permissions, params.user)) {
 			throw new Forbidden(this.err.noAccess);
 		}
 

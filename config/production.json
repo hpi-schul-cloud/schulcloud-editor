@@ -1,6 +1,7 @@
 {
 	"host": "localhost",
 	"port": "PORT",
+	"protocol": "https",
 	"mongodb": "MONGO_URI",
 	"public": "../public/",
 	"routes": {
@@ -10,5 +11,6 @@
 			"meUri": "ROUTE_ME"
 		},
 		"timeout": "2000"
-	}
+	},
+	"testsecret": "TESTSECRET"
 }
