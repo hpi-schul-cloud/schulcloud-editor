@@ -5,6 +5,7 @@ const { filterOutResults, joinChannel, createChannel } = require('../../global/h
 const {
 	prepareParams,
 	permissions,
+	paginate,
 	removeKeyFromList,
 	convertSuccessMongoPatchResponse,
 	modifiedParamsToReturnPatchResponse,
@@ -91,7 +92,8 @@ class SectionService {
 			return section;
 		});
 
-		return filtered;
+		sections.data = filtered;
+		return sections;
 	}
 
 	get(id, params) {
