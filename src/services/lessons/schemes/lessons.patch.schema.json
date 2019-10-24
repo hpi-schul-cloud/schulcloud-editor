@@ -19,11 +19,11 @@
         "$id": "#/properties/updatedBy",
         "type": "string",
         "pattern": "[a-f0-9]{24}"
+      },
+      "position": {
+        "$id": "#/properties/position",
+        "type": "number"
       }
     },
     "additionalProperties": false
-		"position": {
-			"$id": "#/properties/position",
-			"type": "number"
-		},
 }
