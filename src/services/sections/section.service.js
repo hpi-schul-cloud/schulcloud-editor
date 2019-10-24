@@ -91,7 +91,7 @@ class SectionService {
 			return section;
 		});
 
-		return sections;
+		return filtered;
 	}
 
 	get(id, params) {
