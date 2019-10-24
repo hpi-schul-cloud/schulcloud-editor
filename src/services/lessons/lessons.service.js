@@ -257,12 +257,8 @@ class Lessons {
 	}
 }
 
-const joinLessonChannel = app => (user) => {
-	app.channel(`lessons/${user.lesson}`).join(user.connection);
-};
 
 module.exports = {
 	Lessons,
 	lessonsHooks,
-	joinLessonChannel,
 };

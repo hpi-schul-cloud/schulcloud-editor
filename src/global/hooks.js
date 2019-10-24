@@ -1,4 +1,5 @@
 const { Forbidden, BadRequest } = require('@feathersjs/errors');
+const { joinChannel: joinChannelLoop } = require('../utils/sockets');
 
 const filterOutResults = (...keys) => (context) => {
 	if (context.result && context.type === 'after') {
@@ -50,17 +51,22 @@ const joinChannel = (prefix, sufixId = '_id') => (context) => {
 	const { app, result, params } = context;
 
 	if (params.provider !== 'socketio') { return context; }
+
 	const { connections } = app
 		.channel(app.channels)
 		.filter(connection => connection.userId === params.user.id);
+
+
 	if (result[sufixId]) {
-		connections.forEach(connection => app.channel(`${prefix}/${result[sufixId]}`).join(connection));
+		connections.forEach(joinChannelLoop(app, prefix, result[sufixId]));
 	} else if (result.data && Array.isArray(result.data)) {
 		result.data.forEach(element => connections
-			.forEach(connection => app.channel(`${prefix}/${element[sufixId]}`).join(connection)));
+			.forEach(joinChannelLoop(app, prefix, element[sufixId])));
 	} else if (Array.isArray(result)) {
 		result.forEach(element => connections
-			.forEach(connection => app.channel(`${prefix}/${element[sufixId]}`).join(connection)));
+			.forEach(joinChannelLoop(app, prefix, element[sufixId])));
+	} else {
+		throw new Error('The result object did not match, please implement a new one');
 	}
 
 	return context;
@@ -72,7 +78,7 @@ const createChannel = (prefix, { from, prefixId }) => (context) => {
 	if (params.provider !== 'socketio') { return context; }
 	const { connections } = app.channel(`${from}/${result[prefixId]}`);
 
-	connections.forEach(connection => app.channel(`${prefix}/${result._id}`).join(connection));
+	connections.forEach(joinChannelLoop(app, prefix, result._id));
 
 	return context;
 };
