@@ -4,7 +4,6 @@ const { iff, isProvider } = require('feathers-hooks-common');
 const { filterOutResults } = require('./hooks');
 
 const addUserId = (context) => {
-
 	if (context.params.force) {
 		return context;
 	}
@@ -78,7 +77,7 @@ exports.before = {
 exports.after = {
 	// todo select is better but need more stable implementations
 	all: [iff(isProvider('external'),
-		filterOutResults(['__v', 'createdAt', 'updatedAt', 'createdBy', 'updatedBy'])),
+		filterOutResults('__v', 'createdAt', 'updatedAt', 'createdBy', 'updatedBy')),
 	],
 	find: [],
 	get: [],
