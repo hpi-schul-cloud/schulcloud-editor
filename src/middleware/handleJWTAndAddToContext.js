@@ -6,14 +6,11 @@ const jwtHandler = (feathers, authorization) => {
 	const regex = /Bearer (.+)/g;
 	const jwt = (regex.exec(authorization) || [])[1]; // todo length >= 2 test.
 
-	try {
+	if (jwt) {
 		const { accountId, userId } = decode(jwt);
 		feathers.accountId = accountId;
 		feathers.userId = userId;
 		feathers.authorization = authorization;
-	} catch (err) {
-		console.log(err); // TODO: remove with thrown error below, but crashed server if in middleware
-		// throw new Forbidden('No valid JWT', err);
 	}
 };
 
