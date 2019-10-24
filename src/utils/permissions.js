@@ -48,7 +48,6 @@ const access = (basePermissions, user, permissionTyp) => {
 const hasRead = (permissions, user) => access(permissions, user, 'read') || access(permissions, user, 'write');
 
 /**
- *
  * @param {*} permissions
  */
 const couldAnyoneOnlyRead = permissions => permissions.some(permission => permission.read);
