@@ -1,7 +1,7 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "type": "object",
-    "title": "LessonCreate",
+    "title": "LessonPatch",
     "properties": {
       "title": {
         "$id": "#/properties/title",

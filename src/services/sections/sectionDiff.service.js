@@ -19,7 +19,6 @@ class SectionDiffService {
 	 */
 	async patch(id, data, params) {
 		params.isSectionDiffMongooseQuery = true;
-		// await this.app.service(this.baseServiceName).patch(id, { state: data.state }, params);
 		await this.app.service(this.baseServiceName).patch(id, diffToMongo(data.state, 'state'), params);
 		return {
 			_id: id,
