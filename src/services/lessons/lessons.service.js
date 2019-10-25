@@ -3,7 +3,7 @@ const { NotFound, Forbidden, BadRequest } = require('@feathersjs/errors');
 const { validateSchema } = require('feathers-hooks-common');
 const Ajv = require('ajv');
 
-const { checkCoursePermission, filterOutResults } = require('../../global/hooks');
+const { checkCoursePermission, filterOutResults, joinChannel } = require('../../global/hooks');
 const {
 	prepareParams,
 	permissions,
@@ -31,7 +31,9 @@ const lessonsHooks = {
 		],
 	},
 	after: {
+
 		get: [
+			joinChannel('lessons'),
 			filterOutResults('permissions'),
 		],
 		find: [
@@ -82,8 +84,7 @@ class Lessons {
 			}).lean()
 				.exec();
 
-			const lessonsWithAccess = permissions.filterHasRead(lessons, user);
-			return paginate(removeKeyFromList(lessonsWithAccess, 'permissions'), params);
+			return paginate(permissions.filterHasRead(lessons, user), params);
 		} catch (err) {
 			throw new BadRequest(this.err.find, err);
 		}
@@ -92,6 +93,8 @@ class Lessons {
 	async get(_id, params) {
 		const { route: { courseId }, user } = params;
 		let lesson;
+		let sections;
+		const parallelRequest = [];
 		const mRequest = LessonModel
 			.findOne({
 				_id,
@@ -109,12 +112,22 @@ class Lessons {
 				courseId: 1,
 			});
 
-		if (params.all === 'true') {
-			mRequest.populate('sections');
+
+		parallelRequest.push(mRequest.lean().exec());
+
+		if (params.query.all === 'true') {
+			// call sections via route and not populate because of permission check and socket channels
+			parallelRequest.push(this.app.service('lesson/:lessonId/sections').find({
+				...params,
+				route: {
+					lessonId: lesson._id,
+				},
+			}));
 		}
 
+
 		try {
-			lesson = await mRequest.lean().exec();
+			[lesson, sections] = await Promise.all(parallelRequest);
 		} catch (err) {
 			throw new BadRequest(this.err.get, err);
 		}
@@ -122,6 +135,10 @@ class Lessons {
 
 		if (!permissions.hasRead(lesson.permissions, user)) {
 			throw new Forbidden(this.err.noAccess);
+		}
+
+		if (sections) {
+			lesson.sections = sections.data;
 		}
 
 		return lesson;
@@ -139,7 +156,7 @@ class Lessons {
 
 		const users = {
 			read: [],
-			write: ['0000d231816abba584714c9e'], // todo replace
+			write: ['0000d231816abba584714c9e', '59ad4c412b442b7f81810285'], // todo replace
 		};
 		try {
 			// const res = await coursePermissions(courseId, { authorization });
@@ -208,7 +225,10 @@ class Lessons {
 				$lesson[key] = value;
 			});
 			await $lesson.save();
-			return { _id };
+			return {
+				...data,
+				_id,
+			};
 		} catch (err) {
 			throw new BadRequest(this.err.patch, err);
 		}
@@ -245,12 +265,8 @@ class Lessons {
 	}
 }
 
-const joinLessonChannel = app => (user) => {
-	app.channel(`lessons/${user.lesson}`).join(user.connection);
-};
 
 module.exports = {
 	Lessons,
 	lessonsHooks,
-	joinLessonChannel,
 };

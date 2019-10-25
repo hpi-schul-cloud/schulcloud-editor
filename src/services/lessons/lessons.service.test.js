@@ -170,7 +170,8 @@ describe('lessons/lessons.service.js', () => {
 		expect(status).to.equal(200);
 		expect(data).to.an('object');
 		expect(data._id).to.equal(id.toString());
-		expect(Object.keys(data)).to.have.lengthOf(1);
+		expect(data.title).to.equal(patchedData.title);
+		expect(Object.keys(data)).to.have.lengthOf(2);
 
 		expect(getStatus).to.equal(200);
 		expect(getData).to.an('object');

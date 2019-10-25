@@ -2,7 +2,6 @@
 const cors = require('cors');
 const path = require('path');
 const feathers = require('@feathersjs/feathers');
-const socketio = require('@feathersjs/socketio');
 // eslint-disable-next-line import/newline-after-import
 const express = require('@feathersjs/express');
 process.env.NODE_CONFIG_DIR = path.join(__dirname, '..', 'config');
@@ -36,7 +35,6 @@ const app = express(feathers())
 	.use(favicon(path.join(__dirname, '..', 'public', 'favicon.ico')))
 	// .use(defaultHeaders) // todo test it, position,  if we need it? @deprecated
 	.configure(swagger)
-	.configure(socketio())
 	.configure(database)
 	.configure(middleware)
 	.configure(routes)

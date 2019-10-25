@@ -1,12 +1,15 @@
 /* eslint-disable class-methods-use-this */
-const { Lessons, lessonsHooks, joinLessonChannel } = require('./lessons.service');
+const { Lessons, lessonsHooks } = require('./lessons.service');
 const { LessonModelService } = require('./LessonModel.service');
+const { publishData } = require('../../utils/sockets');
 
 module.exports = function setup(app) {
+	const path = '/course/:courseId/lessons';
 	app.configure(LessonModelService);
-	app.use('/course/:courseId/lessons', new Lessons({}));
-	const lessonsService = app.service('course/:courseId/lessons');
+	app.use(path, new Lessons({}));
+	const lessonsService = app.service(path);
 	lessonsService.hooks(lessonsHooks);
-	lessonsService.publish('patched', data => app.channel(`lesson/${data.id}`).send(data));
-	lessonsService.on('getted', joinLessonChannel);
+
+	lessonsService.publish('patched', publishData(app, 'lessons'));
+	lessonsService.publish('removed', publishData(app, 'lessons'));
 };

@@ -1,10 +1,11 @@
 const { Forbidden } = require('@feathersjs/errors');
 const { disallow } = require('feathers-hooks-common');
 
-const { filterOutResults } = require('../../global/hooks');
+const { filterOutResults, joinChannel, createChannel } = require('../../global/hooks');
 const {
 	prepareParams,
 	permissions,
+	paginate,
 	removeKeyFromList,
 	convertSuccessMongoPatchResponse,
 	modifiedParamsToReturnPatchResponse,
@@ -32,6 +33,18 @@ SectionServiceHooks.before = {
 SectionServiceHooks.after = {
 	all: [
 		filterOutResults('permissions'),
+	],
+	find: [
+		joinChannel('sections'),
+	],
+	get: [
+		joinChannel('sections'),
+	],
+	create: [
+		createChannel('sections', {
+			from: 'lessons',
+			prefixId: 'lessonId',
+		}),
 	],
 };
 
@@ -68,16 +81,19 @@ class SectionService {
 		return params;
 	}
 
-	find(params) {
+	async find(params) {
 		const internParams = this.setScope(prepareParams(params));
-		return this.app.service(this.baseService)
-			.find(internParams)
-			.then((sections) => {
-				const data = permissions.filterHasRead(sections.data, params.user);
-				sections.data = removeKeyFromList(data, 'permissions');
-				sections.total = sections.data.length;
-				return sections;
-			});
+		const sections = await this.app.service(this.baseService)
+			.find(internParams);
+		const filtered = permissions.filterHasRead(sections.data, params.user);
+
+		filtered.map((section) => {
+			section.visible = !permissions.couldAnyoneOnlyRead(section.permissions);
+			return section;
+		});
+
+		sections.data = filtered;
+		return sections;
 	}
 
 	get(id, params) {
@@ -93,6 +109,8 @@ class SectionService {
 	}
 
 	async remove(_id, params) {
+		const { app } = this;
+		const { lessonId } = params.route;
 		const internParams = this.setScope(prepareParams(params));
 		internParams.query.$select = ['permissions'];
 
@@ -106,8 +124,14 @@ class SectionService {
 		// But deletedAt exist as select and without mongoose.writeResult = true it return nothing.
 		const deletedAt = new Date();
 		const patchParams = modifiedParamsToReturnPatchResponse(prepareParams(params));
-		return service.patch(_id, { deletedAt }, patchParams)
+		const result = await service.patch(_id, { deletedAt }, patchParams)
 			.then(res => convertSuccessMongoPatchResponse(res, { _id, deletedAt }, true));
+
+		await app.service('models/LessonModel')
+			.patch(lessonId,
+				{ $pull: { sections: section._id } },
+				prepareParams(params));
+		return result;
 	}
 
 	async create(data, params) {
@@ -135,9 +159,18 @@ class SectionService {
 		const key = permService.permissionKey;
 		data[key] = await permService.createDefaultPermissionsData(syncGroups);
 
-		return this.app.service(this.baseService)
-			.create(data, prepareParams(params))
-			.then(({ _id }) => ({ _id }));
+		// TODO: add try catch
+		const section = await this.app.service(this.baseService)
+			.create(data, prepareParams(params));
+
+		await app.service('models/LessonModel')
+			.patch(lessonId,
+				{ $push: { sections: section._id } },
+				prepareParams(params));
+
+		return {
+			_id: section._id,
+		};
 	}
 
 	async patch(id, data, params) {
