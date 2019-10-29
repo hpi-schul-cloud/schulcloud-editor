@@ -120,7 +120,7 @@ class Lessons {
 			parallelRequest.push(this.app.service('lesson/:lessonId/sections').find({
 				...params,
 				route: {
-					lessonId: lesson._id,
+					lessonId: _id,
 				},
 			}));
 		}
