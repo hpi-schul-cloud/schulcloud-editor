@@ -17,6 +17,7 @@ const lessonSchema = new Schema({
 	// todo first step for imigrate old data, second move it to activated = true / false in permissions group
 	visible: { type: Boolean, default: true },
 	position: { type: Number, default: Date.now },
+	folderId: { type: Schema.Types.ObjectId },
 	fork: { type: Schema.Types.ObjectId }, // is forked from
 }, {
 	timestamps: true,

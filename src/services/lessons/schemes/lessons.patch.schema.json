@@ -19,6 +19,11 @@
       "position": {
         "$id": "#/properties/position",
         "type": "number"
+      },
+      "folderId": {
+        "$id": "#/properties/folderId",
+        "type": "string",
+        "pattern": "[a-f0-9]{24}"
       }
     },
     "additionalProperties": false
