@@ -11,13 +11,19 @@ class SectionDiffService {
 	}
 
 	/**
+	 * Convert diff data json request to mongoose query to insert it.
+	 *
 	 * @param {ObjectId} id
-	 * @param {Object} diffData Convert diff data json request to mongoose query to insert it.
+	 * @param {Object} data
 	 * @param {Object:FeatherParams} params
 	 */
-	patch(id, diffData, params) {
+	async patch(id, data, params) {
 		params.isSectionDiffMongooseQuery = true;
-		return this.app(this.baseServiceName).patch(id, diffToMongo(diffData), params);
+		await this.app.service(this.baseServiceName).patch(id, diffToMongo(data.state, 'state'), params);
+		return {
+			_id: id,
+			diff: data.state,
+		};
 	}
 }
 
