@@ -78,6 +78,7 @@ describe('lessons/lessons.service.js', () => {
 		expect(getStatus).to.equal(200);
 		expect(getData).to.an('object');
 		expect(getData._id.toString()).to.equal(data._id.toString());
+		expect(getData.sections).to.have.length(1);
 
 		// send from server mock
 		expect(syncGroups).to.have.lengthOf(2);
@@ -128,8 +129,24 @@ describe('lessons/lessons.service.js', () => {
 		expect(data._id).to.equal(id.toString());
 		expect(data.title).to.equal(title);
 		expect(data.courseId).to.equal(courseId);
-		expect(data.sections).to.have.lengthOf(0);
+		expect(data.sections).to.have.lengthOf(0); // test
 		expect(data).to.not.have.property('permissions');
+	});
+
+	it('get with query all=true should populate the sections', async () => {
+		await syncGroupsService.Model.remove();
+		const { status: statusCreate, data: { _id } } = await service.sendRequestToThisService('create', { userId, courseId });
+
+		expect(statusCreate).to.equal(201);
+
+		const { status, data } = await service
+			.sendRequestToThisService('get', {
+				id: _id.toString(), userId, courseId, query: { all: true },
+			});
+
+		expect(status).to.equal(200);
+		expect(data.sections).to.have.lengthOf(1);
+		expect(data.sections[0]).to.an('object');
 	});
 
 

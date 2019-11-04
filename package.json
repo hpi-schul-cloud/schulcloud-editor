@@ -9,7 +9,7 @@
     "debug": "nodemon --inspect=4002 src/",
     "debug:container": "nodemon --inspect=0.0.0.0:4002 src/",
     "test": "cross-env NODE_ENV=test mocha src/**/*.test.js --timeout 5000",
-    "test:inspect": "cross-env NODE_ENV=test mocha --debug-brk --inspect src/**/*.test.js --timeout 5000",
+    "test:inspect": "cross-env NODE_ENV=test mocha --debug-brk --inspect src/**/*.test.js --timeout 50000",
     "test:watch": "cross-env NODE_ENV=test mocha src/**/*.test.js  --watch --timeout 5000"
   },
   "repository": {
