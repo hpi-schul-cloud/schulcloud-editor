@@ -10,7 +10,7 @@
 			"coursePermissionsUri": "/courses/:courseId/userPermissions",
 			"meUri": "/me"
 		},
-		"timeout": "2000"
+		"timeout": "TIMEOUT"
 	},
 	"testsecret": "TESTSECRET"
 }
