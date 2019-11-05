@@ -1,5 +1,5 @@
 {
-	"host": "HOST",
+	"host": "localhost",
 	"port": "PORT",
 	"protocol": "http",
 	"mongodb": "MONGO_URI",
