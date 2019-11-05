@@ -6,9 +6,9 @@
 	"public": "../public/",
 	"routes": {
 		"server": {
-			"baseURL": "SERVER_BASE_URL",
-			"coursePermissionsUri": "ROUTE_COURSE_PERMISSIONS",
-			"meUri": "ROUTE_ME"
+			"baseURL": "SERVER_API_URL",
+			"coursePermissionsUri": "/courses/:courseId/userPermissions",
+			"meUri": "/me"
 		},
 		"timeout": "2000"
 	},
