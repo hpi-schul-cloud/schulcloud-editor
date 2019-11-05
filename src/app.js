@@ -26,7 +26,7 @@ console.log('From config file:', conf());
 console.log('\n');
 
 const app = express(feathers())
-	.configure(conf)
+	.configure(conf())
 	.use(express.json())
 	.use(express.urlencoded({ extended: true }))
 	.use(cors())
