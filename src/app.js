@@ -2,12 +2,11 @@
 const cors = require('cors');
 const path = require('path');
 const feathers = require('@feathersjs/feathers');
-// eslint-disable-next-line import/newline-after-import
 const express = require('@feathersjs/express');
+
 process.env.NODE_CONFIG_DIR = path.join(__dirname, '..', 'config');
 process.env.NODE_ENV = process.env.NODE_ENV || 'default';
 const configuration = require('@feathersjs/configuration');
-const favicon = require('serve-favicon');
 
 const hooks = require('./global/');
 const database = require('./database/');
@@ -17,12 +16,10 @@ const swagger = require('./swagger');
 const handleResponseType = require('./middleware/handleResponseType');
 const routes = require('./routes');
 
-const conf = configuration();
-
-console.log('\n___process.env___');
+console.log('\n******************** process.env *********************\n');
 ['NODE_CONFIG_DIR', 'NODE_ENV']
 	.forEach(key => console.log(key, process.env[key]));
-console.log('From config file:', conf());
+console.log('From config file:', configuration()());
 console.log('\n');
 
 const app = express(feathers())
@@ -30,10 +27,7 @@ const app = express(feathers())
 	.use(express.json())
 	.use(express.urlencoded({ extended: true }))
 	.use(cors())
-	// todo "handleResponseType" test it, maybe no effect see express.json() @deprecated
 	.configure(express.rest(handleResponseType))
-	.use(favicon(path.join(__dirname, '..', 'public', 'favicon.ico')))
-	// .use(defaultHeaders) // todo test it, position,  if we need it? @deprecated
 	.configure(swagger)
 	.configure(database)
 	.configure(middleware)
@@ -47,11 +41,5 @@ const app = express(feathers())
 			res.json(error);
 		},
 	}));
-
-/*
-app.on('unhandledRejection', (reason, p) => { @deprecated
-	logger.info('Unhandled Rejection at: Promise ', p, ' reason: ', reason);
-});
-*/
 
 module.exports = app;

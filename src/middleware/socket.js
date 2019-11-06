@@ -3,6 +3,8 @@ const { socketJwtHandler, jwtHandler } = require('./handleJWTAndAddToContext');
 
 module.exports = app => app.configure(
 	socketio((io) => {
+		// eslint-disable-next-line no-console
+		console.log('Add socket connections');
 		io.on('connection', (socket) => {
 		// do some authorization things
 			app.channel('anonymous').join(socket.feathers);

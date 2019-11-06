@@ -21,5 +21,6 @@ module.exports = function setup(app) {
 	const permissionService = app.service(path);
 	permissionService.hooks(permissionServiceHooks);
 
-	app.logger.info(`Permission services is adding add ${path} with key ${permissionKey}.`);
+	// eslint-disable-next-line no-console
+	console.log(`Permission services is adding add ${path} with key ${permissionKey}.`);
 };

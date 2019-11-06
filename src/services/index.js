@@ -26,5 +26,6 @@ module.exports = (app) => {
 		baseService: 'viewports',
 	}));
 
-	app.logger.info('Configure services completed!');
+	// eslint-disable-next-line no-console
+	console.log('Configure services completed!');
 };

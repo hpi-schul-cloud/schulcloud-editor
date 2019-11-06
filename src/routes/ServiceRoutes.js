@@ -143,7 +143,8 @@ class ServiceRouteApplication {
 				);
 			}
 			this.routes[path] = serviceRoute;
-			this.app.logger.info(`Register service route ${path}.`);
+			// eslint-disable-next-line no-console
+			console.log(`Register service route ${path}.`);
 			return serviceRoute.getWrapper();
 		};
 	}

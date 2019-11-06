@@ -1,7 +1,7 @@
 const logger = require('../logger');
 
 module.exports = (app) => {
-	// eslint-disable-next-line no-param-reassign
+	// eslint-disable-next-line no-console
+	console.log('Add logger to app.');
 	app.logger = logger;
-	app.logger.info('Add logger to app.');
 };

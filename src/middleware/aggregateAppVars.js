@@ -6,6 +6,7 @@ const aggregateAppVars = (app) => {
 };
 
 module.exports = (app) => {
-	app.logger.info('Aggregate app vars.');
+	// eslint-disable-next-line no-console
+	console.log('Aggregate app vars.');
 	app.configure(aggregateAppVars);
 };
