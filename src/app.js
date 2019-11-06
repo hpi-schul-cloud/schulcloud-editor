@@ -26,7 +26,7 @@ console.log('From config file:', conf());
 console.log('\n');
 
 const app = express(feathers())
-	.configure(conf)
+	.configure(configuration())
 	.use(express.json())
 	.use(express.urlencoded({ extended: true }))
 	.use(cors())
@@ -47,7 +47,6 @@ const app = express(feathers())
 			res.json(error);
 		},
 	}));
-
 
 /*
 app.on('unhandledRejection', (reason, p) => { @deprecated
