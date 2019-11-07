@@ -19,7 +19,7 @@ const { systemInfo } = require('./logger');
 
 systemInfo('\n******************** process.env *********************\n');
 ['NODE_CONFIG_DIR', 'NODE_ENV']
-	.forEach(key => systemInfo(key, process.env[key]));
+	.forEach(key => systemInfo(`${key} ${process.env[key]}`));
 systemInfo('From config file:');
 systemInfo(configuration()());
 systemInfo('\n');
