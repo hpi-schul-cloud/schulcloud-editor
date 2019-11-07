@@ -4,6 +4,5 @@ const headerToContextHandler = (req, res, next) => {
 };
 
 module.exports = (app) => {
-	app.logger.info('Add header information to feather context.');
 	app.use(headerToContextHandler);
 };

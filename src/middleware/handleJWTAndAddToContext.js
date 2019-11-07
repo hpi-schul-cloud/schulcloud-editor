@@ -1,6 +1,4 @@
 const decode = require('jwt-decode');
-const { Forbidden } = require('@feathersjs/errors');
-
 
 const jwtHandler = (feathers, authorization) => {
 	const regex = /Bearer (.+)/g;

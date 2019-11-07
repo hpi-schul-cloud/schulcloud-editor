@@ -6,6 +6,5 @@ const aggregateAppVars = (app) => {
 };
 
 module.exports = (app) => {
-	app.logger.info('Aggregate app vars.');
 	app.configure(aggregateAppVars);
 };

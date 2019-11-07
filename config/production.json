@@ -3,12 +3,9 @@
 	"port": "PORT",
 	"protocol": "http",
 	"mongodb": "MONGO_URI",
-	"public": "../public/",
 	"routes": {
 		"server": {
-			"baseURL": "SERVER_API_URL",
-			"coursePermissionsUri": "/courses/:courseId/userPermissions",
-			"meUri": "/me"
+			"baseURL": "SERVER_API_URL"
 		},
 		"timeout": "TIMEOUT"
 	},

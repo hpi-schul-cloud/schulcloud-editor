@@ -3,12 +3,12 @@
 	"port": 4001,
 	"protocol": "http",
 	"mongodb": "mongodb://localhost:27017/schulcloud-editor",
-	"public": "../public/",
 	"routes": {
 		"server": {
 			"baseURL": "http://localhost:3030",
 			"coursePermissionsUri": "/courses/:courseId/userPermissions",
-			"meUri": "/me"
+			"meUri": "/me",
+			"courseMembersUri": "/courses/:courseId/members"
 		},
 		"timeout": "30000"
 	},

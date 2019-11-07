@@ -4,6 +4,5 @@ const requestLogging = app => (req, res, next) => {
 };
 
 module.exports = (app) => {
-	app.logger.info('Set request logging.');
 	app.use(requestLogging(app));
 };

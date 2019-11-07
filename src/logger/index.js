@@ -20,6 +20,7 @@ if (!logLevel) {
 }
 
 const logger = winston.createLogger({
+	exitOnError: false,
 	levels: winston.config.syslog.levels,
 	format: winston.format.combine(
 		winston.format.timestamp(), // adds current timestamp
@@ -35,9 +36,37 @@ const logger = winston.createLogger({
 });
 
 
+const colors = {
+//	emerg: 'green',
+//	alert: 'green',
+//	crit: 'green',
+//	error: 'green',
+//	warning: 'green',
+	notice: 'green',
+	info: 'green',
+//	debug: 'green',
+};
+
+const systemLogger = winston.createLogger({
+	level: 'info',
+	exitOnError: false,
+	format: winston.format.combine(
+		winston.format.colorize({ colors, message: true }),
+		winston.format.printf(log => log.message),
+	),
+	transports: [
+		new winston.transports.Console({
+			// colorize: true,
+		}),
+	],
+});
+
 // add events log for methods
 logger.event = event(logger, ['create', 'remove', 'update', 'patch']);
 logger.request = request(logger);
 
 
-module.exports = logger;
+module.exports = {
+	logger,
+	systemInfo: systemLogger.info,
+};

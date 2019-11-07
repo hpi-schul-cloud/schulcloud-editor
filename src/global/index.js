@@ -4,10 +4,6 @@ const { iff, isProvider } = require('feathers-hooks-common');
 const { filterOutResults } = require('./hooks');
 
 const addUserId = (context) => {
-	if (context.params.force) {
-		return context;
-	}
-
 	if (context.params.userId) {
 		// todo validate mongoose id
 		// todo add name ?

@@ -1,5 +1,6 @@
 /* eslint-disable no-underscore-dangle */
 const { PermissionService, permissionServiceHooks } = require('./Permission.service');
+const { systemInfo } = require('../../logger');
 
 module.exports = function setup(app) {
 	const {
@@ -21,5 +22,6 @@ module.exports = function setup(app) {
 	const permissionService = app.service(path);
 	permissionService.hooks(permissionServiceHooks);
 
-	app.logger.info(`Permission services is adding add ${path} with key ${permissionKey}.`);
+	// eslint-disable-next-line no-console
+	systemInfo(`Permission services is adding add ${path} with key ${permissionKey}.`);
 };

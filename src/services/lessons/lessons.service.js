@@ -12,7 +12,10 @@ const {
 } = require('../../utils');
 const { create: createSchema, patch: patchSchema } = require('./schemes');
 const { LessonModel } = require('./models/');
-const { setCourseId } = require('./hooks/');
+const { setCourseId, defaultName } = require('./hooks/');
+
+const DEFAULT_CREATE_PERMISSION = 'LESSONS_CREATE';
+const DEFAULT_VIEW_PERMISSION = 'LESSONS_VIEW';
 
 const lessonsHooks = {
 	before: {
@@ -20,8 +23,9 @@ const lessonsHooks = {
 		get: [],
 		create: [
 			setCourseId,
+			defaultName,
 			validateSchema(createSchema, Ajv),
-			checkCoursePermission('LESSONS_CREATE'),
+			checkCoursePermission(DEFAULT_CREATE_PERMISSION),
 		],
 		patch: [
 			validateSchema(patchSchema, Ajv),
@@ -48,7 +52,7 @@ class Lessons {
 	constructor({ docs = {} }) {
 		this.docs = docs;
 
-		this.err = {
+		this.err = Object.freeze({
 			create: 'Failed to create the lesson.',
 			get: 'Failed to get the lesson',
 			find: 'Failed to find lessons.',
@@ -56,7 +60,7 @@ class Lessons {
 			remove: 'Failed to delete the lesson.',
 			noAccess: 'You have no access.',
 			notFound: 'Ressource not found.',
-		};
+		});
 	}
 
 	setup(app) {
@@ -147,17 +151,28 @@ class Lessons {
 	async createDefaultGroups(lesson, _params) {
 		const lessonId = lesson._id;
 		const params = prepareParams(_params);
-		params.route.ressourceId = lessonId;
+		params.route.ressourceId = lessonId; // todo check if it can removed
 		params.route.lessonId = lessonId;
 
-		const { authorization, route: { courseId }, user } = params;
-		const coursePermissions = await this.app.serviceRoute('server/courses/userPermissions')
-			.get(user.id, authorization, { courseId });
+		const { authorization, route: { courseId } } = params;
+		const courseMembers = await this.app.serviceRoute('server/courses/members')
+			.find(authorization, { courseId });
 
 		const users = {
 			read: [],
-			write: ['0000d231816abba584714c9e', '59ad4c412b442b7f81810285'], // todo replace
+			write: [],
 		};
+
+		Object.entries(courseMembers).forEach(([userId, perms]) => {
+			if (perms.includes(DEFAULT_CREATE_PERMISSION)) {
+				users.write.push(userId);
+			} else if (perms.includes(DEFAULT_VIEW_PERMISSION)) {
+				users.read.push(userId);
+			} else {
+				this.app.logger.warning(`User with id ${userId} has no permission to add it to lesson.`);
+			}
+		});
+
 		try {
 			// const res = await coursePermissions(courseId, { authorization });
 			this.app.logger.warning('Course fetch data do not exist');
