@@ -1,6 +1,8 @@
 const axios = require('axios');
 const queryString = require('query-string');
 
+const { systemInfo } = require('../logger');
+
 class ServiceRoute {
 	constructor({
 		baseURL, uri, timeout = 4000, allowedMethods,
@@ -144,7 +146,7 @@ class ServiceRouteApplication {
 			}
 			this.routes[path] = serviceRoute;
 			// eslint-disable-next-line no-console
-			console.log(`Register service route ${path}.`);
+			systemInfo(`Register service route ${path}.`);
 			return serviceRoute.getWrapper();
 		};
 	}

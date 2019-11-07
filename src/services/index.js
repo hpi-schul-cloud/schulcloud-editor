@@ -4,6 +4,7 @@ const syncGroups = require('./syncGroups');
 const sections = require('./sections');
 const viewports = require('./viewports');
 const permissionsHelper = require('./permissionsHelper');
+const { systemInfo } = require('../logger');
 // Events
 
 module.exports = (app) => {
@@ -27,5 +28,5 @@ module.exports = (app) => {
 	}));
 
 	// eslint-disable-next-line no-console
-	console.log('Configure services completed!');
+	systemInfo('Configure services completed!');
 };

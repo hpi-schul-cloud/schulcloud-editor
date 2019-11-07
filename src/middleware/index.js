@@ -1,4 +1,5 @@
 /* eslint-disable no-console */
+const { systemInfo } = require('../logger');
 const addLoggerToApp = require('./addLoggerToApp');
 const requestLogs = require('./requestLogs');
 const ping = require('./ping');
@@ -7,18 +8,25 @@ const addHeaderToContext = require('./addHeaderToContext');
 const aggregateAppVars = require('./aggregateAppVars');
 const socket = require('./socket');
 
+
+const executeWithSystemInfo = app => (middleware, info) => {
+	app.configure(middleware);
+	if (info) systemInfo(`[middleware] ${info}`);
+};
+
 module.exports = function setup(app) {
-	console.log('***** Configure additional middleware operations *****\n');
+	systemInfo('***** Configure additional middleware operations *****\n');
 
-	// important that logger is add as first
-	app.configure(addLoggerToApp);
+	const exec = executeWithSystemInfo(app);
+
+	exec(addLoggerToApp, 'logger to app'); // todo is not a middleware
 	// app.configure(redis);
-	app.configure(addHeaderToContext);
-	app.configure(ping);
-	app.configure(apiJwtHandler);
-	app.configure(requestLogs);
-	app.configure(aggregateAppVars);
-	app.configure(socket);
+	exec(addHeaderToContext, 'Add header information to feather context.');
+	exec(ping, 'Set ping route.'); // no middleware
+	exec(apiJwtHandler, 'Add jwt decoder.');
+	exec(requestLogs, 'Set request logging.');
+	exec(aggregateAppVars, 'Aggregate app vars.'); // no middleware
+	exec(socket, 'Add socket connections');
 
-	console.log('\n******************************************************\n');
+	systemInfo('\n******************************************************\n');
 };

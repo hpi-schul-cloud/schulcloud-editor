@@ -15,12 +15,14 @@ const middleware = require('./middleware');
 const swagger = require('./swagger');
 const handleResponseType = require('./middleware/handleResponseType');
 const routes = require('./routes');
+const { systemInfo } = require('./logger');
 
-console.log('\n******************** process.env *********************\n');
+systemInfo('\n******************** process.env *********************\n');
 ['NODE_CONFIG_DIR', 'NODE_ENV']
-	.forEach(key => console.log(key, process.env[key]));
-console.log('From config file:', configuration()());
-console.log('\n');
+	.forEach(key => systemInfo(key, process.env[key]));
+systemInfo('From config file:');
+systemInfo(configuration()());
+systemInfo('\n');
 
 const app = express(feathers())
 	.configure(configuration())
