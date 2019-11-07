@@ -2,7 +2,7 @@
  * @method create
  * @param {*} context
  */
-const setCourseId = (context) => {
+const setDefaultName = (context) => {
 	const { title } = context.data;
 	if (!title || title === '') {
 		const date = new Date();
@@ -17,4 +17,4 @@ const setCourseId = (context) => {
 	return context;
 };
 
-module.exports = setCourseId;
+module.exports = setDefaultName;
