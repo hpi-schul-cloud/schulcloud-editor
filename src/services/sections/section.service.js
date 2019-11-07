@@ -174,10 +174,12 @@ class SectionService {
 		const section = await this.app.service(this.baseService)
 			.create(data, prepareParams(params));
 
-		await app.service('models/LessonModel')
-			.patch(lessonId,
-				{ $push: { sections: section._id } },
-				prepareParams(params));
+		if (!payload.syncGroups) {
+			await app.service('models/LessonModel')
+				.patch(lessonId,
+					{ $push: { sections: section._id } },
+					prepareParams(params));
+		}
 
 		return {
 			_id: section._id,
