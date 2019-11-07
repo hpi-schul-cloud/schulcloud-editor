@@ -182,16 +182,30 @@ class Lessons {
 		}
 	}
 
+	async createEmptySection(_lessonId, syncGroups, params) {
+		const lessonId = _lessonId.toString();
+		params.route.lessonId = lessonId;
+		params.payload = { syncGroups };
+		return this.app.service('/lesson/:lessonId/sections')
+			.create({ lessonId }, params);
+	}
+
 	async create(data, params) {
 		try {
 			const $lesson = new LessonModel({
 				...data,
 			});
+			const lessonId = $lesson._id;
 
 			const defaultGroups = await this.createDefaultGroups($lesson, params);
 			const permissionService = this.app.service('course/:courseId/lessons/:ressourceId/permission');
 			const key = permissionService.permissionKey;
-			$lesson[key] = await permissionService.createDefaultPermissionsData(defaultGroups);
+			const [permissionsData, emptySection] = await Promise.all([
+				permissionService.createDefaultPermissionsData(defaultGroups),
+				this.createEmptySection(lessonId, defaultGroups, params),
+			]);
+			$lesson[key] = permissionsData;
+			$lesson.sections.push(emptySection._id);
 
 			await $lesson.save();
 			return { _id: $lesson._id };
