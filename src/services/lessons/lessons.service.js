@@ -169,7 +169,7 @@ class Lessons {
 			} else if (perms.includes(DEFAULT_VIEW_PERMISSION)) {
 				users.read.push(userId);
 			} else {
-				this.app.warning(`User with id ${userId} has no permission to add it to code.`);
+				this.app.warning(`User with id ${userId} has no permission to add it to lesson.`);
 			}
 		});
 
