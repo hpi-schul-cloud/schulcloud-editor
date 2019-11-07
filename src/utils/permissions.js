@@ -8,9 +8,9 @@ const saveSelect = (base, key, fallbackValue) => {
 };
 
 const userIsInside = (users = [], userId) => users.some(id => id.toString() === userId.toString());
-const isInUsers = (permissions, userId) => permissions.some(perm => userIsInside(perm.users, userId));
+const isInUsers = (permissions = [], userId) => permissions.some(perm => userIsInside(perm.users, userId));
 // eslint-disable-next-line max-len
-const isInGroup = (permissions, userId) => permissions.some(perm => userIsInside(saveSelect(perm.group, 'users', []), userId));
+const isInGroup = (permissions = [], userId) => permissions.some(perm => userIsInside(saveSelect(perm.group, 'users', []), userId));
 const userIsInGroupOrUsers = (permissions, userId) => {
 	if (!userId) {
 		return false;

@@ -65,6 +65,7 @@ class SectionService {
 		this.err = {
 			softDelete: 'Can not set soft delete.',
 			noAccess: 'You have no access.',
+			createWithoutPermissionGroups: 'Something are wrong please check your request. (1)',
 		};
 	}
 
@@ -135,7 +136,7 @@ class SectionService {
 	}
 
 	async create(data, params) {
-		const { route: { lessonId }, user } = params;
+		const { route: { lessonId }, user, payload = {} } = params;
 		const { app } = this;
 
 		data.ref = {
@@ -144,10 +145,20 @@ class SectionService {
 		};
 		data.context = 'section';
 
-		const internParams = prepareParams(params);
-		internParams.query.lessonId = lessonId;
-		// todo only write group as default?
-		const { data: syncGroups } = await app.service('models/syncGroup').find(internParams);
+		let syncGroups;
+		if (payload.syncGroups) {
+			({ syncGroups } = payload);
+		} else {
+			// todo only write group as default?
+			const internParams = prepareParams(params);
+			internParams.query.lessonId = lessonId;
+			const syncGroupsResponse = await app.service('models/syncGroup').find(internParams);
+			syncGroups = syncGroupsResponse.data;
+		}
+
+		if (syncGroups.length <= 0) {
+			throw new Forbidden(this.err.createWithoutPermissionGroups);
+		}
 
 		// check permissions -> userId must exist in own of the syncGroups with write permissions
 		const syncGroupWritePermission = syncGroups.filter(g => g.permission === 'write');
