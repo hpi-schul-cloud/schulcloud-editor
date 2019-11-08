@@ -174,9 +174,6 @@ class Lessons {
 		});
 
 		try {
-			// const res = await coursePermissions(courseId, { authorization });
-			this.app.logger.warning('Course fetch data do not exist');
-
 			const readGroupPromise = this.app.service('models/syncGroup').create({
 				users: users.read,
 				permission: 'read',
