@@ -30,7 +30,7 @@ const isActivated = ({ endDate, publishDate, activated }) => {
 	&& (date > publishDate || publishDate === null);
 };
 
-const access = (basePermissions, user, permissionTyp) => {
+const access = (basePermissions = [], user, permissionTyp) => {
 	const validPermissions = basePermissions.filter(
 		perm => perm[permissionTyp] === true && isActivated(perm),
 	);
@@ -50,7 +50,7 @@ const hasRead = (permissions, user) => access(permissions, user, 'read') || acce
 /**
  * @param {*} permissions
  */
-const couldAnyoneOnlyRead = permissions => permissions.some(permission => permission.read);
+const couldAnyoneOnlyRead = (permissions = []) => permissions.some(permission => permission.read);
 
 /**
  * @ref permissions
