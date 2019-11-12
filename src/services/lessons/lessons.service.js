@@ -14,8 +14,8 @@ const { create: createSchema, patch: patchSchema } = require('./schemes');
 const { LessonModel } = require('./models/');
 const { setCourseId, defaultName } = require('./hooks/');
 
-const DEFAULT_CREATE_PERMISSION = 'LESSONS_CREATE';
-const DEFAULT_VIEW_PERMISSION = 'LESSONS_VIEW';
+const DEFAULT_CREATE_PERMISSIONS = ['LESSONS_CREATE', 'TOPIC_CREATE'];
+const DEFAULT_VIEW_PERMISSIONS = ['LESSONS_VIEW', 'TOPIC_VIEW'];
 
 const lessonsHooks = {
 	before: {
@@ -25,7 +25,7 @@ const lessonsHooks = {
 			setCourseId,
 			defaultName,
 			validateSchema(createSchema, Ajv),
-			checkCoursePermission(DEFAULT_CREATE_PERMISSION),
+			checkCoursePermission(DEFAULT_CREATE_PERMISSIONS),
 		],
 		patch: [
 			validateSchema(patchSchema, Ajv),
@@ -164,9 +164,9 @@ class Lessons {
 		};
 
 		Object.entries(courseMembers).forEach(([userId, perms]) => {
-			if (perms.includes(DEFAULT_CREATE_PERMISSION)) {
+			if (DEFAULT_CREATE_PERMISSIONS.some(p => perms.includes(p))) {
 				users.write.push(userId);
-			} else if (perms.includes(DEFAULT_VIEW_PERMISSION)) {
+			} else if (DEFAULT_VIEW_PERMISSIONS.some(p => perms.includes(p))) {
 				users.read.push(userId);
 			} else {
 				this.app.logger.warning(`User with id ${userId} has no permission to add it to lesson.`);
@@ -199,7 +199,7 @@ class Lessons {
 		params.route.lessonId = lessonId;
 		params.payload = { syncGroups };
 		return this.app.service('/lesson/:lessonId/sections')
-			.create({ lessonId }, params);
+			.create({}, params);
 	}
 
 	async create(data, params) {

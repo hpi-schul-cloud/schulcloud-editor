@@ -1,0 +1,19 @@
+{
+	"$schema": "http://json-schema.org/draft-07/schema#",
+	"type": "object",
+	"title": "SectionCreate",
+	"required": [],
+	"properties": {
+    	"title": {
+    		"type": "string"
+    	},
+		"state": {
+ 			"type": "object"
+		},
+		"createdBy": {
+			"type": "string",
+			"pattern": "[a-f0-9]{24}"
+		}
+	},
+	"additionalProperties": false
+}
