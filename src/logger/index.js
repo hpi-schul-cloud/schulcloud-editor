@@ -75,6 +75,7 @@ const request = req => systemLogger.http({
 
 module.exports = {
 	logger,
+	externInfo: systemLogger.warn,
 	requestInfo: request,
 	systemInfo: systemLogger.info,
 };
