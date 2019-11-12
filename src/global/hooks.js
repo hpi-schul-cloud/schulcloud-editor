@@ -23,9 +23,9 @@ const filterOutResults = (...keys) => (context) => {
 /**
  * Request Course service to get permissions
  *
- * @param {Array::string} allowedPermissions
+ * @param {String || ...Strings} allowedPermissions
  */
-const checkCoursePermission = allowedPermissions => async (context) => {
+const checkCoursePermission = (...allowedPermissions) => async (context) => {
 	const {
 		params: {
 			user, route: { courseId }, authorization,

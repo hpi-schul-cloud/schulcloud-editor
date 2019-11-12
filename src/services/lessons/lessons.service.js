@@ -25,7 +25,7 @@ const lessonsHooks = {
 			setCourseId,
 			defaultName,
 			validateSchema(createSchema, Ajv),
-			checkCoursePermission(DEFAULT_CREATE_PERMISSIONS),
+			checkCoursePermission(...DEFAULT_CREATE_PERMISSIONS),
 		],
 		patch: [
 			validateSchema(patchSchema, Ajv),

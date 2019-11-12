@@ -2,7 +2,9 @@
 	"$schema": "http://json-schema.org/draft-07/schema#",
 	"type": "object",
 	"title": "SectionPatch",
-	"required": [],
+	"required": [
+		"updatedBy"
+	],
 	"properties": {
     	"title": {
     		"type": "string"

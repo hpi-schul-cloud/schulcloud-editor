@@ -40,7 +40,7 @@ logger.event = event(logger, ['create', 'remove', 'update', 'patch']);
 
 const systemLogger = winston.createLogger({
 	level: systemLogLevel,
-	levels: {
+	levels: {			// todo syslog levels ?
 		error: 0,
 		warn: 1,
 		info: 2,
@@ -64,7 +64,7 @@ const systemLogger = winston.createLogger({
 		}),
 	],
 });
-systemLogger.request = req => systemLogger.http({
+const request = req => systemLogger.http({
 	userId: req.feathers.userId,
 	url: req.url,
 	data: req.body,
@@ -73,6 +73,6 @@ systemLogger.request = req => systemLogger.http({
 
 module.exports = {
 	logger,
-	requestInfo: systemLogger.request,
+	requestInfo: request,
 	systemInfo: systemLogger.info,
 };
