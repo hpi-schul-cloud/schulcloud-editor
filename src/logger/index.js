@@ -24,7 +24,7 @@ const logger = winston.createLogger({
 	levels: winston.config.syslog.levels,
 	format: winston.format.combine(
 		winston.format.timestamp(), // adds current timestamp
-		winston.format.ms(),	// adds time since last log
+	//	winston.format.ms(),	// adds time since last log
 		winston.format.prettyPrint(), // Use 'winston.format.prettyPrint()' for string output
 	),
 	transports: [
@@ -65,10 +65,12 @@ const systemLogger = winston.createLogger({
 	],
 });
 const request = req => systemLogger.http({
+	type: 'Request',
 	userId: req.feathers.userId,
 	url: req.url,
 	data: req.body,
 	method: req.method,
+	timestamp: new Date(),
 });
 
 module.exports = {
