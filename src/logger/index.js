@@ -1,7 +1,7 @@
 const winston = require('winston');
 const event = require('./event');
 
-const systemLogLevel = process.env.SYSTEM_LOG_LEVEL || 'http';
+const systemLogLevel = process.env.SYSTEM_LOG_LEVEL || 'sendRequests';
 let logLevel = process.env.LOG_LEVEL;
 
 if (!logLevel) {
