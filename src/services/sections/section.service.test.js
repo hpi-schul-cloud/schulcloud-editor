@@ -264,7 +264,7 @@ describe('sections/section.service.js', () => {
 			id: section._id, userId, lessonId, data: { ref: refNew },
 		});
 
-		expect(status).to.equal(404);
+		expect(status).to.equal(400);
 	});
 
 	it('update with permission should not work', async () => {

@@ -1,17 +1,21 @@
 const { Forbidden } = require('@feathersjs/errors');
 const { disallow } = require('feathers-hooks-common');
+const { validateSchema } = require('feathers-hooks-common');
+const Ajv = require('ajv');
 
 const { filterOutResults, joinChannel, createChannel } = require('../../global/hooks');
 const {
 	prepareParams,
 	permissions,
-	paginate,
-	removeKeyFromList,
 	convertSuccessMongoPatchResponse,
 	modifiedParamsToReturnPatchResponse,
 } = require('../../utils');
 
-// todo validation
+const { 
+	create: createSchema,
+	patch: patchSchema,
+} = require('./schemas');
+
 const SectionServiceHooks = {};
 SectionServiceHooks.before = {
 	all: [],
@@ -20,11 +24,13 @@ SectionServiceHooks.before = {
 	get: [
 	],
 	create: [
+		validateSchema(createSchema, Ajv),
 	],
 	update: [
 		disallow(),
 	],
 	patch: [
+		validateSchema(patchSchema, Ajv),
 	],
 	remove: [
 	],
@@ -49,13 +55,7 @@ SectionServiceHooks.after = {
 };
 
 SectionServiceHooks.error = {
-	all: [
-	/*	(context) => {
-			if (context.error) {
-				throw new Forbidden('Can not execute', context.error);
-			}
-		}, */
-	],
+	all: [],
 };
 
 class SectionService {
@@ -139,6 +139,7 @@ class SectionService {
 		const { route: { lessonId }, user, payload = {} } = params;
 		const { app } = this;
 
+		// todo refactor later -> context and ref
 		data.ref = {
 			target: lessonId,
 			targetModel: 'lesson',
