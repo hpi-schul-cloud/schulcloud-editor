@@ -24,8 +24,9 @@ const logger = winston.createLogger({
 	levels: winston.config.syslog.levels,
 	format: winston.format.combine(
 		winston.format.timestamp(), // adds current timestamp
-	//	winston.format.ms(),	// adds time since last log
+		//	winston.format.ms(),	// adds time since last log
 		winston.format.prettyPrint(), // Use 'winston.format.prettyPrint()' for string output
+		// todo format for MethodNotAllowed: Method `update` is not supported by this endpoint.  -> MethodNotAllowed:
 	),
 	transports: [
 		new winston.transports.Console({
@@ -42,17 +43,17 @@ const systemLogger = winston.createLogger({
 	level: systemLogLevel,
 	levels: {			// todo syslog levels ?
 		error: 0,
-		warn: 1,
-		info: 2,
-		http: 3,
+		systemLogs: 1,
+		request: 2,
+		sendRequests: 3,
 	},
 	format: winston.format.combine(
 		winston.format.colorize({
 			colors: {
 				error: 'red',
-				warn: 'blue',
-				info: 'green',
-				http: 'yellow',
+				systemLogs: 'green',
+				request: 'yellow',
+				sendRequests: 'blue',
 			},
 			message: true,
 		}),
@@ -64,7 +65,7 @@ const systemLogger = winston.createLogger({
 		}),
 	],
 });
-const request = req => systemLogger.http({
+const request = req => systemLogger.request({
 	type: 'Request',
 	userId: req.feathers.userId,
 	url: req.url,
@@ -75,7 +76,7 @@ const request = req => systemLogger.http({
 
 module.exports = {
 	logger,
-	externInfo: systemLogger.warn,
+	sendRequests: systemLogger.sendRequests,
 	requestInfo: request,
-	systemInfo: systemLogger.info,
+	systemInfo: systemLogger.systemLogs,
 };

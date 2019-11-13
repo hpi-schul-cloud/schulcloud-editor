@@ -1,9 +1,9 @@
 const express = require('@feathersjs/express');
 const feathers = require('@feathersjs/feathers');
 const decode = require('jwt-decode');
-const { BadRequest, NotFound, Forbidden } = require('@feathersjs/errors');
+const { BadRequest, Forbidden } = require('@feathersjs/errors');
 
-const { externInfo } = require('../logger');
+const { systemInfo } = require('../logger');
 const { server: serverDB } = require('./defaultData');
 const { setupApplication, ServiceRoute } = require('../routes/ServiceRoutes');
 
@@ -29,12 +29,12 @@ class ServerMock {
 		try {
 			this.server = await this.app.listen(this.port);
 		} catch (err) {
-			externInfo(err);
+			systemInfo(err);
 			return this.app;
 		}
 
 		// eslint-disable-next-line no-console
-		externInfo(`Mock-Server is started at port:${this.port}`);
+		systemInfo(`Mock-Server is started at port:${this.port}`);
 		// todo configure which routes should override
 
 		const testUri = '/test';
@@ -80,8 +80,8 @@ class ServerMock {
 		this.app.get(testUri + courseMembersUri, this.members.bind(this));
 
 		// eslint-disable-next-line no-console
-		externInfo('Mock-Server routes:');
-		externInfo(getRoutes(this.app));
+		systemInfo('Mock-Server routes:');
+		systemInfo(getRoutes(this.app));
 		return this.app;
 	}
 
