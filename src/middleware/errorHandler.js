@@ -5,8 +5,8 @@ const formatErrors = app => (error, req, res, next) => {
 	if (error) {
 		// app.logger.info(error.stack);
 		// clear for extern
-		error.stack = null;
-		error.data = undefined;
+		delete error.stack;
+		delete error.data;
 	}
 
 	next(error);
