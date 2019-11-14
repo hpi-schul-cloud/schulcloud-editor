@@ -4,7 +4,7 @@ const path = require('path');
 const feathers = require('@feathersjs/feathers');
 const express = require('@feathersjs/express');
 
-process.env.NODE_CONFIG_DIR = path.join(__dirname, '..', 'config');
+process.env.NODE_CONFIG_DIR = process.env.NODE_CONFIG_DIR || path.join(__dirname, '..', 'config');
 process.env.NODE_ENV = process.env.NODE_ENV || 'default';
 const configuration = require('@feathersjs/configuration');
 
