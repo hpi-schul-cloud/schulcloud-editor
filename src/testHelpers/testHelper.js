@@ -76,8 +76,10 @@ class TestHelperService {
 	 */
 	async sendRequestToThisService(method, settings) {
 		const {
-			id, userId, query = '', data: sendData,
+			id, userId, data: sendData,
 		} = settings;
+		let { query } = settings;
+
 		if (['remove', 'delete', 'update', 'patch'].includes(method) && !id) {
 			this.warn(`Method ${method} required to set a id. Please add it with settings.id.`);
 		}
@@ -94,14 +96,11 @@ class TestHelperService {
 		});
 
 		if (id) { url += `/${id}`; }
-		if (query) {
-			if (typeof query === 'string') {
-				url += query;
-			} else {
-				url += queryString.stringify(query, { arrayFormat: 'bracket' });
-			}
+		if (query) { url += '?'; }
+		if (typeof query === 'object') {
+			query = queryString.stringify(query, { arrayFormat: 'bracket' });
 		}
-		url += query;
+		url += query || '';
 
 		const requestParams = {
 			method,

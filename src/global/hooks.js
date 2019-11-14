@@ -23,9 +23,9 @@ const filterOutResults = (...keys) => (context) => {
 /**
  * Request Course service to get permissions
  *
- * @param {string} permission
+ * @param {String || ...Strings} allowedPermissions
  */
-const checkCoursePermission = permission => async (context) => {
+const checkCoursePermission = (...allowedPermissions) => async (context) => {
 	const {
 		params: {
 			user, route: { courseId }, authorization,
@@ -40,7 +40,7 @@ const checkCoursePermission = permission => async (context) => {
 		throw new BadRequest('Can not request server.', permissions);
 	}
 
-	if (!permissions.includes(permission)) {
+	if (!allowedPermissions.some(perm => permissions.includes(perm))) {
 		throw new Forbidden('Missing privileges');
 	}
 
