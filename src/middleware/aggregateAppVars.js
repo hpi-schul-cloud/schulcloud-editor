@@ -1,5 +1,6 @@
 const configuration = require('@feathersjs/configuration');
 
+const { version } = require('../../package.json');
 const { systemInfo } = require('../logger');
 
 const aggregateAppVars = (app) => {
@@ -8,10 +9,13 @@ const aggregateAppVars = (app) => {
 	const port = app.get('port');
 	app.set('baseEditorUrl', `${protocol}://${host}:${port}`);
 
+	app.set('version', version);
+
 	systemInfo('\n******************** env *********************');
 
 	systemInfo('\nFrom aggregation:');
-	systemInfo('baseEditorUrl', app.get('baseEditorUrl'));
+	systemInfo(`baseEditorUrl ${app.get('baseEditorUrl')}`);
+	systemInfo(`version ${app.get('version')}`);
 
 	systemInfo('\nFrom process.env:');
 	['NODE_CONFIG_DIR', 'NODE_ENV', 'EDITOR_BACKEND_SENTRY_DSN', 'SC_DOMAIN']

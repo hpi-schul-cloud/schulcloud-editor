@@ -1,21 +1,12 @@
 const Sentry = require('@sentry/node');
 
 const { systemInfo } = require('../logger');
-const { version } = require('../../package.json');
 
-const removeIds = (url) => {
-	const checkForHexRegExp = /[a-f\d]{24}/ig;
-	return url.replace(checkForHexRegExp, 'ID');
-};
-
-const middleware = (req, res, next) => {
-	Sentry.configureScope((scope) => {
-		// todo request combine with request params
-		const { url, headers } = req;
-		scope.request = { url: removeIds(url), headers };
-	});
-	// to test it: Sentry.captureMessage('Something went wrong');
-	return next();
+const replaceIds = (string) => {
+	if (string) {
+		return string.replace(/[a-f\d]{24}/ig, '[id]');
+	}
+	return string;
 };
 
 module.exports = (app) => {
@@ -25,10 +16,24 @@ module.exports = (app) => {
 		Sentry.init({
 			dsn: DSN,
 			environment: app.get('NODE_ENV'),
-			release: version,
+			release: app.get('version'),
 			integrations: [
-				new Sentry.Integrations.Console(),
+				new Sentry.Integrations.Console({
+					dsn: DSN,
+				}),
 			],
+			beforeSend(event, hint) {
+				// todo filter which errors should send to sentry
+				// eslint-disable-next-line camelcase
+				const { request: { data, url, query_string } } = event;
+
+				event.request.data = replaceIds(data);
+				event.request.url = replaceIds(url);
+				event.request.query_string = replaceIds(query_string);
+
+				app.logger.info('Error is send to sentry!');
+				return event;
+			},
 		});
 		Sentry.configureScope((scope) => {
 			scope.setTag('frontend', false);
@@ -37,8 +42,5 @@ module.exports = (app) => {
 			// scope.setTag('sha', sha); todo add it later
 		});
 		app.use(Sentry.Handlers.requestHandler());
-		app.use(Sentry.Handlers.errorHandler());
-
-		app.use(middleware);
 	}
 };

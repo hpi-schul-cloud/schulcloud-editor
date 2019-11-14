@@ -14,6 +14,7 @@ const services = require('./services/');
 const middleware = require('./middleware');
 const swagger = require('./swagger');
 const handleResponseType = require('./middleware/handleResponseType');
+const errorHandling = require('./middleware/errorHandler');
 const routes = require('./routes');
 
 const app = express(feathers())
@@ -28,12 +29,6 @@ const app = express(feathers())
 	.configure(routes)
 	.configure(services)
 	.hooks(hooks)
-	.use(express.errorHandler({
-		// force format html error to json
-		// eslint-disable-next-line no-unused-vars
-		html: (error, req, res, next) => {
-			res.json(error);
-		},
-	}));
+	.configure(errorHandling);
 
 module.exports = app;

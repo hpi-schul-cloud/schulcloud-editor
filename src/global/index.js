@@ -3,6 +3,8 @@ const { GeneralError, Forbidden } = require('@feathersjs/errors');
 const { iff, isProvider } = require('feathers-hooks-common');
 const { filterOutResults } = require('./hooks');
 
+const { redInfo } = require('../logger');
+
 const addUserId = (context) => {
 	if (context.params.userId) {
 		// todo validate mongoose id
@@ -45,14 +47,14 @@ const errorHandler = (ctx) => {
 		if (!ctx.error.code) {
 			ctx.error = new GeneralError(ctx.error.message || 'server error', ctx.error.stack || '');
 		}
-
+		redInfo(`(${ctx.error.code}) Route: ${ctx.path} - ${ctx.error.message}`);
 		ctx.app.logger.error(ctx.error);
 
-		if (process.env.NODE_ENV === 'production') {
-			ctx.error.stack = null;
-			ctx.error.data = undefined;
+		// for error handling in sentrys and logs remove this keys
+		if (ctx.data) {
+			delete ctx.data.createdBy;
+			delete ctx.data.updatedBy;
 		}
-
 		return ctx;
 	}
 	ctx.app.logger.warning('Error with no error key is throw. Error logic can not handle it.');

@@ -19,26 +19,6 @@ if (!logLevel) {
 	}
 }
 
-const logger = winston.createLogger({
-	level: logLevel,
-	levels: winston.config.syslog.levels,
-	format: winston.format.combine(
-		winston.format.timestamp(), // adds current timestamp
-		//	winston.format.ms(),	// adds time since last log
-		winston.format.prettyPrint(), // Use 'winston.format.prettyPrint()' for string output
-		// todo format for MethodNotAllowed: Method `update` is not supported by this endpoint.  -> MethodNotAllowed:
-	),
-	transports: [
-		new winston.transports.Console({
-			logLevel,
-			handleExceptions: true,
-		}),
-	],
-});
-
-// add events log for methods
-logger.event = event(logger, ['create', 'remove', 'update', 'patch']);
-
 const systemLogger = winston.createLogger({
 	level: systemLogLevel,
 	levels: {			// todo syslog levels ?
@@ -74,8 +54,30 @@ const request = req => systemLogger.request({
 	timestamp: new Date(),
 });
 
+const logger = winston.createLogger({
+	level: logLevel,
+	levels: winston.config.syslog.levels,
+	format: winston.format.combine(
+		winston.format.timestamp(), // adds current timestamp
+		//	winston.format.ms(),	// adds time since last log
+		winston.format.prettyPrint(), // Use 'winston.format.prettyPrint()' for string output
+		// todo format for MethodNotAllowed: Method `update` is not supported by this endpoint.  -> MethodNotAllowed:
+	),
+	transports: [
+		new winston.transports.Console({
+			logLevel,
+			handleExceptions: true,
+		}),
+	],
+	exitOnError: false,
+});
+
+// add events log for methods
+logger.event = event(logger, ['create', 'remove', 'update', 'patch']);
+
 module.exports = {
 	logger,
+	redInfo: systemLogger.error,
 	sendRequests: systemLogger.sendRequests,
 	requestInfo: request,
 	systemInfo: systemLogger.systemLogs,
