@@ -8,12 +8,22 @@ const removeIds = (url) => {
 	return url.replace(checkForHexRegExp, 'ID');
 };
 
+const middleware = (req, res, next) => {
+	Sentry.configureScope((scope) => {
+		// todo request combine with request params
+		const { url, headers } = req;
+		scope.request = { url: removeIds(url), headers };
+	});
+	// to test it: Sentry.captureMessage('Something went wrong');
+	return next();
+};
+
 module.exports = (app) => {
-	const dns = app.get('EDITOR_BACKEND_SENTRY_DSN');
-	if (process.env.dns) {
-		systemInfo('Sentry reporting enabled using DSN', dns);
+	const DSN = app.get('EDITOR_BACKEND_SENTRY_DSN');
+	if (DSN) {
+		systemInfo(`Sentry reporting enabled using DSN ${DSN}`);
 		Sentry.init({
-			dsn: dns,
+			dsn: DSN,
 			environment: app.get('NODE_ENV'),
 			release: version,
 			integrations: [
@@ -23,19 +33,12 @@ module.exports = (app) => {
 		Sentry.configureScope((scope) => {
 			scope.setTag('frontend', false);
 			scope.setLevel('warning');
-			scope.setTag('domain', app.get('baseEditorUrl'));
+			scope.setTag('domain', app.get('SC_DOMAIN') || 'localhost');
 			// scope.setTag('sha', sha); todo add it later
 		});
 		app.use(Sentry.Handlers.requestHandler());
 		app.use(Sentry.Handlers.errorHandler());
 
-		app.use((req, res, next) => {
-			Sentry.configureScope((scope) => {
-				// todo add schoolId if logged in
-				const { url, header } = req;
-				scope.request = { url: removeIds(url), header };
-			});
-			return next();
-		});
+		app.use(middleware);
 	}
 };

@@ -15,14 +15,6 @@ const middleware = require('./middleware');
 const swagger = require('./swagger');
 const handleResponseType = require('./middleware/handleResponseType');
 const routes = require('./routes');
-const { systemInfo } = require('./logger');
-
-systemInfo('\n******************** process.env *********************\n');
-['NODE_CONFIG_DIR', 'NODE_ENV']
-	.forEach(key => systemInfo(`${key} ${process.env[key]}`));
-systemInfo('From config file:');
-systemInfo(configuration()());
-systemInfo('\n');
 
 const app = express(feathers())
 	.configure(configuration())
