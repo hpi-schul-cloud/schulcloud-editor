@@ -7,6 +7,7 @@ const { apiJwtHandler } = require('./handleJWTAndAddToContext');
 const addHeaderToContext = require('./addHeaderToContext');
 const aggregateAppVars = require('./aggregateAppVars');
 const socket = require('./socket');
+const sentry = require('./sentry');
 
 
 const executeWithSystemInfo = app => (middleware, info) => {
@@ -27,6 +28,7 @@ module.exports = function setup(app) {
 	exec(requestLogs, 'Set request logging.');
 	exec(aggregateAppVars, 'Aggregate app vars.'); // no middleware
 	exec(socket, 'Add socket connections');
+	exec(sentry, 'Add sentry for logging errors.');
 
 	systemInfo('\n******************************************************\n');
 };
