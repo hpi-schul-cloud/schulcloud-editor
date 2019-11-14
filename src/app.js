@@ -29,6 +29,6 @@ const app = express(feathers())
 	.configure(routes)
 	.configure(services)
 	.hooks(hooks)
-	.configure(errorHandling);
+	.configure(errorHandling); // important to execute after the hooks
 
 module.exports = app;
