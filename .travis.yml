@@ -7,6 +7,8 @@ branches:
     - master
     - /^greenkeeper/.*$/
     - /^(?i:release|hotfix).*$/
+stages:
+  - test
 jobs:
   include:
     - stage: test
