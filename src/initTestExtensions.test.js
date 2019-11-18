@@ -1,5 +1,5 @@
 // This file is to add mocha and chai extensions to execute it in tests.
-// Every execution of chai use is implicit a global adding for every that file after this is execute.
+// Every execution of chai use is implicit a global adding for every file after this is execute.
 // Also should this execute first.
 const chai = require('chai');
 const chaiThings = require('chai-things');
