@@ -30,9 +30,7 @@ const removeIdMiddleware = (event, hint, app) => {
 };
 
 const logItMiddleware = (event, hint, app) => {
-	if (event.environment === 'default') {
-		app.logger.info('Error is send to sentry!');
-	}
+	app.logger.info('Error is send to sentry!');
 	return event;
 };
 
