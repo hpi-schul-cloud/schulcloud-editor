@@ -43,9 +43,7 @@ const filterByErrorCodesMiddleware = (...errorCode) => (event, hint, app) => {
 	return event;
 };
 
-const skipIt = () => {
-	return undefined;
-};
+const skipItMiddleware = () => undefined;
 
 module.exports = (app) => {
 	const dsn = app.get('EDITOR_BACKEND_SENTRY_DSN');
@@ -64,7 +62,7 @@ module.exports = (app) => {
 		}
 		// do not execute for test runs
 		if (environment === 'test') {
-			middleware = [skipIt];
+			middleware = [skipItMiddleware];
 		}
 
 		const runMiddlewares = (event, hint, index = 0) => {
