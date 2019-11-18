@@ -1,26 +1,17 @@
-dist: bionic
+dist: xenial
 language: node_js
 node_js: '10.16'
-
-services:
-  - docker
-
 branches:
   only:
     - develop
     - master
-
+    - /^greenkeeper/.*$/
+    - /^(?i:release|hotfix).*$/
 jobs:
   include:
-
     - stage: test
-    script:
-      - npm test
-    name: test:mocha
-    cache: npm
-    install:
-      - sudo docker pull mongo:4.0
-      - sudo docker run -d -p 27017:27017 mongo:4.0
-      - npm ci
-      - npm i -g wait-on
-      - wait-on tcp:27017 -t 60000
+      name: test:mocha
+      script: npm test
+      cache: npm
+      services:
+        - mongodb
