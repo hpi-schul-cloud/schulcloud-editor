@@ -1,12 +1,6 @@
 dist: xenial
 language: node_js
 node_js: '10.16'
-branches:
-  only:
-    - develop
-    - master
-    - /^greenkeeper/.*$/
-    - /^(?i:release|hotfix).*$/
 stages:
   - test
 jobs:
