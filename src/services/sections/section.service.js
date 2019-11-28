@@ -1,4 +1,4 @@
-const { Forbidden } = require('@feathersjs/errors');
+const { Forbidden, BadRequest } = require('@feathersjs/errors');
 const { disallow } = require('feathers-hooks-common');
 const { validateSchema } = require('feathers-hooks-common');
 const Ajv = require('ajv');
@@ -11,7 +11,9 @@ const {
 	modifiedParamsToReturnPatchResponse,
 } = require('../../utils');
 
-const { 
+const { diffToMongo } = require('./utils');
+
+const {
 	create: createSchema,
 	patch: patchSchema,
 } = require('./schemas');
@@ -187,6 +189,16 @@ class SectionService {
 		};
 	}
 
+	manageStateDiffsIfProvided(data) {
+		if (data.stateDiff && data.state) {
+			throw new BadRequest('You can not provide state and stateDiff in same request.');
+		}
+		if (data.stateDiff) {
+			data.state = diffToMongo(data.stateDiff, 'state');
+		}
+		return data;
+	}
+
 	async patch(id, data, params) {
 		const internParams = this.setScope(prepareParams(params));
 		internParams.query.$select = ['permissions'];
@@ -198,7 +210,8 @@ class SectionService {
 			throw new Forbidden(this.err.noAccess);
 		}
 
-		return service.patch(id, data, internParams);
+
+		return service.patch(id, this.manageStateDiffsIfProvided(data), internParams);
 	}
 
 	setup(app) {

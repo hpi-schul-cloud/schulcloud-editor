@@ -20,8 +20,8 @@ module.exports = (app) => {
 		baseServiceName: path,
 	}));
 
-	const diffService = app.service(diffPath);
-	diffService.publish('patched', publishData(app, 'sections'));
+	// const diffService = app.service(diffPath);
+	// diffService.publish('patched', publishData(app, 'sections'));
 
 	const courseGroupsService = app.service(path);
 	courseGroupsService.hooks(SectionServiceHooks);
