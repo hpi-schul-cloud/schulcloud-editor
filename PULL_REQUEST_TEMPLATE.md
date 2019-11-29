@@ -4,7 +4,7 @@
 
 ## Allgemein
 - [ ] Links zu verwandten PRs anderer Repositories
-  - https://github.com/schul-cloud/schulcloud-client/pull/????
+  - https://github.com/schul-cloud/edtrio/pull/????
   - Im Ticket (oder PR, wenn kein Ticket): Beschreibung und Begründung der Änderung/Neuerungen
 - [ ] Link zum Ticket https://ticketsystem.schul-cloud.org/browse/SC-????
 
