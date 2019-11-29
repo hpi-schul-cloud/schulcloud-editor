@@ -1,9 +1,10 @@
 const batchOperations = require('./batchOperations');
 const mongoose = require('./mongoose');
-const pagination = require('./pagination');
+const { paginate, isPaginated } = require('./pagination');
 const params = require('./params');
 const query = require('./query');
 const permissions = require('./permissions');
+const { setUserScopePermission, setUserScopePermissionForFindRequests } = require('./setUserScopePermission');
 
 // permissions - Operations
 exports.permissions = permissions;
@@ -14,8 +15,10 @@ exports.removeKeyFromList = batchOperations.removeKeyFromList;
 // mongoose - Operations
 exports.addTypeString = mongoose.addTypeString;
 
-// paginate - Operations
-exports.paginate = pagination.paginate;
+// modifiedResult - Operations
+exports.paginate = paginate;
+exports.setUserScopePermission = setUserScopePermission;
+exports.setUserScopePermissionForFindRequests = setUserScopePermissionForFindRequests;
 
 // params - Operations
 exports.prepareParams = params.prepareParams;
@@ -24,3 +27,6 @@ exports.modifiedParamsToReturnPatchResponse = params.modifiedParamsToReturnPatch
 // query - Operations
 exports.dataToSetQuery = query.dataToSetQuery;
 exports.convertSuccessMongoPatchResponse = query.convertSuccessMongoPatchResponse;
+
+// test - Operations
+exports.isPaginated = isPaginated;

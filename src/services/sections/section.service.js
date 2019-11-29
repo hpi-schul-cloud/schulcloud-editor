@@ -9,6 +9,8 @@ const {
 	permissions,
 	convertSuccessMongoPatchResponse,
 	modifiedParamsToReturnPatchResponse,
+	setUserScopePermission,
+	setUserScopePermissionForFindRequests,
 } = require('../../utils');
 
 const { diffToMongo } = require('./utils');
@@ -96,7 +98,7 @@ class SectionService {
 		});
 
 		sections.data = filtered;
-		return sections;
+		return setUserScopePermissionForFindRequests(sections, params.user);
 	}
 
 	get(id, params) {
@@ -107,7 +109,7 @@ class SectionService {
 				if (!permissions.hasRead(section.permissions, params.user)) {
 					throw new Forbidden(this.err.noAccess);
 				}
-				return section;
+				return setUserScopePermission(section, section.permissions, params.user);
 			});
 	}
 
@@ -134,7 +136,7 @@ class SectionService {
 			.patch(lessonId,
 				{ $pull: { sections: section._id } },
 				prepareParams(params));
-		return result;
+		return setUserScopePermission(result, 'write');
 	}
 
 	async create(data, params) {
@@ -149,6 +151,7 @@ class SectionService {
 		data.context = 'section';
 
 		let syncGroups;
+		// todo remove if switch to intern call by lesson default section call
 		if (payload.syncGroups) {
 			({ syncGroups } = payload);
 		} else {
@@ -159,6 +162,7 @@ class SectionService {
 			syncGroups = syncGroupsResponse.data;
 		}
 
+		// todo check if can return by intern call by lesson default section call
 		if (syncGroups.length <= 0) {
 			throw new Forbidden(this.err.createWithoutPermissionGroups);
 		}
@@ -173,10 +177,12 @@ class SectionService {
 		const key = permService.permissionKey;
 		data[key] = await permService.createDefaultPermissionsData(syncGroups);
 
-		// TODO: add try catch
+		// TODO: add try catch and role back for patch from lessons
 		const section = await this.app.service(this.baseService)
 			.create(data, prepareParams(params));
 
+		// If section is created over the lesson, the lesson do not exist
+		// todo remove if switch to intern call by lesson default section call
 		if (!payload.syncGroups) {
 			await app.service('models/LessonModel')
 				.patch(lessonId,
@@ -184,9 +190,9 @@ class SectionService {
 					prepareParams(params));
 		}
 
-		return {
+		return setUserScopePermission({
 			_id: section._id,
-		};
+		}, 'write');
 	}
 
 	manageStateDiffsIfProvided(data) {
@@ -210,8 +216,8 @@ class SectionService {
 			throw new Forbidden(this.err.noAccess);
 		}
 
-
-		return service.patch(id, this.manageStateDiffsIfProvided(data), internParams);
+		const { _id } = await service.patch(id, this.manageStateDiffsIfProvided(data), internParams);
+		return setUserScopePermission({ _id }, 'write');
 	}
 
 	setup(app) {
