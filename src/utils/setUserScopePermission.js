@@ -4,7 +4,7 @@ const { isPaginated } = require('./pagination');
 const KEY_NAME = 'scopePermission'; // is forced by this utils
 
 /**
- * For every request it should return also the user scope, forced over this util.
+ * For every request it return also the user scope, forced over this util.
  * @param {ResultObject} result The request result, that should modified.
  * @param {String ||  Array::Permission} permissions
  * @param {String} permissionsAsString It is set directly for example in create request 'write'.
@@ -28,7 +28,7 @@ const setUserScopePermission = (result, permissions, user) => {
 };
 
 /**
- * For every request it should return also the user scope, forced over this util.
+ * For every request it return also the user scope, forced over this util.
  * This is only for paginated find results, please use setUserScopePermission for other requests.
  * !!! Is expensiv operation at the moment. !!!
  * @param {PaginatedResultObject||Array::ResultObject} paginatedResult The request result, that should modified.
