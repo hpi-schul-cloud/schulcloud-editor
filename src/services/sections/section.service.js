@@ -1,9 +1,12 @@
-const { Forbidden, BadRequest } = require('@feathersjs/errors');
-const { disallow } = require('feathers-hooks-common');
-const { validateSchema } = require('feathers-hooks-common');
 const Ajv = require('ajv');
+const { Forbidden, BadRequest } = require('@feathersjs/errors');
+const { disallow, validateSchema } = require('feathers-hooks-common');
 
-const { filterOutResults, joinChannel, createChannel } = require('../../global/hooks');
+const {
+	filterOutResults,
+	joinChannel,
+	createChannel,
+} = require('../../global/hooks');
 const {
 	prepareParams,
 	permissions,
@@ -12,54 +15,43 @@ const {
 	setUserScopePermission,
 	setUserScopePermissionForFindRequests,
 } = require('../../utils');
-
-const { diffToMongo } = require('./utils');
-
+const {
+	diffToMongo,
+} = require('./utils');
 const {
 	create: createSchema,
 	patch: patchSchema,
 } = require('./schemas');
 
-const SectionServiceHooks = {};
-SectionServiceHooks.before = {
-	all: [],
-	find: [
-	],
-	get: [
-	],
-	create: [
-		validateSchema(createSchema, Ajv),
-	],
-	update: [
-		disallow(),
-	],
-	patch: [
-		validateSchema(patchSchema, Ajv),
-	],
-	remove: [
-	],
-};
-
-SectionServiceHooks.after = {
-	all: [
-		filterOutResults('permissions'),
-	],
-	find: [
-		joinChannel('sections'),
-	],
-	get: [
-		joinChannel('sections'),
-	],
-	create: [
-		createChannel('sections', {
-			from: 'lessons',
-			prefixId: 'lessonId',
-		}),
-	],
-};
-
-SectionServiceHooks.error = {
-	all: [],
+const SectionServiceHooks = {
+	before: {
+		create: [
+			validateSchema(createSchema, Ajv),
+		],
+		update: [
+			disallow(),
+		],
+		patch: [
+			validateSchema(patchSchema, Ajv),
+		],
+	},
+	after: {
+		all: [
+			filterOutResults('permissions'),
+		],
+		find: [
+			joinChannel('sections'),
+		],
+		get: [
+			joinChannel('sections'),
+		],
+		create: [
+			createChannel('sections', {
+				from: 'lessons',
+				prefixId: 'lessonId',
+			}),
+		],
+	},
 };
 
 class SectionService {
@@ -200,14 +192,17 @@ class SectionService {
 			throw new BadRequest('You can not provide state and stateDiff in same request.');
 		}
 		if (data.stateDiff) {
-			data.state = diffToMongo(data.stateDiff, 'state');
+			const changes = diffToMongo(data.stateDiff);
+			// $set, $pull, $unset is override from changes
+			const newData = { ...data, ...changes };
+			return newData;
 		}
 		return data;
 	}
 
 	async patch(id, data, params) {
 		const internParams = this.setScope(prepareParams(params));
-		internParams.query.$select = ['permissions'];
+		internParams.query.$select = ['permissions', 'state'];
 
 		const service = this.app.service(this.baseService);
 		const section = await service.get(id, internParams);
@@ -216,8 +211,18 @@ class SectionService {
 			throw new Forbidden(this.err.noAccess);
 		}
 
-		const { _id } = await service.patch(id, this.manageStateDiffsIfProvided(data), internParams);
-		return setUserScopePermission({ _id }, 'write');
+		const { _id, state } = await service.patch(id, this.manageStateDiffsIfProvided(data), internParams);
+
+		const response = { _id };
+		const queryState = params.query.state;
+		if (data.stateDiff && ['all', 'diff'].includes(queryState)) {
+			response.stateDiff = data.stateDiff;
+		}
+
+		if (['all', 'state'].includes(queryState)) {
+			response.state = state;
+		}
+		return setUserScopePermission(response, 'write');
 	}
 
 	setup(app) {

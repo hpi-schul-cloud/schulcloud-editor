@@ -73,7 +73,7 @@ exports.before = {
 exports.after = {
 	// todo select is better but need more stable implementations
 	all: [iff(isProvider('external'),
-		filterOutResults('__v', 'createdAt', 'updatedAt', 'createdBy', 'updatedBy')),
+		filterOutResults('__v', 'createdAt', 'updatedAt')),
 	],
 	find: [],
 	get: [],

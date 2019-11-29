@@ -12,6 +12,9 @@
 		"state": {
  			"type": "object"
 		},
+		"stateDiff": {
+			"type": "object"
+	   	},
 		"updatedBy": {
 			"type": "string",
 			"pattern": "[a-f0-9]{24}"
