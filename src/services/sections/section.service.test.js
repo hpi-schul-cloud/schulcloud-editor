@@ -1,11 +1,16 @@
 const chai = require('chai');
+// const chaiThings = require('chai-things');
+
 const app = require('../../app');
 const { TestHelper } = require('../../testHelpers');
+const { KEY_NAME: userScopePermissionKey } = require('../../utils/setUserScopePermission');
 
-const { expect } = chai;
 const pathLesson = '/course/:courseId/lessons';
 const pathSection = 'lesson/:lessonId/sections';
 const pathSyncGroup = 'course​/:courseId​/lesson​/:lessonId/groups';
+
+const { expect } = chai;
+// chai.use(chaiThings);
 
 describe('sections/section.service.js', () => {
 	let editor;
@@ -74,9 +79,10 @@ describe('sections/section.service.js', () => {
 		// todo test if lesson sections is updated
 		expect(status).to.equal(201);
 		expect(data).to.an('object');
-		expect(Object.keys(data)).to.have.lengthOf(1);
+		expect(Object.keys(data)).to.have.lengthOf(2);
 		expect(data._id.toString()).to.a('string');
 		expect(data).to.not.have.property('permissions');
+		expect(data).to.have.property(userScopePermissionKey);
 	});
 
 	it('create with read permissions should not work', async () => {
@@ -136,6 +142,7 @@ describe('sections/section.service.js', () => {
 		expect(data.ref.target.toString()).to.equal(lessonId.toString());
 		expect(data.state).to.deep.equal(state);
 		expect(data).to.not.have.property('permissions');
+		expect(data).to.have.property(userScopePermissionKey);
 	});
 
 	it('get with write permissions should work', async () => {
@@ -158,6 +165,7 @@ describe('sections/section.service.js', () => {
 		expect(data.ref.target.toString()).to.equal(lessonId.toString());
 		expect(data.state).to.deep.equal(state);
 		expect(data).to.not.have.property('permissions');
+		expect(data).to.have.property(userScopePermissionKey);
 	});
 
 	it('get without permissions should not work', async () => {
@@ -191,10 +199,11 @@ describe('sections/section.service.js', () => {
 		const { status, data } = await sectionService.sendRequestToThisService('find', { userId, lessonId });
 
 		expect(status).to.equal(200);
-		expect(data).to.have.all.keys('total', 'limit', 'skip', 'data'); // paginated
+		expect(data).to.have.keys('total', 'limit', 'skip', 'data'); // paginated
 		expect(data.data).to.have.lengthOf(2);
 		expect(data.data[0]).to.not.have.property('permissions');
 		expect(data.data[0].ref.target.toString()).to.equal(lessonId.toString());
+		expect(data.data).all.have.property(userScopePermissionKey);
 	});
 
 
@@ -217,7 +226,8 @@ describe('sections/section.service.js', () => {
 		expect(status).to.equal(200);
 		expect(data).to.an('object');
 		expect(data._id.toString()).to.equal(section._id.toString());
-		expect(Object.keys(data)).to.have.lengthOf(1);
+		expect(Object.keys(data)).to.have.lengthOf(2);
+		expect(data).to.have.property(userScopePermissionKey);
 
 		const {
 			status: getStatus, data: getData,
@@ -308,6 +318,7 @@ describe('sections/section.service.js', () => {
 			expect(data).to.an('object');
 			expect(data._id.toString()).to.equal(section._id.toString());
 			expect(data.deletedAt).to.not.be.undefined;
+			expect(data).to.have.property(userScopePermissionKey);
 
 			expect(modelData._id.toString()).to.equal(section._id.toString());
 			expect(modelData.deletedAt).to.not.be.undefined;
