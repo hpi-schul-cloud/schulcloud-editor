@@ -1,11 +1,10 @@
-/* eslint-disable no-console */
 const cors = require('cors');
 const path = require('path');
 const feathers = require('@feathersjs/feathers');
 const express = require('@feathersjs/express');
 
 process.env.NODE_CONFIG_DIR = process.env.NODE_CONFIG_DIR || path.join(__dirname, '..', 'config');
-process.env.NODE_ENV = process.env.NODE_ENV || 'default';
+process.env.NODE_ENV = process.env.NODE_ENV || 'development';
 const configuration = require('@feathersjs/configuration');
 
 const hooks = require('./global/');
@@ -19,10 +18,10 @@ const routes = require('./routes');
 
 const app = express(feathers())
 	.configure(configuration())
-	.use(express.json())
-	.use(express.urlencoded({ extended: true }))
-	.use(cors())
-	.configure(express.rest(handleResponseType))
+	.use(express.json()) // TODO move to middleware
+	.use(express.urlencoded({ extended: true })) // TODO move to middleware
+	.use(cors()) // TODO: check if it must modified
+	.configure(express.rest(handleResponseType)) // @deprecated?
 	.configure(swagger)
 	.configure(database)
 	.configure(middleware)

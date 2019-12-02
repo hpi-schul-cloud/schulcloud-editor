@@ -29,19 +29,34 @@ const removeIdMiddleware = (event, hint, app) => {
 	return event;
 };
 
-const logItMiddleware = (event, hint, app) => {
-	app.logger.info('Error is send to sentry!');
+const removeJwtToken = (event) => {
+	delete event.request.headers.authorization;
 	return event;
+};
+
+const logItMiddleware = (sendToSentry = false) => (event, hint, app) => {
+	app.logger.info(
+		'If you are not in development mode, the error is sent to sentry at this point! '
+		+ 'If you actually want to send a real request to sentry, please modify sendToSentry.',
+	);
+	return sendToSentry ? event : null;
 };
 
 const filterByErrorCodesMiddleware = (...errorCode) => (event, hint, app) => {
 	if (errorCode.includes(hint.originalException.code)) {
-		return undefined;
+		return null;
 	}
 	return event;
 };
-
-const skipItMiddleware = () => undefined;
+/*
+const filterByErrorMessageMiddleware = (...errorMessage) => (event, hint, app) => {
+	if (errorMessage.includes(hint.originalException.message)) {
+		return null;
+	}
+	return event;
+};
+*/
+const skipItMiddleware = () => null;
 
 module.exports = (app) => {
 	const dsn = app.get('EDITOR_BACKEND_SENTRY_DSN');
@@ -53,10 +68,11 @@ module.exports = (app) => {
 		let middleware = [
 			filterByErrorCodesMiddleware(404),
 			removeIdMiddleware,
+			removeJwtToken,
 		];
 		// for local test runs, post feedback
-		if (environment === 'default') {
-			middleware.push(logItMiddleware);
+		if (environment === 'development') {
+			middleware.push(logItMiddleware(false));
 		}
 		// do not execute for test runs
 		if (environment === 'test') {
@@ -64,8 +80,8 @@ module.exports = (app) => {
 		}
 
 		const runMiddlewares = (event, hint, index = 0) => {
-			if (event === undefined) {
-				return undefined;
+			if (!event) {
+				return event;
 			}
 
 			if (middleware.length === index) {
@@ -82,11 +98,10 @@ module.exports = (app) => {
 			dsn,
 			environment,
 			release,
-			integrations: [
-				new Sentry.Integrations.Console({}),
-			],
+			sampleRate: 1.0,
 			beforeSend(event, hint) {
-				return runMiddlewares(event, hint);
+				const modifiedEvent = runMiddlewares(event, hint);
+				return modifiedEvent;
 			},
 		});
 

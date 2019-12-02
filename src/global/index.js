@@ -3,8 +3,6 @@ const { GeneralError, Forbidden } = require('@feathersjs/errors');
 const { iff, isProvider } = require('feathers-hooks-common');
 const { filterOutResults } = require('./hooks');
 
-const { redInfo } = require('../logger');
-
 const addUserId = (context) => {
 	if (context.params.userId) {
 		// todo validate mongoose id
@@ -36,28 +34,25 @@ const addUpadtedBy = (context) => {
 /**
  * For errors without error code create server error with code 500.
  * In production mode remove error stack and data.
- * @param {context} ctx
+ * @param {context} context
  */
-const errorHandler = (ctx) => {
-	if (ctx.error) {
-		if (ctx.error.hook) {
-			delete ctx.error.hook;
+const errorHandler = (context) => {
+	if (context.error) {
+		// too much for logging...
+		if (context.error.hook) {
+			delete context.error.hook;
 		}
+		// statusCode is return by extern services / or mocks that use express res.status(myCodeNumber)
+		context.error.code = context.error.code || context.error.statusCode;
+		if (!context.error.code) {
+			context.error = new GeneralError(context.error.message || 'server error', context.error.stack || '');
+		}
+		// in some cases is config set with secret informations like jwt
+		(context.error.data || {}).config = '<hide>';
 
-		if (!ctx.error.code) {
-			ctx.error = new GeneralError(ctx.error.message || 'server error', ctx.error.stack || '');
-		}
-		redInfo(`(${ctx.error.code}) Route: ${ctx.path} - ${ctx.error.message}`);
-		ctx.app.logger.error(ctx.error);
-
-		// for error handling in sentrys and logs remove this keys
-		if (ctx.data) {
-			delete ctx.data.createdBy;
-			delete ctx.data.updatedBy;
-		}
-		return ctx;
+		return context;
 	}
-	ctx.app.logger.warning('Error with no error key is throw. Error logic can not handle it.');
+	context.app.logger.warning('Error with no error key is throw. Error logic can not handle it.');
 
 	throw new GeneralError('server error');
 };
