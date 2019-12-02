@@ -5,6 +5,13 @@ const paginate = (data, params) => ({
 	data,
 });
 
+const isNumber = v => typeof v === 'number';
+const isPaginated = (obj = {}) => isNumber(obj.total)
+								&& isNumber(obj.total)
+								&& isNumber(obj.skip)
+								&& Array.isArray(obj.data);
+
 module.exports = {
 	paginate,
+	isPaginated,
 };

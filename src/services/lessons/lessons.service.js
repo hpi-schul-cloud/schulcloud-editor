@@ -8,7 +8,8 @@ const {
 	prepareParams,
 	permissions,
 	paginate,
-	removeKeyFromList,
+	setUserScopePermissionForFindRequests,
+	setUserScopePermission,
 } = require('../../utils');
 const { create: createSchema, patch: patchSchema } = require('./schemes');
 const { LessonModel } = require('./models/');
@@ -88,7 +89,8 @@ class Lessons {
 			}).lean()
 				.exec();
 
-			return paginate(permissions.filterHasRead(lessons, user), params);
+			const paginatedResult = paginate(permissions.filterHasRead(lessons, user), params);
+			return setUserScopePermissionForFindRequests(paginatedResult, user);
 		} catch (err) {
 			throw new BadRequest(this.err.find, err);
 		}
@@ -145,7 +147,7 @@ class Lessons {
 			lesson.sections = sections.data;
 		}
 
-		return lesson;
+		return setUserScopePermission(lesson, lesson.permissions, user);
 	}
 
 	async createDefaultGroups(lesson, _params) {
@@ -220,7 +222,7 @@ class Lessons {
 			$lesson.sections.push(emptySection._id);
 
 			await $lesson.save();
-			return { _id: $lesson._id };
+			return setUserScopePermission({ _id: $lesson._id }, 'wrtite');
 		} catch (err) {
 			throw new BadRequest(this.err.create, err);
 		}
@@ -251,10 +253,10 @@ class Lessons {
 				$lesson[key] = value;
 			});
 			await $lesson.save();
-			return {
+			return setUserScopePermission({
 				...data,
 				_id,
-			};
+			}, 'write');
 		} catch (err) {
 			throw new BadRequest(this.err.patch, err);
 		}
@@ -284,7 +286,7 @@ class Lessons {
 			const deletedAt = new Date();
 			$lesson.deletedAt = deletedAt;
 			await $lesson.save();
-			return { _id, deletedAt };
+			return setUserScopePermission({ _id, deletedAt }, 'write');
 		} catch (err) {
 			throw new BadRequest(this.err.remove, err);
 		}

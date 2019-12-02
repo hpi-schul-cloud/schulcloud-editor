@@ -1,17 +1,20 @@
 dist: xenial
 language: node_js
-node_js: '10.16'
+node_js:
+  - '10.16'
 branches:
   only:
-    - develop
+    - development
     - master
     - /^greenkeeper/.*$/
     - /^(?i:release|hotfix).*$/
+services:
+  - mongodb
+stages:
+  - test
 jobs:
   include:
     - stage: test
       name: test:mocha
       script: npm run test
       cache: npm
-      services:
-        - mongodb
