@@ -14,9 +14,11 @@ const shortErrorLine = (req, error) => {
 	redInfo(`(${error.code}) Route: ${req.path} - ${error.message}`);
 };
 
-const catch405 = (error, req, res, next) => {
+const catch405 = withShortLog => (error, req, res, next) => {
 	if (error && error.code === 405) {
-		shortErrorLine(req, error);
+		if (withShortLog) { 
+			shortErrorLine(req, error);
+		}
 		res.json(error);
 	} else {
 		next(error); // next without error
@@ -57,10 +59,12 @@ const returnAsJson = express.errorHandler({
 module.exports = (app) => {
 	systemInfo('\nAdd error handling middleware:');
 	const exec = executeWithSystemInfo(app);
+	const isTestRun = app.get('NODE_ENV') !== 'test';
 
-	exec(catch405, 'If a services do not support an endpoint a error if throw but should not go to error pipeline.');
+	exec(catch405(isTestRun),
+		'If a services do not support an endpoint a error if throw but should not go to error pipeline.');
 
-	if (app.get('NODE_ENV') !== 'test') {
+	if (isTestRun) {
 		exec(logRelatedErrors,
 			'logError: For pass error to winston logger and set additional short line for seperate errors.'
 			+ 'Do not execute for 405 errors.');
