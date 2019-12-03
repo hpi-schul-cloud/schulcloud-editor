@@ -192,7 +192,7 @@ class SectionService {
 			throw new BadRequest('You can not provide state and stateDiff in same request.');
 		}
 		if (data.stateDiff) {
-			const changes = diffToMongo(data.stateDiff);
+			const changes = diffToMongo(data.stateDiff, 'state');
 			// $set, $pull, $unset is override from changes
 			const newData = { ...data, ...changes };
 			return newData;
