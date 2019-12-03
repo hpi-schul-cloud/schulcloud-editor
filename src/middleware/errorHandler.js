@@ -16,7 +16,7 @@ const shortErrorLine = (req, error) => {
 
 const catch405 = withShortLog => (error, req, res, next) => {
 	if (error && error.code === 405) {
-		if (withShortLog) { 
+		if (withShortLog) {
 			shortErrorLine(req, error);
 		}
 		res.json(error);
