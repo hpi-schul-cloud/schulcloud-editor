@@ -195,7 +195,8 @@ describe('lessons/lessons.service.js', () => {
 		expect(data).to.an('object');
 		expect(data._id).to.equal(id.toString());
 		expect(data.title).to.equal(patchedData.title);
-		expect(Object.keys(data)).to.have.lengthOf(3);
+		expect(data.updatedBy).to.equal(userId);
+		expect(Object.keys(data)).to.have.lengthOf(4);
 		expect(data).to.have.property(userScopePermissionKey);
 
 		expect(getStatus).to.equal(200);

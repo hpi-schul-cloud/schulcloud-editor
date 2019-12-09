@@ -1,9 +1,13 @@
 /* eslint-disable class-methods-use-this */
 const { NotFound, Forbidden, BadRequest } = require('@feathersjs/errors');
-const { validateSchema } = require('feathers-hooks-common');
+const { validateSchema, iff, isProvider } = require('feathers-hooks-common');
 const Ajv = require('ajv');
 
-const { checkCoursePermission, filterOutResults, joinChannel } = require('../../global/hooks');
+const {
+	checkCoursePermission,
+	filterOutResults,
+	joinChannel,
+} = require('../../global/hooks');
 const {
 	prepareParams,
 	permissions,
@@ -11,7 +15,10 @@ const {
 	setUserScopePermissionForFindRequests,
 	setUserScopePermission,
 } = require('../../utils');
-const { create: createSchema, patch: patchSchema } = require('./schemes');
+const {
+	create: createSchema,
+	patch: patchSchema,
+} = require('./schemes');
 const { LessonModel } = require('./models/');
 const { setCourseId, defaultName } = require('./hooks/');
 
@@ -222,7 +229,7 @@ class Lessons {
 			$lesson.sections.push(emptySection._id);
 
 			await $lesson.save();
-			return setUserScopePermission({ _id: $lesson._id }, 'wrtite');
+			return setUserScopePermission({ _id: $lesson._id }, 'write');
 		} catch (err) {
 			throw new BadRequest(this.err.create, err);
 		}
@@ -250,8 +257,9 @@ class Lessons {
 
 		try {
 			Object.entries(data).forEach(([key, value]) => {
-				$lesson[key] = value;
+				$lesson[key] = value; // TODO: over patch
 			});
+
 			await $lesson.save();
 			return setUserScopePermission({
 				...data,

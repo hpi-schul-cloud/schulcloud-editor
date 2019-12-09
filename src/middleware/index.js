@@ -22,8 +22,8 @@ module.exports = function setup(app) {
 
 	exec(addLoggerToApp, 'addLoggerToApp: Add logger to app'); // TODO: is not a middleware
 	// app.configure(redis);
-	exec(addHeaderToContext, 'addHeaderToContext: Add header information to feather context.');
-	exec(ping, 'ping: Set ping route.'); // TODO: no middleware
+	exec(addHeaderToContext, 'Add header information to feather context.'); // TODO: @deprecated
+	exec(ping, 'Set ping route.'); // no middleware
 	exec(apiJwtHandler, 'Add jwt decoder.');
 	if (app.get('NODE_ENV') === 'development') {
 		// exec(requestLogs, 'Set request logging.');

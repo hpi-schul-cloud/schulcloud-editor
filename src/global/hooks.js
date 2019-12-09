@@ -19,6 +19,12 @@ const filterOutResults = (...keys) => (context) => {
 	return context;
 };
 
+const returnSendedData = (context) => {
+	if (context.type === 'after' && context.data) {
+		context.result = context.data;
+	}
+	return context;
+};
 
 /**
  * Request Course service to get permissions
@@ -84,6 +90,7 @@ const createChannel = (prefix, { from, prefixId }) => (context) => {
 };
 
 module.exports = {
+	returnSendedData,
 	filterOutResults,
 	checkCoursePermission,
 	joinChannel,
