@@ -206,6 +206,7 @@ class TestHelper {
 		this.services = {};
 		this.defaultPermissionData = defaultData.permission || {};
 		this.init(app);
+		this.showDetailes = false;
 	}
 
 	init(app) {
@@ -227,10 +228,14 @@ class TestHelper {
 
 	registerServiceHelper({ serviceName, modelName }) {
 		const warn = (messsage) => {
-			this.warn(`${serviceName} ${messsage}`);
+			if (this.showDetailes) {
+				this.warn(`${serviceName} ${messsage}`);
+			}
 		};
 		const info = (messsage) => {
-			this.info(`${serviceName} ${messsage}`);
+			if (this.showDetailes) {
+				this.info(`${serviceName} ${messsage}`);
+			}
 		};
 
 		if (this.services.serviceName) {

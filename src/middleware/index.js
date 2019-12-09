@@ -7,11 +7,12 @@ const { apiJwtHandler } = require('./handleJWTAndAddToContext');
 const addHeaderToContext = require('./addHeaderToContext');
 const aggregateAppVars = require('./aggregateAppVars');
 const socket = require('./socket');
+const sentry = require('./sentry');
 
 
 const executeWithSystemInfo = app => (middleware, info) => {
-	app.configure(middleware);
 	if (info) systemInfo(`[middleware] ${info}`);
+	app.configure(middleware);
 };
 
 module.exports = function setup(app) {
@@ -19,14 +20,17 @@ module.exports = function setup(app) {
 
 	const exec = executeWithSystemInfo(app);
 
-	exec(addLoggerToApp, 'logger to app'); // todo is not a middleware
+	exec(addLoggerToApp, 'addLoggerToApp: Add logger to app'); // TODO: is not a middleware
 	// app.configure(redis);
 	exec(addHeaderToContext, 'Add header information to feather context.'); // TODO: @deprecated
 	exec(ping, 'Set ping route.'); // no middleware
 	exec(apiJwtHandler, 'Add jwt decoder.');
-	exec(requestLogs, 'Set request logging.');
-	exec(aggregateAppVars, 'Aggregate app vars.'); // no middleware
-	exec(socket, 'Add socket connections');
+	if (app.get('NODE_ENV') === 'development') {
+		// exec(requestLogs, 'Set request logging.');
+	}
+	exec(aggregateAppVars, 'aggregateAppVars: Add aggregate app vars and display it.'); // TODO: no middleware
+	exec(socket, 'socket: Add socket connections');
+	exec(sentry, 'sentry: Add sentry for logging errors.');
 
 	systemInfo('\n******************************************************\n');
 };
