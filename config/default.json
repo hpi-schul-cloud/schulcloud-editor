@@ -1,6 +1,6 @@
 {
 	"host": "localhost",
-	"port": 4001,
+	"port": 4002,
 	"protocol": "http",
 	"mongodb": "mongodb://localhost:27017/schulcloud-editor",
 	"routes": {
@@ -12,5 +12,6 @@
 		},
 		"timeout": "30000"
 	},
-	"testsecret": "secret"
+	"testsecret": "secret",
+	"redis": "redis://localhost:6379"
 }

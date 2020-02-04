@@ -9,5 +9,6 @@
 		},
 		"timeout": "TIMEOUT"
 	},
-	"testsecret": "TESTSECRET"
+	"testsecret": "TESTSECRET",
+	"redis": "REDIS_URL"
 }
