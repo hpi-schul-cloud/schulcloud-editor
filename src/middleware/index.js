@@ -31,7 +31,9 @@ module.exports = function setup(app) {
 	}
 	exec(aggregateAppVars, 'aggregateAppVars: Add aggregate app vars and display it.'); // TODO: no middleware
 	exec(socket, 'socket: Add socket connections');
-	exec(feathersSync, 'feathers-sync: connected');
+	if (app.get('NODE_ENV') !== 'development' && app.get('NODE_ENV') !== 'default') {
+		exec(feathersSync, 'feathers-sync: Add feathers-sync');
+	}
 	exec(sentry, 'sentry: Add sentry for logging errors.');
 
 	systemInfo('\n******************************************************\n');
