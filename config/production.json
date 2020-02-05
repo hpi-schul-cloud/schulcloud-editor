@@ -10,5 +10,5 @@
 		"timeout": "TIMEOUT"
 	},
 	"testsecret": "TESTSECRET",
-	"redis": "REDIS_URL"
+	"redis": "REDIS_URI",
 }
