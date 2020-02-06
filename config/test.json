@@ -8,6 +8,5 @@
 			"baseURL": "http://localhost:3030"
 		}
 	},
-	"testsecret": "TESTSECRET",
-	"redis": "redis://localhost:6379"
+	"testsecret": "TESTSECRET"
 }

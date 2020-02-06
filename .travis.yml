@@ -13,6 +13,8 @@ services:
   - redis-server
 stages:
   - test
+env:
+  - REDIS_URI=redis://localhost:6379
 jobs:
   include:
     - stage: test
