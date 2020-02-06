@@ -42,6 +42,7 @@
     "feathers-hooks-common": "^4.20.7",
     "feathers-mongoose": "^7.3.2",
     "feathers-swagger": "^1.1.0",
+    "feathers-sync": "^2.0.0",
     "jsonwebtoken": "^8.5.1",
     "jwt-decode": "^2.2.0",
     "mongoose": "^5.7.5",

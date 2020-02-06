@@ -12,5 +12,6 @@
 		},
 		"timeout": "30000"
 	},
-	"testsecret": "secret"
+	"testsecret": "secret",
+	"redis": "REDIS_URI"
 }
