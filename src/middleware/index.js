@@ -31,7 +31,7 @@ module.exports = function setup(app) {
 	}
 	exec(aggregateAppVars, 'aggregateAppVars: Add aggregate app vars and display it.'); // TODO: no middleware
 	exec(socket, 'socket: Add socket connections');
-	if (app.get('NODE_ENV') !== 'development' && app.get('NODE_ENV') !== 'default') {
+	if (app.get('redis') && app.get('redis') !== 'REDIS_URI') {
 		exec(feathersSync, 'feathers-sync: Add feathers-sync');
 	}
 	exec(sentry, 'sentry: Add sentry for logging errors.');
