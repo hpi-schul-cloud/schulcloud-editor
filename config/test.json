@@ -8,5 +8,6 @@
 			"baseURL": "http://localhost:3030"
 		}
 	},
+	
 	"testsecret": "TESTSECRET"
 }
