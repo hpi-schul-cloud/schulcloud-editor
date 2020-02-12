@@ -2,10 +2,10 @@
 	"host": "app.edtr.l",
 	"port": 4001,
 	"protocol": "http",
-	"mongodb": "mongodb://mongodb:27017/schulcloud-editor",
+	"mongodb": "mongodb://localhost:27017/schulcloud-editor",
 	"routes": {
 		"server": {
-			"baseURL": "http://server:3030",
+			"baseURL": "http://localhost:3030",
 			"coursePermissionsUri": "/courses/:courseId/userPermissions",
 			"meUri": "/me",
 			"courseMembersUri": "/courses/:courseId/members"
