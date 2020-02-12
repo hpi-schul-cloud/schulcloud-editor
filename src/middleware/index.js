@@ -9,7 +9,6 @@ const aggregateAppVars = require('./aggregateAppVars');
 const socket = require('./socket');
 const feathersSync = require('./feathersSync');
 const sentry = require('./sentry');
-const featherSync = require('./feathersSync');
 
 
 const executeWithSystemInfo = app => (middleware, info) => {
