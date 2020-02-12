@@ -1,5 +1,5 @@
 {
-	"host": "app.edtr.l",
+	"host": "localhost",
 	"port": 4001,
 	"protocol": "http",
 	"mongodb": "mongodb://localhost:27017/schulcloud-editor",
