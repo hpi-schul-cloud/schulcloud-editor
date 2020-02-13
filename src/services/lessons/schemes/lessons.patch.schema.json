@@ -11,6 +11,9 @@
         "$id": "#/properties/visible",
         "type": "boolean"
       },
+      "sections":{
+        "type": "array"
+      },
       "updatedBy": {
         "$id": "#/properties/updatedBy",
         "type": "string",

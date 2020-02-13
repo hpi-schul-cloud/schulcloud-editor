@@ -151,7 +151,9 @@ class Lessons {
 		}
 
 		if (sections) {
-			lesson.sections = sections.data;
+			lesson.sections = lesson.sections
+				.map(sectionId => sections.data
+					.find(({ _id }) => sectionId.toString() === _id.toString()));
 		}
 
 		return setUserScopePermission(lesson, lesson.permissions, user);
