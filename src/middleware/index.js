@@ -26,8 +26,8 @@ module.exports = function setup(app) {
 	exec(addHeaderToContext, 'Add header information to feather context.'); // TODO: @deprecated
 	exec(ping, 'Set ping route.'); // no middleware
 	exec(apiJwtHandler, 'Add jwt decoder.');
-	if (app.get('NODE_ENV') === 'development') {
-		// exec(requestLogs, 'Set request logging.');
+	if (!['production', 'test'].includes(app.get('NODE_ENV'))) {
+		exec(requestLogs, 'Set request logging.');
 	}
 	exec(aggregateAppVars, 'aggregateAppVars: Add aggregate app vars and display it.'); // TODO: no middleware
 	exec(socket, 'socket: Add socket connections');
