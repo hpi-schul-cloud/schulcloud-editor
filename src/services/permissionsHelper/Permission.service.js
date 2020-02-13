@@ -51,7 +51,7 @@ class PermissionService {
 			const promises = defaultGroups.map(({ _id, permission }) => this.createPermissionObject({
 				group: _id,
 				[permission]: true,
-				activated: true,
+				activated: permission === 'write',	// for write is true, else false
 			}));
 			return Promise.all(promises);
 		} catch (err) {
