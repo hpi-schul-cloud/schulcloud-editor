@@ -22,7 +22,7 @@ if (['production', 'test'].includes(process.env)) {
 			url: `${prefix}/${sufix}`,
 		}, { userId: 'xxx', type: 'Socket' });
 
-		app.channel(`${prefix}/${sufix}`).join(connection)
+		app.channel(`${prefix}/${sufix}`).join(connection);
 	};
 }
 module.exports = {
