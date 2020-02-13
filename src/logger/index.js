@@ -51,9 +51,9 @@ const systemLogger = winston.createLogger({
 	],
 	exitOnError: false,
 });
-const request = req => systemLogger.request(util.inspect({
-	type: 'Request',
-	userId: req.feathers.userId,
+const request = (req, payload = {}) => systemLogger.request(util.inspect({
+	type: payload.type || 'Request',
+	userId: payload.userId || (req.feathers || {}).userId,
 	url: req.url,
 	data: req.body,
 	method: req.method,
