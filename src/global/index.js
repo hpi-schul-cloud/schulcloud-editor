@@ -48,7 +48,9 @@ const errorHandler = (context) => {
 			context.error = new GeneralError(context.error.message || 'server error', context.error.stack || '');
 		}
 		// in some cases is config set with secret informations like jwt
-		(context.error.data || {}).config = '<hide>';
+		if ((context.error.data || {}).config) {
+			context.error.data.config = '<hide>';
+		}
 
 		return context;
 	}

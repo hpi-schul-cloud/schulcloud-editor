@@ -5,6 +5,7 @@ const sections = require('./sections');
 const viewports = require('./viewports');
 const permissionsHelper = require('./permissionsHelper');
 const { systemInfo } = require('../logger');
+const helpers = require('./helperServices');
 // Events
 
 module.exports = (app) => {
@@ -14,6 +15,7 @@ module.exports = (app) => {
 	app.configure(syncGroups);
 	app.configure(sections);
 	app.configure(viewports);
+	app.configure(helpers);
 
 	app.configure(permissionsHelper.bind({
 		modelService: 'models/LessonModel',
