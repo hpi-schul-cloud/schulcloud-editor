@@ -39,7 +39,6 @@ class VisibilityService {
 			$select: [pK, 'sections'],
 			$populate: [
 				{ path: 'permissions.group', select: 'users' },
-			//	{ path: 'sections', select: ['_id', pK] },
 			],
 		});
 
@@ -50,13 +49,19 @@ class VisibilityService {
 			throw new Forbidden(this.err.noAccess);
 		}
 
-		const patchParams = prepareParams(params, {
-			$select: [pK, `${pK}._id`, `${pK}.activated`],
-			[pK]: { $elemMatch: { read: true } },
-		});
+		const readPermissions = overview[pK].filter(perm => perm.read === true)
+		let patched = {};
 
-		const patchOperator = { $set: { [`${pK}.$.activated`]: visible } };
-		const patched = await this.app.service(services).patch(ressourceId, patchOperator, patchParams);
+		if (readPermissions.length > 0) {
+			const patchParams = prepareParams(params, {
+				$select: [pK, `${pK}._id`, `${pK}.activated`],
+				[pK]: { $elemMatch: { read: true } },
+			});
+
+			const patchOperator = { $set: { [`${pK}.$.activated`]: visible } };
+			patched = await this.app.service(services).patch(ressourceId, patchOperator, patchParams);
+		}
+
 		return {
 			patched,
 			overview,
@@ -64,7 +69,7 @@ class VisibilityService {
 	}
 
 	batchRequest(ids, params, visible) {
-		return ids.map(id => this.request(this.serviceType.section, id, params, visible, false));
+		return Promise.all(ids.map(id => this.request(this.serviceType.section, id, params, visible, false)));
 	}
 
 	/**
@@ -74,8 +79,9 @@ class VisibilityService {
 	 */
 	async patch(ressourceId, { childs = true, visible = true, type = 'lesson' }, params) {
 		const { patched, overview } = await this.request(this.serviceType[type], ressourceId, params, visible);
+
 		if (childs && overview.sections) {
-			const patchedSections = await Promise.all(this.batchRequest(overview.sections, visible, params));
+			const patchedSections = await this.batchRequest(overview.sections, visible, params);
 			patched.sections = patchedSections.map(res => res.patched);
 		}
 
