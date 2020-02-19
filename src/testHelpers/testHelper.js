@@ -312,7 +312,6 @@ class TestHelper {
 		res.pathLesson = '/course/:courseId/lessons';
 		res.pathSection = 'lesson/:lessonId/sections';
 
-		res.userId = this.createObjectId();
 		res.courseId = this.createObjectId();
 
 		this.registerServiceHelper({
@@ -344,11 +343,13 @@ class TestHelper {
 			sectionService,
 			lessonService,
 			courseId,
-			userId,
 		} = this.memory.defaultServiceSetup;
 
-		const optRead = { users: [userId], read: true, activated: readIsActivated };
-		const optWrite = { users: [userId], write: true, activated: true };
+		const readUserId = this.createObjectId();
+		const writeUserId = this.createObjectId();
+
+		const optRead = { users: [readUserId], read: true, activated: readIsActivated };
+		const optWrite = { users: [writeUserId], write: true, activated: true };
 		const permissions = {
 			lesson: {
 				read: lessonPermission.includes('read') ? this.createPermission(optRead) : undefined,
@@ -378,7 +379,7 @@ class TestHelper {
 
 		const [lesson, section] = await Promise.all([createLesson, createSection]);
 		return {
-			lesson, section, lessonId, sectionId, permissions,
+			lesson, section, lessonId, sectionId, permissions, readUserId, writeUserId,
 		};
 	}
 

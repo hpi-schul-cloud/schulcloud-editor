@@ -12,7 +12,6 @@ describe.only('helperServices/visible.service.js', () => {
 	let editor;
 	let helper;
 	let visibleService;
-	let userId;
 
 	before((done) => {
 		editor = app.listen(app.get('port'), done);
@@ -20,7 +19,7 @@ describe.only('helperServices/visible.service.js', () => {
 
 	before(() => {
 		helper = new TestHelper(app);
-		({ userId } = helper.defaultServiceSetup());
+		helper.defaultServiceSetup();
 
 		helper.registerServiceHelper({
 			serviceName: pathVisible,
@@ -61,12 +60,26 @@ describe.only('helperServices/visible.service.js', () => {
 		expect(data.message, 'should return the right error message from services').to.equal(visibleService.service.err.noAccess);
 	});
 
+	it('lesson patch with read permission should not work', async () => {
+		const { lessonId, readUserId } = await helper.createTestData({ readIsActivated: false });
+
+		const patchOptions = {
+			id: lessonId,
+			userId: readUserId,
+			data: { visible: true, type: 'lesson' },
+		};
+
+		const { status, data } = await visibleService.sendRequestToThisService('patch', patchOptions);
+		expect(status, 'should return forbidden').to.equal(403);
+		expect(data.message, 'should return the right error message from services').to.equal(visibleService.service.err.noAccess);
+	});
+
 	it('section patch should work', async () => {
-		const { section } = await helper.createTestData({ readIsActivated: false });
+		const { section, writeUserId } = await helper.createTestData({ readIsActivated: false });
 
 		const patchOptions = {
 			id: section._id,
-			userId,
+			userId: writeUserId,
 			data: { visible: true, type: 'section' },
 		};
 
@@ -95,11 +108,11 @@ describe.only('helperServices/visible.service.js', () => {
 	});
 
 	it('lesson patch with childs should work', async () => {
-		const { sectionId, lesson } = await helper.createTestData({ readIsActivated: false });
+		const { sectionId, lesson, writeUserId } = await helper.createTestData({ readIsActivated: false });
 		// data.child default is true
 		const patchOptions = {
 			id: lesson._id,
-			userId,
+			userId: writeUserId,
 			data: { visible: true, type: 'lesson' },
 		};
 
@@ -119,7 +132,6 @@ describe.only('helperServices/visible.service.js', () => {
 		expect(trueSection.permissions[0].activated, 'should activated now, default is false').to.be.true;
 		expect(trueSection.permissions[1].activated, 'should not modified, default is true').to.be.true;
 
-		// patch.child default is true
 		patchOptions.data.visible = false;
 
 		const {
@@ -148,11 +160,63 @@ describe.only('helperServices/visible.service.js', () => {
 		expect(writeSectionPerm.activated, 'should not modified, default is true').to.be.true;
 	});
 
-	// test other methods
+	// user has only read permission
 
 	// no read permission vorhanden
 
 	// lesson permission nicht vorhanden + section schon
 
 	// lesson permission vorhanden + section teilweise nicht
+	let lessonId;
+	let testWriteUserId;
+	before(async () => {
+		({ lessonId, writeUserId: testWriteUserId } = await helper.createTestData({ readIsActivated: false }));
+	});
+
+	it('update should not allowed', async () => {
+		const patchOptions = {
+			id: lessonId,
+			userId: testWriteUserId,
+		};
+		const { status, data } = await visibleService.sendRequestToThisService('update', patchOptions);
+		expect(status).to.equal(405);
+		expect(data.className).to.equal('method-not-allowed');
+	});
+
+	it('create should not allowed', async () => {
+		const patchOptions = {
+			userId: testWriteUserId,
+		};
+		const { status, data } = await visibleService.sendRequestToThisService('create', patchOptions);
+		expect(status).to.equal(405);
+		expect(data.className).to.equal('method-not-allowed');
+	});
+
+	it('get should not allowed', async () => {
+		const patchOptions = {
+			id: lessonId,
+			userId: testWriteUserId,
+		};
+		const { status, data } = await visibleService.sendRequestToThisService('get', patchOptions);
+		expect(status).to.equal(405);
+		expect(data.className).to.equal('method-not-allowed');
+	});
+
+	it('find should not allowed', async () => {
+		const patchOptions = {
+			userId: testWriteUserId,
+		};
+		const { status, data } = await visibleService.sendRequestToThisService('find', patchOptions);
+		expect(status).to.equal(405);
+		expect(data.className).to.equal('method-not-allowed');
+	});
+
+	it('remove should not allowed', async () => {
+		const patchOptions = {
+			userId: testWriteUserId,
+		};
+		const { status, data } = await visibleService.sendRequestToThisService('remove', patchOptions);
+		expect(status).to.equal(405);
+		expect(data.className).to.equal('method-not-allowed');
+	});
 });
