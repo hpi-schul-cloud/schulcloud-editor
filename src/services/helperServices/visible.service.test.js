@@ -34,11 +34,31 @@ describe.only('helperServices/visible.service.js', () => {
 	});
 
 	it('section patch without permission should not work', async () => {
+		const { sectionId } = await helper.createTestData({ readIsActivated: false });
 
+		const patchOptions = {
+			id: sectionId,
+			userId: helper.createObjectId(),
+			data: { visible: true, type: 'section' },
+		};
+
+		const { status, data } = await visibleService.sendRequestToThisService('patch', patchOptions);
+		expect(status, 'should return forbidden').to.equal(403);
+		expect(data.message, 'should return the right error message from services').to.equal(visibleService.service.err.noAccess);
 	});
 
 	it('lesson patch without permission should not work', async () => {
+		const { lessonId } = await helper.createTestData({ readIsActivated: false });
 
+		const patchOptions = {
+			id: lessonId,
+			userId: helper.createObjectId(),
+			data: { visible: true, type: 'lesson' },
+		};
+
+		const { status, data } = await visibleService.sendRequestToThisService('patch', patchOptions);
+		expect(status, 'should return forbidden').to.equal(403);
+		expect(data.message, 'should return the right error message from services').to.equal(visibleService.service.err.noAccess);
 	});
 
 	it('section patch should work', async () => {
