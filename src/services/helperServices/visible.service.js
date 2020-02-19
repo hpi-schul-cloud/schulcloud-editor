@@ -49,7 +49,7 @@ class VisibilityService {
 			throw new Forbidden(this.err.noAccess);
 		}
 
-		const readPermissions = overview[pK].filter(perm => perm.read === true)
+		const readPermissions = overview[pK].filter(perm => perm.read === true);
 		let patched = {};
 
 		if (readPermissions.length > 0) {

@@ -137,7 +137,7 @@ class TestHelperService {
 					return {
 						status: err.response.status,
 						data: err.response.data,
-						message: err.response.message,
+						statusText: err.response.statusText,
 					};
 				}
 				return err;
