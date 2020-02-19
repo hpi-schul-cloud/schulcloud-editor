@@ -74,6 +74,23 @@ describe.only('helperServices/visible.service.js', () => {
 		expect(data.message, 'should return the right error message from services').to.equal(visibleService.service.err.noAccess);
 	});
 
+	it('by lesson request test only lesson permission, if user has to access reject it', async () => {
+		const { lessonId, writeUserId } = await helper.createTestData({
+			lessonPermission: ['read'], // permission for write user it not added
+			readIsActivated: false,
+		});
+
+		const patchOptions = {
+			id: lessonId,
+			userId: writeUserId,
+			data: { visible: true, type: 'lesson' },
+		};
+
+		const { status, data } = await visibleService.sendRequestToThisService('patch', patchOptions);
+		expect(status, 'should return forbidden').to.equal(403);
+		expect(data.message, 'should return the right error message from services').to.equal(visibleService.service.err.noAccess);
+	});
+
 	it('section patch should work', async () => {
 		const { section, writeUserId } = await helper.createTestData({ readIsActivated: false });
 
@@ -160,11 +177,25 @@ describe.only('helperServices/visible.service.js', () => {
 		expect(writeSectionPerm.activated, 'should not modified, default is true').to.be.true;
 	});
 
-	// user has only read permission
+	it('services should work for lessons and sections without read permissions', async () => {
+		const { lessonId, writeUserId } = await helper.createTestData({
+			sectionPermission: ['write'],
+			lessonPermission: ['write'],
+			readIsActivated: false,
+		});
 
-	// no read permission vorhanden
+		const patchOptions = {
+			id: lessonId,
+			userId: writeUserId,
+			data: { visible: true, type: 'lesson' },
+		};
 
-	// lesson permission nicht vorhanden + section schon
+		const { status, data } = await visibleService.sendRequestToThisService('patch', patchOptions);
+		expect(status).to.equal(200);
+		expect(data.type).to.be.exist;
+		expect(data.sections).to.be.an('array').to.has.lengthOf(1);
+		expect(Object.keys(data.sections[0]).length, 'should include an empty object').to.equal(0);
+	});
 
 	// lesson permission vorhanden + section teilweise nicht
 	let lessonId;
