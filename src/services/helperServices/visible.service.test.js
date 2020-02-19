@@ -1,30 +1,18 @@
+/* eslint-disable max-len */
 const chai = require('chai');
 
 const app = require('../../app');
 const { TestHelper } = require('../../testHelpers');
-// const { KEY_NAME: userScopePermissionKey } = require('../../utils/setUserScopePermission');
 
-const pathLesson = '/course/:courseId/lessons';
-const pathSection = 'lesson/:lessonId/sections';
 const pathVisible = 'helpers/setVisibility';
 
 const { expect } = chai;
 
-const getReadId = (doc) => {
-	const { _id: readId } = doc.permissions.find(perm => perm.read === true);
-	return readId.toString();
-};
-
 describe.only('helperServices/visible.service.js', () => {
 	let editor;
 	let helper;
-	let sectionService;
-	let lessonService;
 	let visibleService;
 	let userId;
-	let courseId;
-	let writePermission;
-	let readPermission;
 
 	before((done) => {
 		editor = app.listen(app.get('port'), done);
@@ -32,29 +20,17 @@ describe.only('helperServices/visible.service.js', () => {
 
 	before(() => {
 		helper = new TestHelper(app);
-
-		helper.registerServiceHelper({
-			serviceName: pathSection,
-			modelName: 'section',
-		});
-		sectionService = app.serviceHelper(pathSection);
-
-		helper.registerServiceHelper({
-			serviceName: pathLesson,
-			modelName: 'lesson',
-		});
-		lessonService = app.serviceHelper(pathLesson);
+		({ userId } = helper.defaultServiceSetup());
 
 		helper.registerServiceHelper({
 			serviceName: pathVisible,
 		});
 		visibleService = app.serviceHelper(pathVisible);
+	});
 
-		userId = helper.createObjectId().toString();
-		courseId = helper.createObjectId().toString();
-
-		writePermission = helper.createPermission({ users: [userId], write: true });
-		readPermission = helper.createPermission({ users: [userId], read: true });
+	after(async () => {
+		await helper.cleanup();
+		await editor.close();
 	});
 
 	it('section patch without permission should not work', async () => {
@@ -66,14 +42,7 @@ describe.only('helperServices/visible.service.js', () => {
 	});
 
 	it('section patch should work', async () => {
-		const { _id: lessonId } = await lessonService.createWithDefaultData({ courseId }, writePermission);
-
-		const ref = {
-			target: lessonId,
-			targetModel: 'lesson',
-		};
-		const section = await sectionService.createWithDefaultData({ ref }, [writePermission, readPermission]);
-		const readId = getReadId(section);
+		const { section } = await helper.createTestData({ readIsActivated: false });
 
 		const patchOptions = {
 			id: section._id,
@@ -82,35 +51,81 @@ describe.only('helperServices/visible.service.js', () => {
 		};
 
 		const {
-			status: patchTrue, data: dataTrue,
+			status: statusTrue, data: dataTrue,
 		} = await visibleService.sendRequestToThisService('patch', patchOptions);
 
-		expect(patchTrue).to.equal(200);
-		expect(dataTrue.permissions).to.be.an('array').to.has.lengthOf(2);
-		expect(dataTrue.permissions[0].activated).to.be.true;
-		expect(dataTrue.permissions[1].activated).to.be.true;
+		expect(statusTrue).to.equal(200);
+		expect(dataTrue.permissions, 'test if read and write permission are added').to.be.an('array').to.has.lengthOf(2);
+		expect(dataTrue.permissions[0].activated, 'should activated now, default is false').to.be.true;
+		expect(dataTrue.permissions[1].activated, 'should not modified, default is true').to.be.true;
 
 		patchOptions.data.visible = false;
 
 		const {
-			status: patchFalse, data: dataFalse,
+			status: statusFalse, data: dataFalse,
 		} = await visibleService.sendRequestToThisService('patch', patchOptions);
 
-		const readResponse = dataFalse.permissions.find(perm => perm._id.toString() === readId);
-		const writeResponse = dataFalse.permissions.find(perm => perm._id.toString() !== readId);
+		const readPerm = dataFalse.permissions.find(p => p.read === true);
+		const writePerm = dataFalse.permissions.find(p => p.write === true);
 
-		expect(patchFalse).to.equal(200);
-		expect(dataFalse.permissions).to.be.an('array').to.has.lengthOf(2);
-		expect(readResponse.activated).to.be.false;
-		expect(writeResponse.activated).to.be.true;
+		expect(statusFalse).to.equal(200);
+		expect(dataFalse.permissions, 'test if read and write permission are added').to.be.an('array').to.has.lengthOf(2);
+		expect(readPerm.activated, 'should set to false now').to.be.false;
+		expect(writePerm.activated, 'should not modified, default is true').to.be.true;
 	});
 
-	it('lesson patch should work', async () => {
+	it('lesson patch with childs should work', async () => {
+		const { sectionId, lesson } = await helper.createTestData({ readIsActivated: false });
+		// data.child default is true
+		const patchOptions = {
+			id: lesson._id,
+			userId,
+			data: { visible: true, type: 'lesson' },
+		};
 
-	});
+		const {
+			status: statusTrue, data: dataTrue,
+		} = await visibleService.sendRequestToThisService('patch', patchOptions);
 
-	it('lesson patch with child sections should work', async () => {
+		expect(statusTrue).to.equal(200);
+		expect(dataTrue.permissions, 'test if read and write permission are added').to.be.an('array').to.has.lengthOf(2);
+		expect(dataTrue.permissions[0].activated, 'should activated now, default is false').to.be.true;
+		expect(dataTrue.permissions[1].activated, 'should not modified, default is true').to.be.true;
+		expect(dataTrue.sections, 'test if section is added').to.be.an('array').to.has.lengthOf(1);
 
+		const trueSection = dataTrue.sections[0];
+		expect(trueSection._id.toString(), 'should be the right section').to.equal(sectionId);
+		expect(trueSection.permissions, 'test if read and write permission are added').to.be.an('array').to.has.lengthOf(2);
+		expect(trueSection.permissions[0].activated, 'should activated now, default is false').to.be.true;
+		expect(trueSection.permissions[1].activated, 'should not modified, default is true').to.be.true;
+
+		// patch.child default is true
+		patchOptions.data.visible = false;
+
+		const {
+			status: statusFalse, data: dataFalse,
+		} = await visibleService.sendRequestToThisService('patch', patchOptions);
+
+		expect(statusFalse).to.equal(200);
+		expect(dataFalse.permissions, 'test if read and write permission are added').to.be.an('array').to.has.lengthOf(2);
+		expect(dataFalse.sections, 'test if section is added').to.be.an('array').to.has.lengthOf(1);
+
+		const readPerm = dataFalse.permissions.find(p => p.read === true);
+		const writePerm = dataFalse.permissions.find(p => p.write === true);
+
+		expect(readPerm.activated, 'should activated now, default is false').to.be.false;
+		expect(writePerm.activated, 'should not modified, default is true').to.be.true;
+
+
+		const falseSection = dataFalse.sections[0];
+		expect(falseSection.permissions, 'test if read and write permission are added').to.be.an('array').to.has.lengthOf(2);
+		expect(falseSection._id.toString(), 'should be the right section').to.equal(sectionId);
+
+		const readSectionPerm = falseSection.permissions.find(p => p.read === true);
+		const writeSectionPerm = falseSection.permissions.find(p => p.write === true);
+
+		expect(readSectionPerm.activated, 'should set to false now').to.be.false;
+		expect(writeSectionPerm.activated, 'should not modified, default is true').to.be.true;
 	});
 
 	// test other methods
@@ -120,9 +135,4 @@ describe.only('helperServices/visible.service.js', () => {
 	// lesson permission nicht vorhanden + section schon
 
 	// lesson permission vorhanden + section teilweise nicht
-
-	after(async () => {
-		await helper.cleanup();
-		await editor.close();
-	});
 });
