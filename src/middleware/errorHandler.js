@@ -59,12 +59,12 @@ const returnAsJson = express.errorHandler({
 module.exports = (app) => {
 	systemInfo('\nAdd error handling middleware:');
 	const exec = executeWithSystemInfo(app);
-	const isTestRun = app.get('NODE_ENV') !== 'test';
+	const isTestRun = app.get('NODE_ENV') === 'test';
 
 	exec(catch405(isTestRun),
 		'If a services do not support an endpoint a error if throw but should not go to error pipeline.');
 
-	if (isTestRun) {
+	if (!isTestRun) {
 		exec(logRelatedErrors,
 			'logError: For pass error to winston logger and set additional short line for seperate errors.'
 			+ 'Do not execute for 405 errors.');
