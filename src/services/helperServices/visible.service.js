@@ -54,14 +54,13 @@ class VisibilityService {
 
 		if (readPermissions.length > 0) {
 			const patchParams = prepareParams(params, {
-				$select: [pK, `${pK}._id`, `${pK}.activated`],
+				$select: [pK, `${pK}._id`, `${pK}.activated`, `${pK}.read`, `${pK}.write`],
 				[pK]: { $elemMatch: { read: true } },
 			});
 
 			const patchOperator = { $set: { [`${pK}.$.activated`]: visible } };
 			patched = await this.app.service(services).patch(ressourceId, patchOperator, patchParams);
 		}
-
 		return {
 			patched,
 			overview,
@@ -74,14 +73,19 @@ class VisibilityService {
 
 	/**
 	 * Is type lesson only the permission of the lesson is check and modified child sections.
+	 * TODO: performance increase to patch child sections from lesson in the same time over ref.parentId
+	 * TODO: performance increase to patch all childs from section with own request over ref.parentId marker
+	 * -> Tasks should do after finish section model
 	 * @param {ObjectId} ressourceId - Map to type section, or lesson
-	 * @param {data} [childs, visible, type] - Is type lesson, child can set true/false to update child sections too
+	 * @param {Object} [{[childs] , [visible], [type]}]
+	 * Is type lesson, you can set child true/false to update child sections from this lesson too
 	 */
 	async patch(ressourceId, { childs = true, visible = true, type = 'lesson' }, params) {
 		const { patched, overview } = await this.request(this.serviceType[type], ressourceId, params, visible);
+		patched.type = type;
 
-		if (childs && overview.sections) {
-			const patchedSections = await this.batchRequest(overview.sections, visible, params);
+		if (childs && Array.isArray(overview.sections) && overview.sections.length > 0) {
+			const patchedSections = await this.batchRequest(overview.sections, params, visible);
 			patched.sections = patchedSections.map(res => res.patched);
 		}
 
