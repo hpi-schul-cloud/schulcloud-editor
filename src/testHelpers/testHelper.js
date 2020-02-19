@@ -134,7 +134,11 @@ class TestHelperService {
 			})
 			.catch((err) => {
 				if (err.response) {
-					return { status: err.response.status, data: err.response.data };
+					return {
+						status: err.response.status,
+						data: err.response.data,
+						message: err.response.message,
+					};
 				}
 				return err;
 			});
@@ -218,6 +222,7 @@ class TestHelper {
 		this.defaultPermissionData = defaultData.permission || {};
 		this.init(app);
 		this.showDetailes = false;
+		this.memory = {};
 	}
 
 	init(app) {
@@ -295,7 +300,86 @@ class TestHelper {
 	}
 
 	createObjectId() {
-		return mongoose.Types.ObjectId();
+		return mongoose.Types.ObjectId().toString();
+	}
+
+	sameId(id) {
+		return e => e._id.toString() === id.toString();
+	}
+
+	defaultServiceSetup() {
+		const res = {};
+		res.pathLesson = '/course/:courseId/lessons';
+		res.pathSection = 'lesson/:lessonId/sections';
+
+		res.userId = this.createObjectId();
+		res.courseId = this.createObjectId();
+
+		this.registerServiceHelper({
+			serviceName: res.pathSection,
+			modelName: 'section',
+		});
+		res.sectionService = this.app.serviceHelper(res.pathSection);
+
+		this.registerServiceHelper({
+			serviceName: res.pathLesson,
+			modelName: 'lesson',
+		});
+		res.lessonService = this.app.serviceHelper(res.pathLesson);
+
+		this.memory.defaultServiceSetup = res;
+		return res;
+	}
+
+	async createTestData({
+		lessonPermission = ['read', 'write'],
+		sectionPermission = ['read', 'write'],
+		readIsActivated = true,
+	} = {}) {
+		if (!this.memory.defaultServiceSetup) {
+			this.defaultServiceSetup();
+		}
+
+		const {
+			sectionService,
+			lessonService,
+			courseId,
+			userId,
+		} = this.memory.defaultServiceSetup;
+
+		const optRead = { users: [userId], read: true, activated: readIsActivated };
+		const optWrite = { users: [userId], write: true, activated: true };
+		const permissions = {
+			lesson: {
+				read: lessonPermission.includes('read') ? this.createPermission(optRead) : undefined,
+				write: lessonPermission.includes('write') ? this.createPermission(optWrite) : undefined,
+			},
+			section: {
+				read: sectionPermission.includes('read') ? this.createPermission(optRead) : undefined,
+				write: sectionPermission.includes('write') ? this.createPermission(optWrite) : undefined,
+			},
+		};
+
+		const lessonId = this.createObjectId();
+		const sectionId = this.createObjectId();
+
+		const ref = {
+			target: lessonId,
+			targetModel: 'lesson',
+		};
+
+		const createSection = sectionService.createWithDefaultData({
+			ref, _id: sectionId,
+		}, Object.values(permissions.section).filter(p => p));
+
+		const createLesson = lessonService.createWithDefaultData({
+			courseId, sections: [sectionId], _id: lessonId,
+		}, Object.values(permissions.lesson).filter(p => p));
+
+		const [lesson, section] = await Promise.all([createLesson, createSection]);
+		return {
+			lesson, section, lessonId, sectionId, permissions,
+		};
 	}
 
 	async cleanup() {
