@@ -34,7 +34,9 @@ module.exports = function setup(app) {
 	if (app.get('redis') && app.get('redis') !== 'REDIS_URI') {
 		exec(feathersSync, 'feathers-sync: Add feathers-sync');
 	}
-	exec(sentry, 'sentry: Add sentry for logging errors.');
+	if (app.get('NODE_ENV') !== 'test') {
+		exec(sentry, 'sentry: Add sentry for logging errors.');
+	}
 
 	systemInfo('\n******************************************************\n');
 };
