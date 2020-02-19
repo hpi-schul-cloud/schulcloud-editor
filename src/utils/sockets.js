@@ -2,7 +2,7 @@ const { requestInfo } = require('../logger');
 
 let publishData;
 let joinChannel;
-if (['production', 'test'].includes(process.env)) {
+if (['production', 'test'].includes(process.env.NODE_ENV)) {
 	publishData = (app, prefix) => data => app.channel(`${prefix}/${data._id}`).send(data);
 	joinChannel = (app, prefix, sufix) => connection => app.channel(`${prefix}/${sufix}`).join(connection);
 } else {
@@ -14,7 +14,7 @@ if (['production', 'test'].includes(process.env)) {
 			url: `${prefix}/${data._id}`,
 		}, { userId: 'xxx', type: 'Socket' });
 
-		app.channel(`${prefix}/${data._id}`).send(data);
+		return app.channel(`${prefix}/${data._id}`).send(data);
 	};
 	joinChannel = (app, prefix, sufix) => (connection) => {
 		requestInfo({
@@ -22,7 +22,7 @@ if (['production', 'test'].includes(process.env)) {
 			url: `${prefix}/${sufix}`,
 		}, { userId: 'xxx', type: 'Socket' });
 
-		app.channel(`${prefix}/${sufix}`).join(connection);
+		return app.channel(`${prefix}/${sufix}`).join(connection);
 	};
 }
 module.exports = {
