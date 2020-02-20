@@ -1,4 +1,7 @@
 # schulcloud-editor
+
+[![Greenkeeper badge](https://badges.greenkeeper.io/schul-cloud/schulcloud-editor.svg)](https://greenkeeper.io/)
+
 MicroService for editor documents. 
 
 
