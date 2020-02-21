@@ -105,9 +105,7 @@ describe('helperServices/visible.service.js', () => {
 		} = await visibleService.sendRequestToThisService('patch', patchOptions);
 
 		expect(statusTrue).to.equal(200);
-		expect(dataTrue.permissions, 'test if read and write permission are added').to.be.an('array').to.has.lengthOf(2);
-		expect(dataTrue.permissions[0].activated, 'should activated now, default is false').to.be.true;
-		expect(dataTrue.permissions[1].activated, 'should not modified, default is true').to.be.true;
+		expect(dataTrue.visible, 'should visible set to true').to.be.true;
 
 		patchOptions.data.visible = false;
 
@@ -115,13 +113,8 @@ describe('helperServices/visible.service.js', () => {
 			status: statusFalse, data: dataFalse,
 		} = await visibleService.sendRequestToThisService('patch', patchOptions);
 
-		const readPerm = dataFalse.permissions.find(p => p.read === true);
-		const writePerm = dataFalse.permissions.find(p => p.write === true);
-
 		expect(statusFalse).to.equal(200);
-		expect(dataFalse.permissions, 'test if read and write permission are added').to.be.an('array').to.has.lengthOf(2);
-		expect(readPerm.activated, 'should set to false now').to.be.false;
-		expect(writePerm.activated, 'should not modified, default is true').to.be.true;
+		expect(dataFalse.visible, 'should visible set to false').to.be.false;
 	});
 
 	it('lesson patch with childs should work', async () => {
@@ -138,16 +131,12 @@ describe('helperServices/visible.service.js', () => {
 		} = await visibleService.sendRequestToThisService('patch', patchOptions);
 
 		expect(statusTrue).to.equal(200);
-		expect(dataTrue.permissions, 'test if read and write permission are added').to.be.an('array').to.has.lengthOf(2);
-		expect(dataTrue.permissions[0].activated, 'should activated now, default is false').to.be.true;
-		expect(dataTrue.permissions[1].activated, 'should not modified, default is true').to.be.true;
+		expect(dataTrue.visible, 'should visible set to true').to.be.true;
 		expect(dataTrue.sections, 'test if section is added').to.be.an('array').to.has.lengthOf(1);
 
 		const trueSection = dataTrue.sections[0];
 		expect(trueSection._id.toString(), 'should be the right section').to.equal(sectionId);
-		expect(trueSection.permissions, 'test if read and write permission are added').to.be.an('array').to.has.lengthOf(2);
-		expect(trueSection.permissions[0].activated, 'should activated now, default is false').to.be.true;
-		expect(trueSection.permissions[1].activated, 'should not modified, default is true').to.be.true;
+		expect(trueSection.visible, 'should visible set to true').to.be.true;
 
 		patchOptions.data.visible = false;
 
@@ -156,25 +145,12 @@ describe('helperServices/visible.service.js', () => {
 		} = await visibleService.sendRequestToThisService('patch', patchOptions);
 
 		expect(statusFalse).to.equal(200);
-		expect(dataFalse.permissions, 'test if read and write permission are added').to.be.an('array').to.has.lengthOf(2);
+		expect(dataFalse.visible, 'should visible set to false').to.be.false;
 		expect(dataFalse.sections, 'test if section is added').to.be.an('array').to.has.lengthOf(1);
 
-		const readPerm = dataFalse.permissions.find(p => p.read === true);
-		const writePerm = dataFalse.permissions.find(p => p.write === true);
-
-		expect(readPerm.activated, 'should activated now, default is false').to.be.false;
-		expect(writePerm.activated, 'should not modified, default is true').to.be.true;
-
-
 		const falseSection = dataFalse.sections[0];
-		expect(falseSection.permissions, 'test if read and write permission are added').to.be.an('array').to.has.lengthOf(2);
+		expect(falseSection.visible, 'should visible set to false').to.be.false;
 		expect(falseSection._id.toString(), 'should be the right section').to.equal(sectionId);
-
-		const readSectionPerm = falseSection.permissions.find(p => p.read === true);
-		const writeSectionPerm = falseSection.permissions.find(p => p.write === true);
-
-		expect(readSectionPerm.activated, 'should set to false now').to.be.false;
-		expect(writeSectionPerm.activated, 'should not modified, default is true').to.be.true;
 	});
 
 	it('services should work for lessons and sections without read permissions', async () => {

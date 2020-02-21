@@ -5,6 +5,7 @@ const params = require('./params');
 const query = require('./query');
 const permissions = require('./permissions');
 const { setUserScopePermission, setUserScopePermissionForFindRequests } = require('./setUserScopePermission');
+const convert = require('./convert');
 
 // permissions - Operations
 exports.permissions = permissions;
@@ -30,3 +31,6 @@ exports.convertSuccessMongoPatchResponse = query.convertSuccessMongoPatchRespons
 
 // test - Operations
 exports.isPaginated = isPaginated;
+
+// data and type converting
+exports.convertTo = convert;

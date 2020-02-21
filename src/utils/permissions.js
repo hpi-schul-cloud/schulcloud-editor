@@ -50,7 +50,7 @@ const hasRead = (permissions, user) => access(permissions, user, 'read') || acce
 /**
  * @param {*} permissions
  */
-const couldAnyoneOnlyRead = (permissions = []) => permissions.some((permission) => permission.read);
+const couldAnyoneOnlyRead = (permissions = []) => permissions.some((permission) => permission.read === true);
 
 /**
  * @ref permissions

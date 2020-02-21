@@ -1,8 +1,13 @@
 const Ajv = require('ajv');
 const { validateSchema } = require('feathers-hooks-common');
-const { Forbidden, BadRequest } = require('@feathersjs/errors');
+const { Forbidden } = require('@feathersjs/errors');
 
-const { prepareParams, permissions: permissionsHelper } = require('../../utils');
+const {
+	prepareParams,
+	permissions: permissionsHelper,
+	setUserScopePermission,
+	convertTo,
+} = require('../../utils');
 
 /*
 const {
@@ -49,17 +54,17 @@ class VisibilityService {
 			throw new Forbidden(this.err.noAccess);
 		}
 
-		const readPermissions = overview[pK].filter(perm => perm.read === true);
 		let patched = {};
-
-		if (readPermissions.length > 0) {
+		if (permissionsHelper.couldAnyoneOnlyRead(overview[pK])) {
 			const patchParams = prepareParams(params, {
-				$select: [pK, `${pK}._id`, `${pK}.activated`, `${pK}.read`, `${pK}.write`],
+				// $select: `pK ${pK}._id ${pK}.activated ${pK}.read ${pK}.write`,
+				$select: [pK], // , `${pK}._id`, `${pK}.activated`, `${pK}.read`, `${pK}.write`],
 				[pK]: { $elemMatch: { read: true } },
 			});
 
 			const patchOperator = { $set: { [`${pK}.$.activated`]: visible } };
 			patched = await this.app.service(services).patch(ressourceId, patchOperator, patchParams);
+			patched = setUserScopePermission(patched, patched[pK], params.user);
 		}
 		return {
 			patched,
@@ -68,7 +73,7 @@ class VisibilityService {
 	}
 
 	batchRequest(ids, params, visible) {
-		return Promise.all(ids.map(id => this.request(this.serviceType.section, id, params, visible, false)));
+		return Promise.all(ids.map((id) => this.request(this.serviceType.section, id, params, visible, false)));
 	}
 
 	/**
@@ -81,14 +86,14 @@ class VisibilityService {
 	 * Is type lesson, you can set child true/false to update child sections from this lesson too
 	 */
 	async patch(ressourceId, { childs = true, visible = true, type = 'lesson' }, params) {
-		const { patched, overview } = await this.request(this.serviceType[type], ressourceId, params, visible);
+		const v = convertTo.boolean(visible);
+		const { patched, overview } = await this.request(this.serviceType[type], ressourceId, params, v);
 		patched.type = type;
 
 		if (childs && Array.isArray(overview.sections) && overview.sections.length > 0) {
-			const patchedSections = await this.batchRequest(overview.sections, params, visible);
-			patched.sections = patchedSections.map(res => res.patched);
+			const patchedSections = await this.batchRequest(overview.sections, params, v);
+			patched.sections = patchedSections.map((res) => res.patched);
 		}
-
 		return patched;
 	}
 
