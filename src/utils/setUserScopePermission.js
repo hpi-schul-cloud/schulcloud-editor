@@ -1,4 +1,4 @@
-const { hasWrite } = require('./permissions');
+const { hasWrite, hasActivatedRead } = require('./permissions');
 const { isPaginated } = require('./pagination');
 
 const KEY_NAME = 'scopePermission'; // is forced by this utils
@@ -19,6 +19,7 @@ const setUserScopePermission = (result, permissions, user) => {
 			perm = 'write';
 		}
 		result[KEY_NAME] = perm;
+		result.visible = hasActivatedRead(permissions);
 	} else if (typeof permissions === 'string') {
 		result[KEY_NAME] = permissions;
 	} else {
@@ -50,7 +51,7 @@ const setUserScopePermissionForFindRequests = (result, user, key = 'permissions'
 	}
 
 	// todo find less expensiv operations
-	data = data.map(res => setUserScopePermission(res, res[key], user));
+	data = data.map((res) => setUserScopePermission(res, res[key], user));
 
 	if (paginatedBoolean) {
 		result.data = data;
