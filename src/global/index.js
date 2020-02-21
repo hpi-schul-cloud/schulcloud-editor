@@ -59,6 +59,11 @@ const errorHandler = (context) => {
 	throw new GeneralError('server error');
 };
 
+const logResult = (context) => {
+	context.app.logger.info(context.result);
+	return context;
+};
+
 exports.before = {
 	all: [addUserId],
 	find: [],
@@ -69,7 +74,7 @@ exports.before = {
 	remove: [],
 };
 
-exports.after = {
+const after = {
 	// todo select is better but need more stable implementations
 	all: [iff(isProvider('external'),
 		filterOutResults('__v', 'createdAt', 'updatedAt')),
@@ -81,6 +86,10 @@ exports.after = {
 	patch: [],
 	remove: [],
 };
+if (!['test', 'production'].includes(process.env.NODE_ENV)) {
+	after.all.push(iff(isProvider('external'), logResult));
+}
+exports.after = after;
 
 exports.error = {
 	all: [errorHandler],

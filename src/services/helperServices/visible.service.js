@@ -65,6 +65,7 @@ class VisibilityService {
 			const patchOperator = { $set: { [`${pK}.$.activated`]: visible } };
 			patched = await this.app.service(services).patch(ressourceId, patchOperator, patchParams);
 			patched = setUserScopePermission(patched, patched[pK], params.user);
+			delete patched[pK];
 		}
 		return {
 			patched,
