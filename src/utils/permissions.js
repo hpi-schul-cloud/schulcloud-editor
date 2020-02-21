@@ -7,10 +7,10 @@ const saveSelect = (base, key, fallbackValue) => {
 	}
 };
 
-const userIsInside = (users = [], userId) => users.some(id => id.toString() === userId.toString());
-const isInUsers = (permissions = [], userId) => permissions.some(perm => userIsInside(perm.users, userId));
+const userIsInside = (users = [], userId) => users.some((id) => id.toString() === userId.toString());
+const isInUsers = (permissions = [], userId) => permissions.some((perm) => userIsInside(perm.users, userId));
 // eslint-disable-next-line max-len
-const isInGroup = (permissions = [], userId) => permissions.some(perm => userIsInside(saveSelect(perm.group, 'users', []), userId));
+const isInGroup = (permissions = [], userId) => permissions.some((perm) => userIsInside(saveSelect(perm.group, 'users', []), userId));
 const userIsInGroupOrUsers = (permissions, userId) => {
 	if (!userId) {
 		return false;
@@ -32,7 +32,7 @@ const isActivated = ({ endDate, publishDate, activated }) => {
 
 const access = (basePermissions = [], user, permissionTyp) => {
 	const validPermissions = basePermissions.filter(
-		perm => perm[permissionTyp] === true && isActivated(perm),
+		(perm) => perm[permissionTyp] === true && isActivated(perm),
 	);
 
 	return userIsInGroupOrUsers(validPermissions, user.id);
@@ -50,7 +50,7 @@ const hasRead = (permissions, user) => access(permissions, user, 'read') || acce
 /**
  * @param {*} permissions
  */
-const couldAnyoneOnlyRead = (permissions = []) => permissions.some(permission => permission.read);
+const couldAnyoneOnlyRead = (permissions = []) => permissions.some((permission) => permission.read);
 
 /**
  * @ref permissions
@@ -60,13 +60,16 @@ const hasWrite = (permissions, user) => access(permissions, user, 'write');
 /**
  * @ref permissions
  */
-const filterHasRead = (ressources = [], user, key = 'permissions') => ressources.filter(r => hasRead(r[key], user));
+const filterHasRead = (ressources = [], user, key = 'permissions') => ressources.filter((r) => hasRead(r[key], user));
 
 /**
  * @ref permissions
  */
-const filterHasWrite = (ressources = [], user, key = 'permissions') => ressources.filter(r => hasWrite(r[key], user));
+const filterHasWrite = (ressources = [], user, key = 'permissions') => ressources.filter((r) => hasWrite(r[key], user));
 
+const hasActivatedRead = (permissions = []) => permissions.some(
+	(permission) => permission.read === true && permission.activated === true,
+);
 
 module.exports = {
 	saveSelect,
@@ -78,6 +81,7 @@ module.exports = {
 	access,
 	hasWrite,
 	hasRead,
+	hasActivatedRead,
 	couldAnyoneOnlyRead,
 	filterHasRead,
 	filterHasWrite,

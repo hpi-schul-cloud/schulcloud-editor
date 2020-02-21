@@ -1,6 +1,6 @@
 /* eslint-disable class-methods-use-this */
 const { NotFound, Forbidden, BadRequest } = require('@feathersjs/errors');
-const { validateSchema, iff, isProvider } = require('feathers-hooks-common');
+const { validateSchema } = require('feathers-hooks-common');
 const Ajv = require('ajv');
 
 const {
@@ -152,8 +152,8 @@ class Lessons {
 
 		if (sections) {
 			lesson.sections = lesson.sections
-				.map(sectionId => sections.data
-					.find(({ _id }) => sectionId.toString() === _id.toString()));
+				.map((sectionId) => sections.data
+					.find(({ _id: id }) => sectionId.toString() === id.toString()));
 		}
 
 		return setUserScopePermission(lesson, lesson.permissions, user);
@@ -175,9 +175,9 @@ class Lessons {
 		};
 
 		Object.entries(courseMembers).forEach(([userId, perms]) => {
-			if (DEFAULT_CREATE_PERMISSIONS.some(p => perms.includes(p))) {
+			if (DEFAULT_CREATE_PERMISSIONS.some((p) => perms.includes(p))) {
 				users.write.push(userId);
-			} else if (DEFAULT_VIEW_PERMISSIONS.some(p => perms.includes(p))) {
+			} else if (DEFAULT_VIEW_PERMISSIONS.some((p) => perms.includes(p))) {
 				users.read.push(userId);
 			} else {
 				this.app.logger.warning(`User with id ${userId} has no permission to add it to lesson.`);

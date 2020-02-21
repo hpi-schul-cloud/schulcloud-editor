@@ -122,7 +122,7 @@ class SectionService {
 		const deletedAt = new Date();
 		const patchParams = modifiedParamsToReturnPatchResponse(prepareParams(params));
 		const result = await service.patch(_id, { deletedAt }, patchParams)
-			.then(res => convertSuccessMongoPatchResponse(res, { _id, deletedAt }, true));
+			.then((res) => convertSuccessMongoPatchResponse(res, { _id, deletedAt }, true));
 
 		await app.service('models/LessonModel')
 			.patch(lessonId,
@@ -160,7 +160,7 @@ class SectionService {
 		}
 
 		// check permissions -> userId must exist in own of the syncGroups with write permissions
-		const syncGroupWritePermission = syncGroups.filter(g => g.permission === 'write');
+		const syncGroupWritePermission = syncGroups.filter((g) => g.permission === 'write');
 		if (!permissions.isInUsers(syncGroupWritePermission, user.id)) {
 			throw new Forbidden(this.err.noAccess);
 		}
