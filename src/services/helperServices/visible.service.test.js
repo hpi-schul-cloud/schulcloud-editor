@@ -8,7 +8,7 @@ const pathVisible = 'helpers/setVisibility';
 
 const { expect } = chai;
 
-describe.only('helperServices/visible.service.js', () => {
+describe('helperServices/visible.service.js', () => {
 	let editor;
 	let helper;
 	let visibleService;
