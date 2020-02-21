@@ -1,0 +1,31 @@
+version: 1
+
+pullapprove_conditions:
+- condition: "'WIP' not in labels"
+  unmet_status: pending
+  explanation: "Work in progress"
+- condition: "'- [ ]' not in body"
+  unmet_status: failure
+  explanation: "Please finish all the required checklist tasks"
+
+  loki:
+    conditions:
+    - "'Loki' in labels"
+    reviews:
+      required: 1  # 1 approval from this group are required
+      request: 2  # 2 reviews requests will be sent at a time
+      request_order: shuffle  # reviewers will be chosen in a random order
+    reviewers:
+      teams:
+      - loki
+
+  privacy:
+    conditions:
+    - "'*model.js' in files or 'src/services/*' not in files or 'src/utils/*' not in files'"
+    reviewers:
+      teams:
+      - editor-core
+    reviews:
+      required: 1  # number of approvals required from this group
+      request: -1  # request from all members a review
+      author_value: 1
