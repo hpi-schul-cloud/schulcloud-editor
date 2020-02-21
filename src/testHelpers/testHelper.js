@@ -20,8 +20,6 @@ class TestHelperService {
 		this.app = app;
 		this.ids = [];
 		this.serviceName = serviceName;
-		this.modelName = modelName;
-		this.Model = mongoose.model(this.modelName);
 
 		this.warn = warn;
 		this.info = info;
@@ -31,11 +29,16 @@ class TestHelperService {
 
 		const urlVars = this.serviceName.match(/(:\w+)/g);
 		this.urlVars = (urlVars || []).map(v => v.substr(1));
+		if (modelName) {
+			this.modelName = modelName;
+			this.Model = mongoose.model(this.modelName);
 
-		this.defaultData = defaultData[this.modelName] || {};
-		if (!this.defaultData) {
-			this.warn(`No default data for model in ./src/testHelpers/defaultData/${this.modelName}.js defined.`);
+			this.defaultData = defaultData[this.modelName] || {};
+			if (!this.defaultData) {
+				this.warn(`No default data for model in ./src/testHelpers/defaultData/${this.modelName}.js defined.`);
+			}
 		}
+
 		this.init(app);
 	}
 
@@ -131,7 +134,11 @@ class TestHelperService {
 			})
 			.catch((err) => {
 				if (err.response) {
-					return { status: err.response.status, data: err.response.data };
+					return {
+						status: err.response.status,
+						data: err.response.data,
+						statusText: err.response.statusText,
+					};
 				}
 				return err;
 			});
@@ -141,6 +148,11 @@ class TestHelperService {
 		const {
 			Model, defaultData: baseData, extractId, warn,
 		} = this;
+
+		if (!Model) {
+			throw new Error('Model for this helper is not defined,'
+			+ ' please pass it with the key "modelName" in constructor.');
+		}
 
 		const inputData = Object.assign({}, baseData, overrideData);
 		inputData[permissionsKey] = Array.isArray(permissions) ? permissions : [permissions];
@@ -185,6 +197,9 @@ class TestHelperService {
 
 	async cleanup() {
 		const { ids, Model, info } = this;
+		if (!Model) {
+			return [];
+		}
 		const $or = ids.map(_id => ({ _id }));
 
 		if ($or.length > 0) {
@@ -207,6 +222,7 @@ class TestHelper {
 		this.defaultPermissionData = defaultData.permission || {};
 		this.init(app);
 		this.showDetailes = false;
+		this.memory = {};
 	}
 
 	init(app) {
@@ -223,8 +239,9 @@ class TestHelper {
 		app.serviceHelper = (serviceName) => {
 			return this.getServiceHelper(serviceName);
 		};
-	}
 
+		this.jwt = jwtHelper(app);
+	}
 
 	registerServiceHelper({ serviceName, modelName }) {
 		const warn = (messsage) => {
@@ -283,7 +300,87 @@ class TestHelper {
 	}
 
 	createObjectId() {
-		return mongoose.Types.ObjectId();
+		return mongoose.Types.ObjectId().toString();
+	}
+
+	sameId(id) {
+		return e => e._id.toString() === id.toString();
+	}
+
+	defaultServiceSetup() {
+		const res = {};
+		res.pathLesson = '/course/:courseId/lessons';
+		res.pathSection = 'lesson/:lessonId/sections';
+
+		res.courseId = this.createObjectId();
+
+		this.registerServiceHelper({
+			serviceName: res.pathSection,
+			modelName: 'section',
+		});
+		res.sectionService = this.app.serviceHelper(res.pathSection);
+
+		this.registerServiceHelper({
+			serviceName: res.pathLesson,
+			modelName: 'lesson',
+		});
+		res.lessonService = this.app.serviceHelper(res.pathLesson);
+
+		this.memory.defaultServiceSetup = res;
+		return res;
+	}
+
+	async createTestData({
+		lessonPermission = ['read', 'write'],
+		sectionPermission = ['read', 'write'],
+		readIsActivated = true,
+	} = {}) {
+		if (!this.memory.defaultServiceSetup) {
+			this.defaultServiceSetup();
+		}
+
+		const {
+			sectionService,
+			lessonService,
+			courseId,
+		} = this.memory.defaultServiceSetup;
+
+		const readUserId = this.createObjectId();
+		const writeUserId = this.createObjectId();
+
+		const optRead = { users: [readUserId], read: true, activated: readIsActivated };
+		const optWrite = { users: [writeUserId], write: true, activated: true };
+		const permissions = {
+			lesson: {
+				read: lessonPermission.includes('read') ? this.createPermission(optRead) : undefined,
+				write: lessonPermission.includes('write') ? this.createPermission(optWrite) : undefined,
+			},
+			section: {
+				read: sectionPermission.includes('read') ? this.createPermission(optRead) : undefined,
+				write: sectionPermission.includes('write') ? this.createPermission(optWrite) : undefined,
+			},
+		};
+
+		const lessonId = this.createObjectId();
+		const sectionId = this.createObjectId();
+
+		const ref = {
+			target: lessonId,
+			targetModel: 'lesson',
+		};
+
+		const createSection = sectionService.createWithDefaultData({
+			ref, _id: sectionId,
+		}, Object.values(permissions.section).filter(p => p));
+
+		const createLesson = lessonService.createWithDefaultData({
+			courseId, sections: [sectionId], _id: lessonId,
+		}, Object.values(permissions.lesson).filter(p => p));
+
+		const [lesson, section] = await Promise.all([createLesson, createSection]);
+		return {
+			lesson, section, lessonId, sectionId, permissions, readUserId, writeUserId,
+		};
 	}
 
 	async cleanup() {

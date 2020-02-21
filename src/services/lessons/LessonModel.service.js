@@ -28,6 +28,7 @@ const LessonModelService = (app) => {
 			default: 50,
 			max: 150,
 		},
+		whitelist: ['$elemMatch'],
 	};
 	app.use('models/LessonModel', service(option));
 	const modelService = app.service('models/LessonModel');
