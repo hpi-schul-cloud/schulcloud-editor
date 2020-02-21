@@ -22,7 +22,6 @@ pullapprove_conditions:
   privacy:
     conditions:
     - "'*model.js' in files or 'src/services/*' not in files or 'src/utils/*' not in files'"
-    # only review if "*model.js", "backup/setup/*.json" files or ".pullapprove.yml" have been touched
     reviewers:
       teams:
       - editor-core
