@@ -7,13 +7,13 @@
 		"createdBy"
 	],
 	"properties": {
-    	"title": {
-    		"$id": "#/properties/title",
-    		"type": "string"
-    	},
+		"title": {
+			"$id": "#/properties/title",
+			"type": "string"
+		},
 		"visible": {
 			"$id": "#/properties/visible",
- 			"type": "boolean"
+			"type": "boolean"
 		},
 		"position": {
 			"$id": "#/properties/position",
@@ -28,6 +28,12 @@
 			"$id": "#/properties/createdBy",
 			"type": "string",
 			"pattern": "[a-f0-9]{24}"
+		},
+		"createdAt": {
+			"type": "number"
+		},
+		"updatedAt": {
+			"type": "number"
 		},
 		"fork": {
 			"$id": "#/properties/fork",

@@ -40,6 +40,9 @@ const sectionSchema = new Schema({
 	deletedAt: { type: Date, expires: (60 * 60 * 24 * 30) },
 	createdBy: { type: Schema.Types.ObjectId, immutable: true },
 	updatedBy: { type: Schema.Types.ObjectId },
+	createdAt: { type: Date, default: Date.now },
+	updatedAt: { type: Date, default: Date.now },
+
 }, {
 	timestamps: true,
 	minimize: false, // to return empty objects

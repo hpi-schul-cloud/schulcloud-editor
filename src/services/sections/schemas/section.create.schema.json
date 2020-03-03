@@ -6,15 +6,21 @@
 		"createdBy"
 	],
 	"properties": {
-    	"title": {
-    		"type": "string"
-    	},
+		"title": {
+			"type": "string"
+		},
 		"state": {
- 			"type": "object"
+			"type": "object"
 		},
 		"createdBy": {
 			"type": "string",
 			"pattern": "[a-f0-9]{24}"
+		},
+		"createdAt": {
+			"type": "number"
+		},
+		"updatedAt": {
+			"type": "number"
 		}
 	},
 	"additionalProperties": false
