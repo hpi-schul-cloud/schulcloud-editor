@@ -1,0 +1,37 @@
+---
+version: \"3.7\"
+
+services:
+  editor-mongodb:
+    image: mongo:3.4
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: always
+    ports:
+      - 27017:27017
+    volumes:
+      - data-editor-mongodb:/data/db
+    restart: unless-stopped
+
+  schulcloud-editor:
+    image: schulcloud/schulcloud-editor:$DOCKERTAG
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: any
+    environment:
+      - NODE_ENV=production
+      - MONGO_URI=mongodb://editor-mongodb:27017/schulcloud-editor
+      - PORT=5001
+      - SERVER_API_URL=http://server:3030
+      - TIMEOUT=30000
+    ports:
+      - \"5001:5001\"
+    depends_on:
+      - editor-mongodb
+      - server
+    restart: unless-stopped
+
+volumes:
+    data-editor-mongodb:
