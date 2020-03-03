@@ -1,7 +1,7 @@
 const service = require('feathers-mongoose');
 const { disallow } = require('feathers-hooks-common');
 
-const { AttachmentModel } = require('./models/');
+const { AttachmentModel } = require('./models');
 
 const hooks = {};
 hooks.before = {

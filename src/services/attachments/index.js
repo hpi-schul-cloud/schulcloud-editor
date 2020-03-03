@@ -6,7 +6,13 @@ module.exports = (app) => {
 
 	const path = 'attachments';
 
-	app.use(path, new AttachmentService({}));
+	app.use(path, new AttachmentService({
+		baseService: '/models/AttachmentModel',
+		typesToModelServices: {
+			lesson: '/models/LessonModel',
+			section: '/models/SectionModel',
+		},
+	}));
 
 	const externerService = app.service(path);
 	externerService.hooks(AttachmentServiceHooks);

@@ -1,15 +1,13 @@
-/* eslint-disable class-methods-use-this */
-const { Forbidden } = require('@feathersjs/errors');
+const { Forbidden, NotFound } = require('@feathersjs/errors');
+
+const logger = require('../../logger');
 // const { validateSchema } = require('feathers-hooks-common');
 // const Ajv = require('ajv');
 
-// const { } = require('../../global/hooks');
 const {
 	prepareParams,
 	permissions: permissionsHelper,
 } = require('../../utils');
-// const { } = require('./schemes');
-// const { } = require('./hooks/');
 
 const AttachmentServiceHooks = {
 	before: {
@@ -23,13 +21,6 @@ const AttachmentServiceHooks = {
 			// TODO: Schema
 		],
 	},
-	/* after: {
-
-		get: [
-		],
-		find: [
-		],
-	}, */
 };
 
 /**
@@ -37,11 +28,17 @@ const AttachmentServiceHooks = {
  * They can not get, or find over this external services.
  */
 class AttachmentService {
-	constructor({ docs = {} } = {}) {
+	constructor({ docs = {}, baseService, typesToModelServices } = {}) {
+		if (!baseService || !typesToModelServices) {
+			logger.error('AttachmentService: missing params!', { baseService, typesToModelServices });
+		}
 		this.docs = docs;
+		this.baseService = baseService;
+		this.typesToModelServices = typesToModelServices;
 
 		this.err = Object.freeze({
 			noAccess: 'You have no access',
+			notFound: 'Element do not exist.',
 		});
 	}
 
@@ -49,28 +46,52 @@ class AttachmentService {
 		this.app = app;
 	}
 
-	populate(params) {
-		params.query.$populate = [
-			{ path: 'permissions.group', select: 'users' },
-		];
-		return params;
+	getTarget(id, params) {
+		return this.app.service(this.baseService)
+			.get(id, prepareParams(params, {
+				$select: ['target', 'targetModel'],
+			}))
+			.catch((err) => {
+				throw new NotFound(this.err.notFound, err);
+			});
 	}
 
-	async create(data, params) {
-		const internParams = this.populate(prepareParams(params));
-		const result = this.app.service(`models/${data.targetModel}`).get(data.target, internParams);
+	async hasPermission(target, targetModel, params) {
+		const modelServiceName = this.typesToModelServices[targetModel];
+		const result = await this.app.service(modelServiceName)
+			.get(target, prepareParams(params, {
+				$populate: [
+					{ path: 'permissions.group', select: 'users' },
+				],
+			}));
+
 		if (!result || !permissionsHelper.hasWrite(result.permissions, params.user)) {
 			throw new Forbidden(this.err.noAccess);
 		}
-		return data;
+		return result;
 	}
 
+	async create(data, params) {
+		await this.hasPermission(data.target, data.targetModel, params);
+		return this.app.service(this.baseService)
+			.create(data, prepareParams(params));
+	}
+
+	// target and targetModel is disallowed
 	async patch(id, data, params) {
-		// permissions
+		const { target, targetModel } = await this.getTarget(id, params);
+		await this.hasPermission(target, targetModel, params);
+		return this.app.service(this.baseService)
+			.patch(id, data, prepareParams(params));
 	}
 
-	async remove(id, params) {
-		// permissions
+	async remove(_id, params) {
+		const { target, targetModel } = await this.getTarget(_id, params);
+		await this.hasPermission(target, targetModel, params);
+		const deletedAt = new Date();
+		return this.app.service(this.baseService)
+			.patch(_id, { deletedAt }, prepareParams(params))
+			.then(() => ({ _id, deletedAt }));
 	}
 }
 

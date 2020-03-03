@@ -120,6 +120,8 @@ class SectionService {
 		// The query operation is also execute in mongoose after it is patched.
 		// But deletedAt exist as select and without mongoose.writeResult = true it return nothing.
 		const deletedAt = new Date();
+		// TODO: Maybe modifiedParamsToReturnPatchResponse and convertSuccessMongoPatchResponse can removed?
+		// -> Please show in attachment services deleted.
 		const patchParams = modifiedParamsToReturnPatchResponse(prepareParams(params));
 		const result = await service.patch(_id, { deletedAt }, patchParams)
 			.then((res) => convertSuccessMongoPatchResponse(res, { _id, deletedAt }, true));
