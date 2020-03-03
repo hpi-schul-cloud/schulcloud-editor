@@ -11,7 +11,7 @@ const helpers = require('./helperServices');
 module.exports = (app) => {
 	/** first configure all services */
 	app.configure(lessons);
-	app.configure(groups);
+	// app.configure(groups); beta
 	app.configure(syncGroups);
 	app.configure(sections);
 	app.configure(viewports);
