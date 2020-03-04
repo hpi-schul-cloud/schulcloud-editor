@@ -123,9 +123,7 @@ class Lessons {
 
 		const [lesson, attachments, sections] = await Promise.all([
 			getLesson, findAttachments, findSections,
-		]).catch((err) => {
-			throw new BadRequest(this.err.get, err);
-		});
+		]);
 
 		if (!lesson) throw new NotFound();
 
