@@ -139,7 +139,9 @@ describe('lessons/lessons.service.js', () => {
 
 	it('get with query all=true should populate the sections', async () => {
 		await syncGroupsService.Model.remove();
-		const { status: statusCreate, data: { _id } } = await service.sendRequestToThisService('create', { userId, courseId });
+		const {
+			status: statusCreate, data: { _id },
+		} = await service.sendRequestToThisService('create', { userId, courseId });
 
 		expect(statusCreate).to.equal(201);
 
