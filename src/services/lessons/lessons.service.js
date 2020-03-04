@@ -79,10 +79,10 @@ class Lessons {
 	scopeParams(params) {
 		return prepareParams(params, {
 			courseId: params.route.courseId,
+			$select: ['title', 'permissions', 'sections', 'courseId', 'position'],
 			$populate: [
 				{ path: 'permissions.group', select: 'users' },
 			],
-			$select: ['title', 'permissions', 'sections', 'courseId', 'position'],
 		});
 	}
 
@@ -93,7 +93,7 @@ class Lessons {
 				throw new BadRequest(this.err.find, err);
 			});
 
-		const paginatedResult = paginate(permissions.filterHasRead(lessons, params.user), params);
+		const paginatedResult = paginate(permissions.filterHasRead(lessons.data, params.user), params);
 		return setUserScopePermissionForFindRequests(paginatedResult, params.user);
 	}
 
