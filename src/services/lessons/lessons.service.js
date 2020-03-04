@@ -137,6 +137,9 @@ class Lessons {
 			lesson.sections = lesson.sections
 				.map((sectionId) => sections.data
 					.find(({ _id }) => sectionId.toString() === _id.toString()));
+			lesson.sections.forEach((s) => {
+				delete s.ref;
+			});
 		}
 
 		if (isfilledArray(attachments.data)) {
