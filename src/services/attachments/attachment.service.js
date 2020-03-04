@@ -1,8 +1,9 @@
 const { Forbidden, NotFound } = require('@feathersjs/errors');
+const { validateSchema } = require('feathers-hooks-common');
+const Ajv = require('ajv');
 
 const logger = require('../../logger');
-// const { validateSchema } = require('feathers-hooks-common');
-// const Ajv = require('ajv');
+const { patchSchema, createSchema } = require('./schemas');
 
 const {
 	prepareParams,
@@ -12,10 +13,10 @@ const {
 const AttachmentServiceHooks = {
 	before: {
 		create: [
-			// TODO: Schema
+			validateSchema(createSchema, Ajv),
 		],
 		patch: [
-			// TODO: Schema
+			validateSchema(patchSchema, Ajv),
 		],
 		remove: [
 			// TODO: Schema
@@ -46,6 +47,12 @@ class AttachmentService {
 		this.app = app;
 	}
 
+	scopeParams(params) {
+		return prepareParams(params, {
+			$select: ['title', 'description', 'type', 'value'],
+		});
+	}
+
 	getTarget(id, params) {
 		return this.app.service(this.baseService)
 			.get(id, prepareParams(params, {
@@ -74,7 +81,7 @@ class AttachmentService {
 	async create(data, params) {
 		await this.hasPermission(data.target, data.targetModel, params);
 		return this.app.service(this.baseService)
-			.create(data, prepareParams(params));
+			.create(data, this.scopeParams(params));
 	}
 
 	// target and targetModel is disallowed
@@ -82,7 +89,7 @@ class AttachmentService {
 		const { target, targetModel } = await this.getTarget(id, params);
 		await this.hasPermission(target, targetModel, params);
 		return this.app.service(this.baseService)
-			.patch(id, data, prepareParams(params));
+			.patch(id, data, this.scopeParams(params));
 	}
 
 	async remove(_id, params) {
@@ -90,7 +97,9 @@ class AttachmentService {
 		await this.hasPermission(target, targetModel, params);
 		const deletedAt = new Date();
 		return this.app.service(this.baseService)
-			.patch(_id, { deletedAt }, prepareParams(params))
+			.patch(_id, { deletedAt }, prepareParams(params, {
+				$select: '_id',
+			}))
 			.then(() => ({ _id, deletedAt }));
 	}
 }

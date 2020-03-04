@@ -4,7 +4,7 @@ const { addTypeString } = require('../../../utils');
 
 const { Schema } = mongoose;
 
-const targetModels = ['lesson', 'section'];
+const targetModels = ['lesson']; // 'section'
 
 const attachmentSchema = new Schema({
 	title: { type: String },
