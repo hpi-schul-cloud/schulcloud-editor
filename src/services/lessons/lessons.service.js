@@ -106,12 +106,14 @@ class Lessons {
 		let findSections;
 		if (params.query.all === 'true') {
 			// call sections via route and not populate because of permission check and socket channels
-			findSections = this.app.service('lesson/:lessonId/sections').find({
+			const sectionParams = {
 				...params,
 				route: {
 					lessonId: id,
 				},
-			});
+			};
+			sectionParams.query = {};
+			findSections = this.app.service('lesson/:lessonId/sections').find(sectionParams);
 		}
 
 		const findAttachments = this.app.service('models/AttachmentModel')
