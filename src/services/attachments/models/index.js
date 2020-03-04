@@ -1,7 +1,5 @@
 const mongoose = require('mongoose');
 
-const { addTypeString } = require('../../../utils');
-
 const { Schema } = mongoose;
 
 const targetModels = ['lesson']; // 'section'
@@ -31,10 +29,6 @@ const attachmentSchema = new Schema({
 }, {
 	timestamps: true,
 });
-
-attachmentSchema
-	.post('find', addTypeString('attachment'))
-	.post('findOne', addTypeString('attachment'));
 
 module.exports = {
 	AttachmentModel: mongoose.model('attachment', attachmentSchema),

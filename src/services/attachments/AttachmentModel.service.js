@@ -2,6 +2,7 @@ const service = require('feathers-mongoose');
 const { disallow } = require('feathers-hooks-common');
 
 const { AttachmentModel } = require('./models');
+const { scopeFilter } = require('./hooks');
 
 const hooks = {};
 hooks.before = {
@@ -15,8 +16,10 @@ hooks.before = {
 	remove: [
 	],
 	get: [
+		scopeFilter,
 	],
 	find: [
+		scopeFilter,
 	],
 };
 

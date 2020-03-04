@@ -14,6 +14,7 @@ const {
 	paginate,
 	setUserScopePermissionForFindRequests,
 	setUserScopePermission,
+	isfilledArray,
 } = require('../../utils');
 const {
 	create: createSchema,
@@ -75,75 +76,55 @@ class Lessons {
 		this.app = app;
 	}
 
-	async find(params) {
-		const { route: { courseId }, user } = params;
-
-		try {
-			const lessons = await LessonModel.find({
-				courseId,
-				deletedAt: { $exists: false },
-			}).populate({
-				path: 'permissions.group',
-				select: 'users',
-			}).select({
-				_id: 1,
-				title: 1,
-				note: 1,
-				visible: 1,
-				permissions: 1,
-				courseId: 1,
-				position: 1,
-			}).lean()
-				.exec();
-
-			const paginatedResult = paginate(permissions.filterHasRead(lessons, user), params);
-			return setUserScopePermissionForFindRequests(paginatedResult, user);
-		} catch (err) {
-			throw new BadRequest(this.err.find, err);
-		}
+	scopeParams(params) {
+		return prepareParams(params, {
+			courseId: params.route.courseId,
+			$populate: [
+				{ path: 'permissions.group', select: 'users' },
+			],
+			$select: ['title', 'permissions', 'sections', 'courseId', 'position'],
+		});
 	}
 
-	async get(_id, params) {
-		const { route: { courseId }, user } = params;
-		let lesson;
-		let sections;
-		const parallelRequest = [];
-		const mRequest = LessonModel
-			.findOne({
-				_id,
-				courseId,
-				deletedAt: { $exists: false },
-			}).populate({
-				path: 'permissions.group',
-				select: 'users',
-			}).select({
-				_id: 1,
-				title: 1,
-				note: 1,
-				permissions: 1,
-				sections: 1,
-				courseId: 1,
+	async find(params) {
+		const lessons = await this.app.service('models/LessonModel')
+			.find(this.scopeParams(params))
+			.catch((err) => {
+				throw new BadRequest(this.err.find, err);
 			});
 
+		const paginatedResult = paginate(permissions.filterHasRead(lessons, params.user), params);
+		return setUserScopePermissionForFindRequests(paginatedResult, params.user);
+	}
 
-		parallelRequest.push(mRequest.lean().exec());
+	async get(id, params) {
+		const { user } = params;
 
+		const getLesson = this.app.service('models/LessonModel')
+			.get(id, this.scopeParams(params));
+
+		let findSections;
 		if (params.query.all === 'true') {
 			// call sections via route and not populate because of permission check and socket channels
-			parallelRequest.push(this.app.service('lesson/:lessonId/sections').find({
+			findSections = this.app.service('lesson/:lessonId/sections').find({
 				...params,
 				route: {
-					lessonId: _id,
+					lessonId: id,
 				},
+			});
+		}
+
+		const findAttachments = this.app.service('models/AttachmentModel')
+			.find(prepareParams(params, {
+				target: id,
 			}));
-		}
 
-
-		try {
-			[lesson, sections] = await Promise.all(parallelRequest);
-		} catch (err) {
+		const [lesson, attachments, sections] = await Promise.all([
+			getLesson, findAttachments, findSections,
+		]).catch((err) => {
 			throw new BadRequest(this.err.get, err);
-		}
+		});
+
 		if (!lesson) throw new NotFound();
 
 		if (!permissions.hasRead(lesson.permissions, user)) {
@@ -153,7 +134,11 @@ class Lessons {
 		if (sections) {
 			lesson.sections = lesson.sections
 				.map((sectionId) => sections.data
-					.find(({ _id: id }) => sectionId.toString() === id.toString()));
+					.find(({ _id }) => sectionId.toString() === _id.toString()));
+		}
+
+		if (isfilledArray(attachments.data)) {
+			lesson.attachments = attachments.data;
 		}
 
 		return setUserScopePermission(lesson, lesson.permissions, user);

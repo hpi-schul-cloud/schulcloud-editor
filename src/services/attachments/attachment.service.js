@@ -18,9 +18,6 @@ const AttachmentServiceHooks = {
 		patch: [
 			validateSchema(patchSchema, Ajv),
 		],
-		remove: [
-			// TODO: Schema
-		],
 	},
 };
 
@@ -47,9 +44,10 @@ class AttachmentService {
 		this.app = app;
 	}
 
-	scopeParams(params) {
+	scopeParams(params, options = {}) {
 		return prepareParams(params, {
 			$select: ['title', 'description', 'type', 'value'],
+			...options,
 		});
 	}
 
