@@ -19,7 +19,12 @@ stages:
     if: type = push && (branch = master || branch = develop || branch ~= /^(?i:release|hotfix).*$/)
 
 env:
-  - REDIS_URI=redis://localhost:6379
+  global:
+    - REDIS_URI=redis://localhost:6379
+    - TZ=Europe/Berlin
+    - GIT_SHA=$( git rev-parse HEAD )
+    - DOCKERTAG="$( echo $TRAVIS_BRANCH | tr -s '[:punct:]' '-' | tr -s '[:upper:]' '[:lower:]' )_v$( jq -r '.version' package.json )_$TRAVIS_COMMIT"
+
 jobs:
   include:
     - stage: test
