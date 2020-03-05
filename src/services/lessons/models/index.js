@@ -13,6 +13,7 @@ const lessonSchema = new Schema({
 	deletedAt: { type: Date, expires: (60 * 60 * 24 * 30) },
 	createdBy: { type: Schema.Types.ObjectId },
 	updatedBy: { type: Schema.Types.ObjectId },
+	hash: { type: String },
 	position: { type: Number, default: Date.now },
 	fork: { type: Schema.Types.ObjectId }, // is forked from
 }, {
