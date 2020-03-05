@@ -7,9 +7,6 @@ branches:
     - develop
     - master
     - /^(?i:release|hotfix).*$/
-services:
-  - mongodb
-  - redis-server
 
 stages:
   - test
@@ -20,7 +17,6 @@ stages:
 
 env:
   global:
-    - REDIS_URI=redis://localhost:6379
     - TZ=Europe/Berlin
     - GIT_SHA=$( git rev-parse HEAD )
     - DOCKERTAG="$( echo $TRAVIS_BRANCH | tr -s '[:punct:]' '-' | tr -s '[:upper:]' '[:lower:]' )_v$( jq -r '.version' package.json )_$TRAVIS_COMMIT"
@@ -30,7 +26,11 @@ jobs:
     - stage: test
       name: test:mocha
       script: npm run test
-      cache: npm
+      services:
+        - mongodb
+        - redis-server
+      env:
+        - REDIS_URI=redis://localhost:6379
 
     # Build Docker Images
     - stage: build
@@ -43,3 +43,5 @@ jobs:
       name: deploy
       language: generic
       script: bash ./deploy/deploy.sh
+
+cache: npm
