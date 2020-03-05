@@ -11,17 +11,17 @@
 
 inform_live() {
 	# $1: Project Name (client, storybook, vuepress)
-  if [[ "$TRAVIS_EVENT_TYPE" != "cron" ]]
-  then
-  curl -X POST -H 'Content-Type: application/json' --data '{"text":":rocket: Die Produktivsysteme können aktualisiert werden: Schul-Cloud editor! Dockertag: '$DOCKERTAG'"}' $WEBHOOK_URL_CHAT
-  fi
+	if [[ "$TRAVIS_EVENT_TYPE" != "cron" ]]
+	then
+	curl -X POST -H 'Content-Type: application/json' --data '{"text":":rocket: Die Produktivsysteme können aktualisiert werden: Schul-Cloud editor! Dockertag: '$DOCKERTAG'"}' $WEBHOOK_URL_CHAT
+	fi
 }
 
 inform_staging() {
-  if [[ "$TRAVIS_EVENT_TYPE" != "cron" ]]
-  then
-    curl -X POST -H 'Content-Type: application/json' --data '{"text":":boom: Das Staging-System wurde aktualisiert: Schul-Cloud editor! (Dockertag: '$DOCKERTAG')"}' $WEBHOOK_URL_CHAT
-  fi
+	if [[ "$TRAVIS_EVENT_TYPE" != "cron" ]]
+	then
+		curl -X POST -H 'Content-Type: application/json' --data '{"text":":boom: Das Staging-System wurde aktualisiert: Schul-Cloud editor! (Dockertag: '$DOCKERTAG')"}' $WEBHOOK_URL_CHAT
+	fi
 }
 
 deploy(){
@@ -72,15 +72,17 @@ case "$TRAVIS_BRANCH" in
 
 	master)
 		inform_live
-		;;
+	;;
 
 	develop)
 		echo "develop"
-    # deploy $SYSTEM $DOCKERFILE $DOCKERTAG $DOCKER_SERVICENAME $COMPOSE_DUMMY $COMPOSE_FILE $COMPOSE_SERVICENAME
-    deploy "test" "editor" $DOCKERTAG "test-schul-cloud_editor" "compose-editor_default.dummy" "editor.yml" "test-schul-cloud"
+		# deploy $SYSTEM $DOCKERFILE $DOCKERTAG $DOCKER_SERVICENAME $COMPOSE_DUMMY $COMPOSE_FILE $COMPOSE_SERVICENAME
+		deploy "test" "editor" $DOCKERTAG "test-schul-cloud_editor" "compose-editor_default.dummy" "editor.yml" "test-schul-cloud"
+	;;
 	release* | hotfix*)
-    echo "release/hotfix"
-    deploy "staging" "editor" $DOCKERTAG "staging_editor" "compose-editor_default.dummy" "editor_default.yml" "staging"
+		echo "release/hotfix"
+		deploy "staging" "editor" $DOCKERTAG "staging_editor" "compose-editor_default.dummy" "editor_default.yml" "staging"
+	;;
 esac
 
 exit 0
