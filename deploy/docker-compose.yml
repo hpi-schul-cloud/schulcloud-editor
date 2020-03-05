@@ -1,0 +1,36 @@
+version: "3.7"
+
+# example compose file
+
+services:
+  editor-mongodb:
+    image: mongo:3.4
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: always
+    ports:
+      - 27017:27017
+    volumes:
+      - data-editor-mongodb:/data/db
+    restart: unless-stopped
+
+  schulcloud-editor:
+    build:
+      context: ../
+      dockerfile: deploy/Dockerfile
+    environment:
+      - NODE_ENV=production
+      - MONGO_URI=mongodb://editor-mongodb:27017/schulcloud-editor
+      - PORT=5001
+      - SERVER_API_URL=http://server:3030
+      - TIMEOUT=30000
+      - REDIS_URI="redis://redis:6379/schulcloud-editor" # ??? where is it used
+    ports:
+      - 5001:5001
+    depends_on:
+        - editor-mongodb
+    restart: unless-stopped
+
+volumes:
+    data-editor-mongodb:
