@@ -4,6 +4,8 @@
 # DECLERATIONS
 # ----------------
 
+set -e # fail with exit 1 on any error
+
 echo "DOCKERTAG" $DOCKERTAG
 echo "GITSHA" $GIT_SHA
 
@@ -38,7 +40,6 @@ buildeditor(){
 # ----------------
 # MAIN SCRIPT
 # ----------------
-
 cd deploy
 
 source ./buildAndDeployFilter.sh
