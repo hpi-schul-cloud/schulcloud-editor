@@ -22,12 +22,12 @@ services:
     environment:
       - NODE_ENV=production
       - MONGO_URI=mongodb://editor-mongodb:27017/schulcloud-editor
-      - PORT=4001
+      - PORT=4101
       - SERVER_API_URL=http://server:3030
       - TIMEOUT=30000
       - REDIS_URI="redis://redis:6379/schulcloud-editor" # ??? where is it used
     ports:
-      - 5101:4001
+      - 4101:4101
     depends_on:
         - editor-mongodb
     restart: unless-stopped
