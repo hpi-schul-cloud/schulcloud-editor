@@ -184,6 +184,48 @@ describe('sections/section.service.js', () => {
 		expect(status).to.equal(403);
 	});
 
+	it('get with hash only sends state if hashes dont match', async () => {
+		const { _id: lessonId } = await lessonService.createWithDefaultData({ courseId }, readPermission);
+		const state = { abc: 123, x: [] };
+		const ref = {
+			target: lessonId,
+			targetModel: 'lesson',
+		};
+		const hash = 'thisisthecurrenthash';
+		const section = await sectionService.createWithDefaultData({ state, ref, hash }, readPermission);
+
+		expect(lessonId.toString()).to.equal(section.ref.target.toString());
+
+		const {
+			status: matchingHashStatus, data: matchingHashData,
+		} = await sectionService.sendRequestToThisService('get', {
+			id: section._id, userId, lessonId, query: { hash: 'thisisthecurrenthash' },
+		});
+
+		expect(matchingHashStatus).to.equal(200);
+		expect(matchingHashData).to.an('object');
+		expect(matchingHashData).to.have.property('hash');
+		expect(matchingHashData).to.not.have.property('ref');
+		expect(matchingHashData).to.not.have.property('state');
+		expect(matchingHashData).to.not.have.property('permissions');
+		expect(matchingHashData).to.have.property(userScopePermissionKey);
+
+		const {
+			status: otherHashStatus, data: otherHashData,
+		} = await sectionService.sendRequestToThisService('get', {
+			id: section._id, userId, lessonId, query: { hash: 'someotherhash' },
+		});
+
+		expect(otherHashStatus).to.equal(200);
+		expect(otherHashData).to.an('object');
+		expect(otherHashData.ref.target.toString()).to.equal(lessonId.toString());
+		expect(otherHashData.state).to.deep.equal(state);
+		expect(otherHashData).to.not.have.property('permissions');
+		expect(otherHashData).to.have.property(userScopePermissionKey);
+		expect(otherHashData).to.have.property('timestamp');
+		expect(otherHashData).to.have.property('hash');
+	});
+
 	it('find with read permissions should work', async () => {
 		const { _id: lessonId } = await lessonService.createWithDefaultData({ courseId }, writePermission);
 		const ref = {

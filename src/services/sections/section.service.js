@@ -93,16 +93,24 @@ class SectionService {
 		return setUserScopePermissionForFindRequests(sections, params.user);
 	}
 
-	get(id, params) {
+	async get(id, params) {
 		const internParams = this.setScope(prepareParams(params));
-		return this.app.service(this.baseService)
-			.get(id, internParams)
-			.then((section) => {
-				if (!permissions.hasRead(section.permissions, params.user)) {
-					throw new Forbidden(this.err.noAccess);
-				}
-				return setUserScopePermission(section, section.permissions, params.user);
-			});
+		let section = await this.app.service(this.baseService).get(id, internParams);
+		if (!permissions.hasRead(section.permissions, params.user)) {
+			throw new Forbidden(this.err.noAccess);
+		}
+		section.timestamp = section.updatedAt;
+		const clientAlreadyHasNewestState = params.query.hash && params.query.hash === section.hash;
+		if (clientAlreadyHasNewestState) {
+			section = {
+				_id: section._id,
+				permissions: section.permissions,
+				title: section.title,
+				hash: section.hash,
+			};
+		}
+		const result = await setUserScopePermission(section, section.permissions, params.user);
+		return result;
 	}
 
 	async remove(_id, params) {
