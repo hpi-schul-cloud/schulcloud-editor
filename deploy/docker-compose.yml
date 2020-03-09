@@ -25,7 +25,7 @@ services:
       - PORT=4101
       - SERVER_API_URL=http://server:3030
       - TIMEOUT=30000
-      - REDIS_URI="redis://redis:6379/schulcloud-editor" # ??? where is it used
+      - REDIS_URI="redis://redis:6379/schulcloud-editor"
     ports:
       - 4101:4101
     depends_on:
