@@ -248,6 +248,33 @@ describe('sections/section.service.js', () => {
 		expect(data.data).all.have.property(userScopePermissionKey);
 	});
 
+	it('find should filter states if hashes match', async () => {
+		const { _id: lessonId } = await lessonService.createWithDefaultData({ courseId }, writePermission);
+		const ref = {
+			target: lessonId,
+			targetModel: 'lesson',
+		};
+		const sections = await Promise.all([
+			sectionService.createWithDefaultData({ ref, hash: 'firsthash' }, writePermission),
+			sectionService.createWithDefaultData({ ref, hash: 'secondhash' }, readPermission),
+			sectionService.createWithDefaultData({ ref, hash: undefined }, readPermission),
+		]);
+
+		const query = { hashes: {} };
+		query.hashes[sections[0]._id] = 'firsthash';
+		query.hashes[sections[1]._id] = 'wronghash';
+		query.hashes = JSON.stringify(query.hashes);
+		const result = await sectionService.sendRequestToThisService('find', {
+			userId, lessonId, query,
+		});
+		expect(result.status).to.equal(200);
+		expect(result.data.data).to.have.lengthOf(3);
+		expect(result.data.data).all.have.property(userScopePermissionKey);
+		expect(result.data.data[0]).to.not.have.property('state');
+		expect(result.data.data[1]).to.have.property('state');
+		expect(result.data.data[2]).to.have.property('state');
+	});
+
 
 	it('patch with write permissions should work', async () => {
 		const { _id: lessonId } = await lessonService.createWithDefaultData({ courseId }, writePermission);

@@ -82,9 +82,30 @@ class SectionService {
 		const internParams = this.setScope(prepareParams(params));
 		const sections = await this.app.service(this.baseService)
 			.find(internParams);
-		const filtered = permissions.filterHasRead(sections.data, params.user);
-
-		filtered.map((section) => {
+		let filtered = permissions.filterHasRead(sections.data, params.user);
+		if (params.query.hashes) {
+			let hashes;
+			try {
+				hashes = JSON.parse(params.query.hashes);
+			} catch (err) {
+				throw new BadRequest('hashes should be valid stringified JSON');
+			}
+			filtered = filtered.map((section) => {
+				const clientHasNewestState = hashes[section._id.toString()]
+				&& hashes[section._id.toString()] === section.hash;
+				if (clientHasNewestState) {
+					// eslint-disable-next-line no-param-reassign
+					section = {
+						_id: section._id,
+						permissions: section.permissions,
+						title: section.title,
+						hash: section.hash,
+					};
+				}
+				return section;
+			});
+		}
+		filtered.forEach((section) => {
 			section.visible = !permissions.couldAnyoneOnlyRead(section.permissions);
 			return section;
 		});
