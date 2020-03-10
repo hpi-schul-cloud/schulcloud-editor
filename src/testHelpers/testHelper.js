@@ -1,4 +1,4 @@
-/* eslint-disable arrow-body-style */
+/* eslint-disable arrow-body-style, max-classes-per-file */
 const mongoose = require('mongoose');
 const axios = require('axios');
 const queryString = require('query-string');
@@ -28,7 +28,7 @@ class TestHelperService {
 		this.service = this.app.service(this.serviceName);
 
 		const urlVars = this.serviceName.match(/(:\w+)/g);
-		this.urlVars = (urlVars || []).map(v => v.substr(1));
+		this.urlVars = (urlVars || []).map((v) => v.substr(1));
 		if (modelName) {
 			this.modelName = modelName;
 			this.Model = mongoose.model(this.modelName);
@@ -154,7 +154,7 @@ class TestHelperService {
 			+ ' please pass it with the key "modelName" in constructor.');
 		}
 
-		const inputData = Object.assign({}, baseData, overrideData);
+		const inputData = { ...baseData, ...overrideData };
 		inputData[permissionsKey] = Array.isArray(permissions) ? permissions : [permissions];
 
 		const $doc = new Model(inputData);
@@ -200,7 +200,7 @@ class TestHelperService {
 		if (!Model) {
 			return [];
 		}
-		const $or = ids.map(_id => ({ _id }));
+		const $or = ids.map((_id) => ({ _id }));
 
 		if ($or.length > 0) {
 			await Model.deleteMany({ $or });
@@ -291,7 +291,7 @@ class TestHelper {
 	}
 
 	createPermission(overrideData = {}) {
-		const inputData = Object.assign({}, this.defaultPermissionData, overrideData);
+		const inputData = { ...this.defaultPermissionData, ...overrideData };
 		if (!inputData.group && !Array.isArray(inputData.users)) {
 			this.warn('Permission without users or group created.');
 		}
@@ -304,7 +304,7 @@ class TestHelper {
 	}
 
 	sameId(id) {
-		return e => e._id.toString() === id.toString();
+		return (e) => e._id.toString() === id.toString();
 	}
 
 	defaultServiceSetup() {
@@ -328,6 +328,10 @@ class TestHelper {
 
 		this.memory.defaultServiceSetup = res;
 		return res;
+	}
+
+	getJwt(userId) {
+		return this.jwt.create(userId);
 	}
 
 	async createTestData({
@@ -371,11 +375,11 @@ class TestHelper {
 
 		const createSection = sectionService.createWithDefaultData({
 			ref, _id: sectionId,
-		}, Object.values(permissions.section).filter(p => p));
+		}, Object.values(permissions.section).filter((p) => p));
 
 		const createLesson = lessonService.createWithDefaultData({
 			courseId, sections: [sectionId], _id: lessonId,
-		}, Object.values(permissions.lesson).filter(p => p));
+		}, Object.values(permissions.lesson).filter((p) => p));
 
 		const [lesson, section] = await Promise.all([createLesson, createSection]);
 		return {
@@ -386,7 +390,7 @@ class TestHelper {
 	async cleanup() {
 		const { services } = this;
 		const promises = Object.keys(services).map(
-			serviceName => services[serviceName].cleanup(),
+			(serviceName) => services[serviceName].cleanup(),
 		);
 		return Promise.all(promises);
 	}
