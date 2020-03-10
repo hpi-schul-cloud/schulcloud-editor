@@ -17,6 +17,8 @@ const {
 } = require('../../utils');
 const {
 	diffToMongo,
+	filterManyByHashes,
+	filterStateByHash,
 } = require('./utils');
 const {
 	create: createSchema,
@@ -83,28 +85,7 @@ class SectionService {
 		const sections = await this.app.service(this.baseService)
 			.find(internParams);
 		let filtered = permissions.filterHasRead(sections.data, params.user);
-		if (params.query.hashes) {
-			let hashes;
-			try {
-				hashes = JSON.parse(params.query.hashes);
-			} catch (err) {
-				throw new BadRequest('hashes should be valid stringified JSON');
-			}
-			filtered = filtered.map((section) => {
-				const clientHasNewestState = hashes[section._id.toString()]
-				&& hashes[section._id.toString()] === section.hash;
-				if (clientHasNewestState) {
-					// eslint-disable-next-line no-param-reassign
-					section = {
-						_id: section._id,
-						permissions: section.permissions,
-						title: section.title,
-						hash: section.hash,
-					};
-				}
-				return section;
-			});
-		}
+		filtered = filterManyByHashes(filtered, params.query.hashes);
 		filtered.forEach((section) => {
 			section.visible = !permissions.couldAnyoneOnlyRead(section.permissions);
 			return section;
@@ -116,21 +97,13 @@ class SectionService {
 
 	async get(id, params) {
 		const internParams = this.setScope(prepareParams(params));
-		let section = await this.app.service(this.baseService).get(id, internParams);
+		const section = await this.app.service(this.baseService).get(id, internParams);
 		if (!permissions.hasRead(section.permissions, params.user)) {
 			throw new Forbidden(this.err.noAccess);
 		}
 		section.timestamp = section.updatedAt;
-		const clientAlreadyHasNewestState = params.query.hash && params.query.hash === section.hash;
-		if (clientAlreadyHasNewestState) {
-			section = {
-				_id: section._id,
-				permissions: section.permissions,
-				title: section.title,
-				hash: section.hash,
-			};
-		}
-		const result = await setUserScopePermission(section, section.permissions, params.user);
+		const filteredSection = filterStateByHash(section, params.query.hash);
+		const result = await setUserScopePermission(filteredSection, filteredSection.permissions, params.user);
 		return result;
 	}
 
