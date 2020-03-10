@@ -56,8 +56,8 @@ describe('middleware/socket.js', () => {
 			const client1Jwt = helper.getJwt(readUserId);
 			const client2Jwt = helper.getJwt(writeUserId);
 
-			const client1 = await createConntectedClient(socketUrl, client1Jwt);
-			const client2 = await createConntectedClient(socketUrl, client2Jwt);
+			const client1 = await createConntectedClient(client1Jwt);
+			const client2 = await createConntectedClient(client2Jwt);
 
 			expect(client1.isConnected).to.be.true;
 			expect(client2.isConnected).to.be.true;
@@ -74,8 +74,8 @@ describe('middleware/socket.js', () => {
 			const client1Jwt = helper.getJwt(readUserId);
 			const client2Jwt = helper.getJwt(writeUserId);
 
-			const client1 = await createConntectedClient(socketUrl, client1Jwt);
-			const client2 = await createConntectedClient(socketUrl, client2Jwt);
+			const client1 = await createConntectedClient(client1Jwt);
+			const client2 = await createConntectedClient(client2Jwt);
 
 			/*= ========  End of Client Setup  =========== */
 
