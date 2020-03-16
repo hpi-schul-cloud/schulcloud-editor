@@ -61,6 +61,15 @@ class Socket {
 		});
 	}
 
+	async joinChannel(courseId, lessonId, params) {
+		await this.emit(
+			'get',
+			`course/${courseId}/lessons`,
+			lessonId,
+			params,
+		);
+	}
+
 	close() {
 		this.socket.close();
 	}
