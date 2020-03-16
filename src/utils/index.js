@@ -31,6 +31,7 @@ exports.convertSuccessMongoPatchResponse = query.convertSuccessMongoPatchRespons
 
 // test - Operations
 exports.isPaginated = isPaginated;
+exports.isfilledArray = (e) => Array.isArray(e) && e.length > 0;
 
 // data and type converting
 exports.convertTo = convert;

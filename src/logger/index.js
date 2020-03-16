@@ -41,7 +41,7 @@ const systemLogger = winston.createLogger({
 			},
 			message: true,
 		}),
-		format.printf(log => log.message),
+		format.printf((log) => log.message),
 	),
 	transports: [
 		new transports.Console({
