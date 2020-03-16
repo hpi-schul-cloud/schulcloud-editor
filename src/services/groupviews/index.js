@@ -2,7 +2,7 @@ const service = require('feathers-mongoose');
 
 const { GroupViewModel } = require('./models');
 const hooks = require('./hooks');
-
+// TODO: deprecated ?
 module.exports = (app) => {
 	const option = {
 		Model: GroupViewModel,
