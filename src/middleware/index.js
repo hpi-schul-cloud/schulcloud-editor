@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-const { systemInfo } = require('../logger');
+const { systemInfo, logger } = require('../logger');
 const addLoggerToApp = require('./addLoggerToApp');
 const requestLogs = require('./requestLogs');
 const ping = require('./ping');
@@ -31,8 +31,12 @@ module.exports = function setup(app) {
 	}
 	exec(aggregateAppVars, 'aggregateAppVars: Add aggregate app vars and display it.'); // TODO: no middleware
 	exec(socket, 'socket: Add socket connections');
-	if (app.get('redis') && app.get('redis') !== 'REDIS_URI') {
+	const redisUriDefined = app.get('redis') && app.get('redis') !== 'REDIS_URI';
+	const redisKeyDefined = app.get('redis_key') && app.get('redis_key') !== 'REDIS_KEY';
+	if (redisUriDefined && redisKeyDefined) {
 		exec(feathersSync, 'feathers-sync: Add feathers-sync');
+	} else {
+		logger.warning(`REDIS_URI (${app.get('redis')}) or REDIS_KEY (${app.get('redis_key')}) env is not defined`);
 	}
 	if (app.get('NODE_ENV') !== 'test') {
 		exec(sentry, 'sentry: Add sentry for logging errors.');
