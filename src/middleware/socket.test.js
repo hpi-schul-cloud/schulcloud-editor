@@ -6,7 +6,6 @@ const { TestHelper, ServerMock } = require('../testHelpers');
 const { expect } = chai;
 
 const pathLesson = '/course/:courseId/lessons';
-const pathVisible = 'helpers/setVisibility';
 const socketUrl = `ws://localhost:${app.get('port')}/`;
 
 const createConntectedClient = async (jwt) => {
@@ -25,11 +24,9 @@ describe('middleware/socket.js', () => {
 	let editor;
 	let server;
 	let helper;
-	let visibleService;
 	let service;
 
 	let writePermission;
-	let readPermission;
 	let teacherUserIds;
 	let studentUserIds;
 	let courseIds;
@@ -45,15 +42,10 @@ describe('middleware/socket.js', () => {
 
 		helper = new TestHelper(app);
 		helper.defaultServiceSetup();
-
-		helper.registerServiceHelper({
-			serviceName: pathVisible,
-		});
 		helper.registerServiceHelper({
 			serviceName: pathLesson,
 			modelName: 'lesson',
 		});
-		visibleService = app.serviceHelper(pathVisible);
 		service = app.serviceHelper(pathLesson);
 
 		teacherUserIds = server.getUserIdsByRole('teacher');
@@ -63,7 +55,6 @@ describe('middleware/socket.js', () => {
 		courseIds = server.getCourseIds();
 
 		writePermission = helper.createPermission({ users, write: true });
-		readPermission = helper.createPermission({ users, read: true });
 	});
 
 	after(async () => {
@@ -116,10 +107,6 @@ describe('middleware/socket.js', () => {
 
 
 	describe('connection', () => {
-		it('client should not connect to websockets with invaild jwt', async () =>
-			// ....
-			 false);
-
 		it('all clients should connect to websockets', async () => {
 			const client = await createClients(1, 1);
 
@@ -206,7 +193,7 @@ describe('middleware/socket.js', () => {
 			await client.teacher[1].joinChannel(course[1].courseId, course[1].lessonId);
 
 
-			await new Promise(((resolve, reject) => {
+			await new Promise(((resolve) => {
 				client.student[1].on('course/:courseId/lessons patched', (data) => {
 					expect(data).to.not.include(patch1);
 				});
@@ -226,7 +213,7 @@ describe('middleware/socket.js', () => {
 				}, 2000);
 			}));
 
-			await new Promise(((resolve, reject) => {
+			await new Promise(((resolve) => {
 				client.student[0].on('course/:courseId/lessons patched', (data) => {
 					expect(data).to.not.include(patch2);
 				});
