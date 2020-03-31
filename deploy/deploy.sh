@@ -62,7 +62,7 @@ case "$TRAVIS_BRANCH" in
 	master)
 		inform_live
 		echo "master"
-		deploy "test" "editor" $DOCKERTAG "${SYSTEM}-schul-cloud_editor"
+		deploy "test" "editor" $DOCKERTAG "${SYSTEM}_editor"
 	;;
 
 	develop)
