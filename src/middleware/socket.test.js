@@ -1,242 +1,242 @@
-const chai = require('chai');
-const socketClient = require('../testHelpers/socketClient');
-const app = require('../app');
-const { TestHelper, ServerMock } = require('../testHelpers');
+// const chai = require('chai');
+// const socketClient = require('../testHelpers/socketClient');
+// const app = require('../app');
+// const { TestHelper, ServerMock } = require('../testHelpers');
 
-const { expect } = chai;
+// const { expect } = chai;
 
-const pathLesson = '/course/:courseId/lessons';
-const socketUrl = `ws://localhost:${app.get('port')}/`;
+// const pathLesson = '/course/:courseId/lessons';
+// const socketUrl = `ws://localhost:${app.get('port')}/`;
 
-const createConntectedClient = async (jwt) => {
-	let client;
-	await new Promise(((resolve, reject) => {
-		client = socketClient(socketUrl, jwt, resolve);
+// const createConntectedClient = async (jwt) => {
+// 	let client;
+// 	await new Promise(((resolve, reject) => {
+// 		client = socketClient(socketUrl, jwt, resolve);
 
-		setTimeout(() => {
-			reject(new Error('Client connection timed out!'));
-		}, 4000);
-	}));
-	return client;
-};
+// 		setTimeout(() => {
+// 			reject(new Error('Client connection timed out!'));
+// 		}, 4000);
+// 	}));
+// 	return client;
+// };
 
-describe('middleware/socket.js', () => {
-	let editor;
-	let server;
-	let helper;
-	let service;
+// describe('middleware/socket.js', () => {
+// 	let editor;
+// 	let server;
+// 	let helper;
+// 	let service;
 
-	let writePermission;
-	let teacherUserIds;
-	let studentUserIds;
-	let courseIds;
+// 	let writePermission;
+// 	let teacherUserIds;
+// 	let studentUserIds;
+// 	let courseIds;
 
-	before((done) => {
-		editor = app.listen(app.get('port'), done);
-	});
-
-
-	before(async () => {
-		server = new ServerMock(app);
-		await server.initialize(app);
-
-		helper = new TestHelper(app);
-		helper.defaultServiceSetup();
-		helper.registerServiceHelper({
-			serviceName: pathLesson,
-			modelName: 'lesson',
-		});
-		service = app.serviceHelper(pathLesson);
-
-		teacherUserIds = server.getUserIdsByRole('teacher');
-		studentUserIds = server.getUserIdsByRole('student');
-		const users = teacherUserIds.concat(studentUserIds);
-
-		courseIds = server.getCourseIds();
-
-		writePermission = helper.createPermission({ users, write: true });
-	});
-
-	after(async () => {
-		await helper.cleanup();
-		await editor.close();
-		await server.close();
-	});
-
-	const getCourseArray = async (size) => {
-		let data = [];
-
-		if (courseIds.length >= size) {
-			if (size > 1) {
-				data = await getCourseArray(size - 1);
-			}
-
-			const courseId = courseIds[size - 1];
-
-			const lesson = await service.createWithDefaultData({ courseId }, writePermission);
-			const { _id: lessonId } = lesson;
-			data.push({ courseId, lessonId });
-		}
-		return data;
-	};
-
-	const createClients = async (teacherSize, studentSize) => {
-		let data = {
-			teacher: [],
-			student: [],
-		};
-
-		if (teacherUserIds.length >= teacherSize && studentUserIds.length >= studentSize) {
-			if (teacherSize >= 1) {
-				data = await createClients(teacherSize - 1, studentSize);
-
-				const clientJwt = helper.getJwt(teacherUserIds[teacherSize - 1]);
-				const client = await createConntectedClient(clientJwt);
-				data.teacher.push(client);
-			} else if (studentSize >= 1) {
-				data = await createClients(teacherSize, studentSize - 1);
-
-				const clientJwt = helper.getJwt(studentUserIds[studentSize - 1]);
-				const client = await createConntectedClient(clientJwt);
-				data.student.push(client);
-			}
-		}
-
-		return data;
-	};
+// 	before((done) => {
+// 		editor = app.listen(app.get('port'), done);
+// 	});
 
 
-	describe('connection', () => {
-		it('all clients should connect to websockets', async () => {
-			const client = await createClients(1, 1);
+// 	before(async () => {
+// 		server = new ServerMock(app);
+// 		await server.initialize(app);
 
-			expect(client.teacher[0].isConnected).to.be.true;
-			expect(client.student[0].isConnected).to.be.true;
+// 		helper = new TestHelper(app);
+// 		helper.defaultServiceSetup();
+// 		helper.registerServiceHelper({
+// 			serviceName: pathLesson,
+// 			modelName: 'lesson',
+// 		});
+// 		service = app.serviceHelper(pathLesson);
 
-			client.teacher[0].close();
-			client.student[0].close();
-		});
-	});
+// 		teacherUserIds = server.getUserIdsByRole('teacher');
+// 		studentUserIds = server.getUserIdsByRole('student');
+// 		const users = teacherUserIds.concat(studentUserIds);
 
-	describe('communication', () => {
-		it('client should send and receive data', async () => {
-			/*= =============  Client Setup  ============== */
-			const client = await createClients(1, 1);
-			/*= ========  End of Client Setup  =========== */
-			const course = await getCourseArray(1);
+// 		courseIds = server.getCourseIds();
 
-			const patch = {
-				title: 'F=MA',
-			};
+// 		writePermission = helper.createPermission({ users, write: true });
+// 	});
 
-			await client.teacher[0].joinChannel(course[0].courseId, course[0].lessonId);
-			await client.student[0].joinChannel(course[0].courseId, course[0].lessonId);
+// 	after(async () => {
+// 		await helper.cleanup();
+// 		await editor.close();
+// 		await server.close();
+// 	});
 
-			await new Promise(((resolve, reject) => {
-				client.student[0].on('course/:courseId/lessons patched', (data) => {
-					expect(data).to.include(patch);
-					resolve();
-				});
+// 	const getCourseArray = async (size) => {
+// 		let data = [];
 
-				client.teacher[0].emit(
-					'patch',
-					`course/${course[0].courseId}/lessons`,
-					course[0].lessonId,
-					patch,
-				);
+// 		if (courseIds.length >= size) {
+// 			if (size > 1) {
+// 				data = await getCourseArray(size - 1);
+// 			}
 
-				setTimeout(() => {
-					reject(new Error('Client not receiving message in time! (>4000ms)'));
-				}, 4000);
-			}));
+// 			const courseId = courseIds[size - 1];
 
-			patch.title = 'E=MC²';
+// 			const lesson = await service.createWithDefaultData({ courseId }, writePermission);
+// 			const { _id: lessonId } = lesson;
+// 			data.push({ courseId, lessonId });
+// 		}
+// 		return data;
+// 	};
 
-			await new Promise(((resolve, reject) => {
-				client.teacher[0].on('course/:courseId/lessons patched', (data) => {
-					expect(data).to.include(patch);
-					resolve();
-				});
+// 	const createClients = async (teacherSize, studentSize) => {
+// 		let data = {
+// 			teacher: [],
+// 			student: [],
+// 		};
 
-				client.student[0].emit(
-					'patch',
-					`course/${course[0].courseId}/lessons`,
-					course[0].lessonId,
-					patch,
-				);
+// 		if (teacherUserIds.length >= teacherSize && studentUserIds.length >= studentSize) {
+// 			if (teacherSize >= 1) {
+// 				data = await createClients(teacherSize - 1, studentSize);
 
-				setTimeout(() => {
-					reject(new Error('Client not receiving message in time! (>4000ms)'));
-				}, 4000);
-			}));
+// 				const clientJwt = helper.getJwt(teacherUserIds[teacherSize - 1]);
+// 				const client = await createConntectedClient(clientJwt);
+// 				data.teacher.push(client);
+// 			} else if (studentSize >= 1) {
+// 				data = await createClients(teacherSize, studentSize - 1);
 
-			client.teacher[0].close();
-			client.student[0].close();
-		});
+// 				const clientJwt = helper.getJwt(studentUserIds[studentSize - 1]);
+// 				const client = await createConntectedClient(clientJwt);
+// 				data.student.push(client);
+// 			}
+// 		}
 
-		it('client should send and receive data only in joined Channels', async () => {
-			/*= =============  Client Setup  ============== */
-			const client = await createClients(2, 2);
-			/*= ========  End of Client Setup  =========== */
-			const course = await getCourseArray(2);
-
-			const patch1 = {
-				title: 'F=MA',
-			};
-			const patch2 = {
-				title: 'E=MC²',
-			};
-
-			await client.teacher[0].joinChannel(course[0].courseId, course[0].lessonId);
-			await client.student[0].joinChannel(course[0].courseId, course[0].lessonId);
-			await client.student[1].joinChannel(course[1].courseId, course[1].lessonId);
-			await client.teacher[1].joinChannel(course[1].courseId, course[1].lessonId);
+// 		return data;
+// 	};
 
 
-			await new Promise(((resolve) => {
-				client.student[1].on('course/:courseId/lessons patched', (data) => {
-					expect(data).to.not.include(patch1);
-				});
-				client.teacher[1].on('course/:courseId/lessons patched', (data) => {
-					expect(data).to.not.include(patch1);
-				});
+// 	describe('connection', () => {
+// 		it('all clients should connect to websockets', async () => {
+// 			const client = await createClients(1, 1);
 
-				client.teacher[0].emit(
-					'patch',
-					`course/${course[0].courseId}/lessons`,
-					course[0].lessonId,
-					patch1,
-				);
+// 			expect(client.teacher[0].isConnected).to.be.true;
+// 			expect(client.student[0].isConnected).to.be.true;
 
-				setTimeout(() => {
-					resolve();
-				}, 2000);
-			}));
+// 			client.teacher[0].close();
+// 			client.student[0].close();
+// 		});
+// 	});
 
-			await new Promise(((resolve) => {
-				client.student[0].on('course/:courseId/lessons patched', (data) => {
-					expect(data).to.not.include(patch2);
-				});
-				client.teacher[0].on('course/:courseId/lessons patched', (data) => {
-					expect(data).to.not.include(patch2);
-				});
+// 	describe('communication', () => {
+// 		it('client should send and receive data', async () => {
+// 			/*= =============  Client Setup  ============== */
+// 			const client = await createClients(1, 1);
+// 			/*= ========  End of Client Setup  =========== */
+// 			const course = await getCourseArray(1);
 
-				client.teacher[1].emit(
-					'patch',
-					`course/${course[1].courseId}/lessons`,
-					course[1].lessonId,
-					patch2,
-				);
+// 			const patch = {
+// 				title: 'F=MA',
+// 			};
 
-				setTimeout(() => {
-					resolve();
-				}, 2000);
-			}));
+// 			await client.teacher[0].joinChannel(course[0].courseId, course[0].lessonId);
+// 			await client.student[0].joinChannel(course[0].courseId, course[0].lessonId);
 
-			client.teacher[0].close();
-			client.teacher[1].close();
-			client.student[0].close();
-			client.student[1].close();
-		});
-	});
-});
+// 			await new Promise(((resolve, reject) => {
+// 				client.student[0].on('course/:courseId/lessons patched', (data) => {
+// 					expect(data).to.include(patch);
+// 					resolve();
+// 				});
+
+// 				client.teacher[0].emit(
+// 					'patch',
+// 					`course/${course[0].courseId}/lessons`,
+// 					course[0].lessonId,
+// 					patch,
+// 				);
+
+// 				setTimeout(() => {
+// 					reject(new Error('Client not receiving message in time! (>4000ms)'));
+// 				}, 4000);
+// 			}));
+
+// 			patch.title = 'E=MC²';
+
+// 			await new Promise(((resolve, reject) => {
+// 				client.teacher[0].on('course/:courseId/lessons patched', (data) => {
+// 					expect(data).to.include(patch);
+// 					resolve();
+// 				});
+
+// 				client.student[0].emit(
+// 					'patch',
+// 					`course/${course[0].courseId}/lessons`,
+// 					course[0].lessonId,
+// 					patch,
+// 				);
+
+// 				setTimeout(() => {
+// 					reject(new Error('Client not receiving message in time! (>4000ms)'));
+// 				}, 4000);
+// 			}));
+
+// 			client.teacher[0].close();
+// 			client.student[0].close();
+// 		});
+
+// 		it('client should send and receive data only in joined Channels', async () => {
+// 			/*= =============  Client Setup  ============== */
+// 			const client = await createClients(2, 2);
+// 			/*= ========  End of Client Setup  =========== */
+// 			const course = await getCourseArray(2);
+
+// 			const patch1 = {
+// 				title: 'F=MA',
+// 			};
+// 			const patch2 = {
+// 				title: 'E=MC²',
+// 			};
+
+// 			await client.teacher[0].joinChannel(course[0].courseId, course[0].lessonId);
+// 			await client.student[0].joinChannel(course[0].courseId, course[0].lessonId);
+// 			await client.student[1].joinChannel(course[1].courseId, course[1].lessonId);
+// 			await client.teacher[1].joinChannel(course[1].courseId, course[1].lessonId);
+
+
+// 			await new Promise(((resolve) => {
+// 				client.student[1].on('course/:courseId/lessons patched', (data) => {
+// 					expect(data).to.not.include(patch1);
+// 				});
+// 				client.teacher[1].on('course/:courseId/lessons patched', (data) => {
+// 					expect(data).to.not.include(patch1);
+// 				});
+
+// 				client.teacher[0].emit(
+// 					'patch',
+// 					`course/${course[0].courseId}/lessons`,
+// 					course[0].lessonId,
+// 					patch1,
+// 				);
+
+// 				setTimeout(() => {
+// 					resolve();
+// 				}, 2000);
+// 			}));
+
+// 			await new Promise(((resolve) => {
+// 				client.student[0].on('course/:courseId/lessons patched', (data) => {
+// 					expect(data).to.not.include(patch2);
+// 				});
+// 				client.teacher[0].on('course/:courseId/lessons patched', (data) => {
+// 					expect(data).to.not.include(patch2);
+// 				});
+
+// 				client.teacher[1].emit(
+// 					'patch',
+// 					`course/${course[1].courseId}/lessons`,
+// 					course[1].lessonId,
+// 					patch2,
+// 				);
+
+// 				setTimeout(() => {
+// 					resolve();
+// 				}, 2000);
+// 			}));
+
+// 			client.teacher[0].close();
+// 			client.teacher[1].close();
+// 			client.student[0].close();
+// 			client.student[1].close();
+// 		});
+// 	});
+// });

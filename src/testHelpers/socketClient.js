@@ -40,6 +40,7 @@ class Socket {
 				token,
 			});
 		} catch (err) {
+			console.error(err);
 			/* dispatch({
 				type: 'ERROR',
 				payload: 'Die Authentifizierung ist fehlgeschlagen. Bitte melde dich an'
