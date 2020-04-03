@@ -6,7 +6,7 @@ const { TestHelper, ServerMock } = require('../../testHelpers');
 const { expect } = chai;
 
 const pathLesson = '/course/:courseId/lessons';
-const socketUrl = 'ws://localhost:5555/';
+let socketUrl;
 //
 const createConntectedClient = async (jwt) => {
 	let client;
@@ -32,13 +32,12 @@ describe('lessons/lessons.socket.js', () => {
 	let courseIds;
 
 	before((done) => {
-		delete require.cache[require.resolve('../../app')];
-		editor = app.listen(5555, done);
+		editor = app.listen(app.get('port'), done);
+		socketUrl = `ws://localhost:${app.get('socketport')}/`;
 	});
 
 
 	before(async () => {
-		console.log(app.get('io'));
 		server = new ServerMock(app);
 		await server.initialize(app);
 

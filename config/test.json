@@ -1,6 +1,7 @@
 {
 	"host": "localhost",
 	"port": 4011,
+	"socketport": 4012,
 	"protocol": "http",
 	"mongodb": "mongodb://localhost:27017/schulcloud-editor-test",
 	"routes": {
