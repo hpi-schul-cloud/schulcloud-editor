@@ -32,6 +32,7 @@ describe('lessons/lessons.socket.js', () => {
 	let courseIds;
 
 	before((done) => {
+		delete require.cache[require.resolve('../../app')];
 		editor = app.listen(5555, done);
 	});
 
