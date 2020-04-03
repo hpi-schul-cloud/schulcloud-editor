@@ -1,7 +1,7 @@
 const chai = require('chai');
-const socketClient = require('../../../testHelpers/socketClient');
-const app = require('../../../app');
-const { TestHelper, ServerMock } = require('../../../testHelpers');
+const socketClient = require('../../testHelpers/socketClient');
+const app = require('../../app');
+const { TestHelper, ServerMock } = require('../../testHelpers');
 
 const { expect } = chai;
 
