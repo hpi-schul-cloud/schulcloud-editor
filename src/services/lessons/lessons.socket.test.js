@@ -37,6 +37,7 @@ describe('lessons/lessons.socket.js', () => {
 
 
 	before(async () => {
+		console.log(app.get('io'));
 		server = new ServerMock(app);
 		await server.initialize(app);
 

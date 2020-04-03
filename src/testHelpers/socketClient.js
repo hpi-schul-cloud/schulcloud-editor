@@ -2,10 +2,16 @@ const io = require('socket.io-client');
 
 // const { store, dispatch } = useContext(LessonContext)
 
+let openSockets = [];
+
 class Socket {
 	constructor(url, authorization, resolve) {
 		this.url = url;
 		this.socket = io(url);
+		this.id = openSockets.length;
+		openSockets.push({ socket: this.socket, url });
+		console.log(openSockets);
+
 		this.isConnected = false;
 		this.resolve = resolve;
 
@@ -21,6 +27,7 @@ class Socket {
 		});
 
 		this.socket.on('disconnect', () => {
+			openSockets = openSockets.splice(this.id, 1);
 			this.isConnected = this.socket.connected;
 		});
 
@@ -31,6 +38,10 @@ class Socket {
 				payload: 'Die Verbindung zum Server konnte nicht aufrecht erhalten werden'
 			}) */
 		});
+
+		this.getOpenSockets = () => {
+			return openSockets;
+		};
 	}
 
 

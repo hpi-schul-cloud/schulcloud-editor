@@ -21,6 +21,7 @@ const socketJwtHandler = io => io.use((socket, next) => {
 
 const apiJwtHandler = app => app.use((req, res, next) => {
 	console.log('jwtHandler>req.headers.authorization', req.headers);
+	console.log('req.url', req.url);
 	jwtHandler(req.feathers, req.headers.authorization);
 	next();
 });

@@ -8,6 +8,7 @@ module.exports = app => app.configure(
 			app.channel('anonymous').join(socket.feathers);
 
 			socket.on('authorization', (data) => {
+				console.log("socket.on('authorization'", data);
 				const { token } = data;
 				jwtHandler(socket.feathers, token);
 				app.channel('all').join(socket.feathers);
@@ -19,5 +20,6 @@ module.exports = app => app.configure(
 		io.use((socket, next) => {
 			next();
 		});
+		app.set('io', io);
 	}),
 );
