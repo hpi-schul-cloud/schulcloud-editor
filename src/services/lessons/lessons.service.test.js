@@ -301,5 +301,3 @@ describe('lessons/lessons.service.js', () => {
 		expect(status).to.equal(403);
 	});
 });
-
-});
