@@ -108,6 +108,7 @@ describe('lessons/lessons.socket.js', () => {
 
 	describe('connection', () => {
 		it('all clients should connect to websockets', async () => {
+			console.log('#########################################################################################################################');
 			const client = await createClients(1, 1);
 
 			// expect(client.teacher[0].isConnected).to.be.true;
@@ -119,7 +120,7 @@ describe('lessons/lessons.socket.js', () => {
 	});
 
 	describe('communication', () => {
-		it('client should send and receive data', async () => {
+		it.skip('client should send and receive data', async () => {
 			/*= =============  Client Setup  ============== */
 			// const client = await createClients(1, 1);
 			/*= ========  End of Client Setup  =========== */
@@ -174,7 +175,7 @@ describe('lessons/lessons.socket.js', () => {
 			// client.student[0].close();
 		});
 
-		it('client should send and receive data only in joined Channels', async () => {
+		it.skip('client should send and receive data only in joined Channels', async () => {
 			/*= =============  Client Setup  ============== */
 			// const client = await createClients(2, 2);
 			/*= ========  End of Client Setup  =========== */
