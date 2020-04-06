@@ -31,7 +31,7 @@ jobs:
         - redis
       env:
         - REDIS_URI=redis://localhost:6379
-        - SOCKETTIMEOUTS=5000
+        - SOCKETTIMEOUTS=4000
 
     # Build Docker Images
     - stage: build

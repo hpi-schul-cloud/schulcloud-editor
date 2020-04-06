@@ -15,7 +15,7 @@ const createConntectedClient = async (jwt) => {
 
 		setTimeout(() => {
 			reject(new Error('Client connection timed out!'));
-		}, (Number(app.get('socketTimeout')) || 5000));
+		}, (Number(app.get('socketTimeout')) || 4000));
 	}));
 	return client;
 };
@@ -134,8 +134,9 @@ describe('lessons/lessons.socket.js', () => {
 			await client.student[0].joinChannel(course[0].courseId, course[0].lessonId);
 
 			await new Promise(((resolve, reject) => {
-				client.student[0].on('course/:courseId/lessons patched', (data) => {
+				client.student[0].on('course/:courseId/lessons patched', (data, lessonId = course[0].lessonId) => {
 					expect(data).to.include(patch);
+					expect(data._id).to.be.equal(lessonId.toString());
 					resolve();
 				});
 
@@ -154,8 +155,9 @@ describe('lessons/lessons.socket.js', () => {
 			patch.title = 'E=MC²';
 
 			await new Promise(((resolve, reject) => {
-				client.teacher[0].on('course/:courseId/lessons patched', (data) => {
+				client.teacher[0].on('course/:courseId/lessons patched', (data, lessonId = course[0].lessonId) => {
 					expect(data).to.include(patch);
+					expect(data._id).to.be.equal(lessonId.toString());
 					resolve();
 				});
 
@@ -195,11 +197,13 @@ describe('lessons/lessons.socket.js', () => {
 
 
 			await new Promise(((resolve) => {
-				client.student[1].on('course/:courseId/lessons patched', (data) => {
+				client.student[1].on('course/:courseId/lessons patched', (data, lessonId = course[0].lessonId) => {
 					expect(data).to.not.include(patch1);
+					expect(data._id).to.not.equal(lessonId.toString());
 				});
-				client.teacher[1].on('course/:courseId/lessons patched', (data) => {
+				client.teacher[1].on('course/:courseId/lessons patched', (data, lessonId = course[0].lessonId) => {
 					expect(data).to.not.include(patch1);
+					expect(data._id).to.not.equal(lessonId.toString());
 				});
 
 				client.teacher[0].emit(
@@ -215,11 +219,13 @@ describe('lessons/lessons.socket.js', () => {
 			}));
 
 			await new Promise(((resolve) => {
-				client.student[0].on('course/:courseId/lessons patched', (data) => {
+				client.student[0].on('course/:courseId/lessons patched', (data, lessonId = course[1].lessonId) => {
 					expect(data).to.not.include(patch2);
+					expect(data._id).to.not.equal(lessonId.toString());
 				});
-				client.teacher[0].on('course/:courseId/lessons patched', (data) => {
+				client.teacher[0].on('course/:courseId/lessons patched', (data, lessonId = course[1].lessonId) => {
 					expect(data).to.not.include(patch2);
+					expect(data._id).to.not.equal(lessonId.toString());
 				});
 
 				client.teacher[1].emit(
