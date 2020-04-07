@@ -2,6 +2,7 @@ function isObject(o) {
 	return typeof o === 'object' && !Array.isArray(o) && o !== null;
 }
 
+// todo ? how we can filter x-new keys if they are added twice in different levels
 function diffToMongo(diff, path = '') {
 	// eslint-disable-next-line no-param-reassign
 	diff = JSON.parse(JSON.stringify(diff));

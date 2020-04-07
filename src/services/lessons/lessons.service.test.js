@@ -1,6 +1,7 @@
 const chai = require('chai');
 const app = require('../../app');
 const { TestHelper, ServerMock } = require('../../testHelpers');
+const { KEY_NAME: userScopePermissionKey } = require('../../utils/setUserScopePermission');
 
 const { expect } = chai;
 const pathLesson = '/course/:courseId/lessons';
@@ -70,9 +71,10 @@ describe('lessons/lessons.service.js', () => {
 
 		expect(status).to.equal(201);
 		expect(data).to.an('object');
-		expect(Object.keys(data)).to.have.lengthOf(1);
+		expect(Object.keys(data)).to.have.lengthOf(2);
 		expect(data._id).to.a('string');
 		expect(data).to.not.have.property('permissions');
+		expect(data).to.have.property(userScopePermissionKey);
 
 		// test if permissions created
 		expect(getStatus).to.equal(200);
@@ -116,6 +118,7 @@ describe('lessons/lessons.service.js', () => {
 		expect(data.courseId).to.equal(courseId);
 		expect(data.sections).to.have.lengthOf(0);
 		expect(data).to.not.have.property('permissions');
+		expect(data).to.have.property(userScopePermissionKey);
 	});
 
 	it('get with read permission should work', async () => {
@@ -131,11 +134,14 @@ describe('lessons/lessons.service.js', () => {
 		expect(data.courseId).to.equal(courseId);
 		expect(data.sections).to.have.lengthOf(0); // test
 		expect(data).to.not.have.property('permissions');
+		expect(data).to.have.property(userScopePermissionKey);
 	});
 
 	it('get with query all=true should populate the sections', async () => {
 		await syncGroupsService.Model.remove();
-		const { status: statusCreate, data: { _id } } = await service.sendRequestToThisService('create', { userId, courseId });
+		const {
+			status: statusCreate, data: { _id },
+		} = await service.sendRequestToThisService('create', { userId, courseId });
 
 		expect(statusCreate).to.equal(201);
 
@@ -147,6 +153,8 @@ describe('lessons/lessons.service.js', () => {
 		expect(status).to.equal(200);
 		expect(data.sections).to.have.lengthOf(1);
 		expect(data.sections[0]).to.an('object');
+		expect(data).to.have.property(userScopePermissionKey);
+		expect(data.sections).all.have.property(userScopePermissionKey);
 	});
 
 
@@ -162,9 +170,10 @@ describe('lessons/lessons.service.js', () => {
 		const { status, data } = await service.sendRequestToThisService('find', { userId, courseId: randomCourseId });
 
 		expect(status).to.equal(200);
-		expect(data).to.have.all.keys('total', 'limit', 'skip', 'data'); // paginated
+		expect(data).to.have.keys('total', 'limit', 'skip', 'data'); // paginated
 		expect(data.data).to.have.lengthOf(2);
 		expect(data.data[0]).to.not.have.property('permissions');
+		expect(data.data).all.have.property(userScopePermissionKey);
 	});
 
 	// todo find sortierung and paginations
@@ -188,7 +197,9 @@ describe('lessons/lessons.service.js', () => {
 		expect(data).to.an('object');
 		expect(data._id).to.equal(id.toString());
 		expect(data.title).to.equal(patchedData.title);
-		expect(Object.keys(data)).to.have.lengthOf(2);
+		expect(data.updatedBy).to.equal(userId);
+		expect(Object.keys(data)).to.have.lengthOf(4);
+		expect(data).to.have.property(userScopePermissionKey);
 
 		expect(getStatus).to.equal(200);
 		expect(getData).to.an('object');
@@ -244,6 +255,7 @@ describe('lessons/lessons.service.js', () => {
 			expect(data).to.an('object');
 			expect(data._id.toString()).to.equal(lessonId.toString());
 			expect(data.deletedAt).to.not.be.undefined;
+			expect(data).to.have.property(userScopePermissionKey);
 
 			expect(modelData._id.toString()).to.equal(lessonId.toString());
 			expect(modelData.deletedAt).to.not.be.undefined;

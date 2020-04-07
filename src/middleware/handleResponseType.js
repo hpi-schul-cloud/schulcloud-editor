@@ -1,4 +1,4 @@
-// todo move to app configure operations, is not a middleware (?)
+// @deprecated?
 module.exports = (req, res) => {
 	res.format({
 		'application/json': () => {

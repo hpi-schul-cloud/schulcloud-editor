@@ -8,7 +8,8 @@
     "startd": "nodemon src/",
     "debug": "nodemon --inspect=4002 src/",
     "debug:container": "nodemon --inspect=0.0.0.0:4002 src/",
-    "test": "cross-env NODE_ENV=test mocha src/**/*.test.js --timeout 5000",
+    "serverMock": "nodemon --inspect=4003 src/testHelpers/StandAloneServerMock.js",
+    "test": "cross-env NODE_ENV=test mocha src/**/*.test.js --timeout 5000 --exit ",
     "test:inspect": "cross-env NODE_ENV=test mocha --debug-brk --inspect src/**/*.test.js --timeout 50000",
     "test:watch": "cross-env NODE_ENV=test mocha src/**/*.test.js  --watch --timeout 5000"
   },
@@ -17,7 +18,7 @@
     "url": "git+https://github.com/schul-cloud/schulcloud-editor.git"
   },
   "keywords": [
-    "fathers"
+    "feathers"
   ],
   "author": "",
   "license": "GPL",
@@ -32,29 +33,32 @@
     "@feathersjs/express": "^4.3.3",
     "@feathersjs/feathers": "^4.3.3",
     "@feathersjs/socketio": "^4.3.3",
+    "@sentry/node": "^5.5.0",
     "ajv": "^6.10.2",
     "axios": "^0.19.0",
     "body-parser": "^1.19.0",
+    "chai-things": "^0.2.0",
     "cors": "^2.8.5",
-    "feathers-hooks-common": "^4.20.7",
-    "feathers-mongoose": "^7.3.2",
+    "feathers-hooks-common": "^5.0.2",
+    "feathers-mongoose": "^8.3.0",
     "feathers-swagger": "^1.1.0",
+    "feathers-sync": "^2.0.0",
     "jsonwebtoken": "^8.5.1",
     "jwt-decode": "^2.2.0",
-    "mongoose": "^5.6.10",
+    "mongoose": "^5.9.1",
     "query-string": "^6.8.3",
     "serve-favicon": "^2.5.0",
-    "util": "^0.11.1",
+    "util": "^0.12.1",
     "winston": "^3.2.1",
     "ws": "^7.1.2"
   },
   "devDependencies": {
     "chai": "^4.2.0",
-    "cross-env": "^5.2.0",
-    "eslint": "^5.16.0",
-    "eslint-config-airbnb-base": "^13.2.0",
+    "cross-env": "^7.0.0",
+    "eslint": "^6.8.0",
+    "eslint-config-airbnb-base": "^14.0.0",
     "eslint-plugin-import": "^2.18.2",
-    "mocha": "^6.2.0",
-    "nodemon": "^1.19.1"
+    "mocha": "^7.0.1",
+    "nodemon": "^2.0.2"
   }
 }

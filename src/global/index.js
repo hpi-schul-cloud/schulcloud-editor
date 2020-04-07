@@ -34,30 +34,34 @@ const addUpadtedBy = (context) => {
 /**
  * For errors without error code create server error with code 500.
  * In production mode remove error stack and data.
- * @param {context} ctx
+ * @param {context} context
  */
-const errorHandler = (ctx) => {
-	if (ctx.error) {
-		if (ctx.error.hook) {
-			delete ctx.error.hook;
+const errorHandler = (context) => {
+	if (context.error) {
+		// too much for logging...
+		if (context.error.hook) {
+			delete context.error.hook;
+		}
+		// statusCode is return by extern services / or mocks that use express res.status(myCodeNumber)
+		context.error.code = context.error.code || context.error.statusCode;
+		if (!context.error.code) {
+			context.error = new GeneralError(context.error.message || 'server error', context.error.stack || '');
+		}
+		// in some cases is config set with secret informations like jwt
+		if ((context.error.data || {}).config) {
+			context.error.data.config = '<hide>';
 		}
 
-		if (!ctx.error.code) {
-			ctx.error = new GeneralError(ctx.error.message || 'server error', ctx.error.stack || '');
-		}
-
-		ctx.app.logger.error(ctx.error);
-
-		if (process.env.NODE_ENV === 'production') {
-			ctx.error.stack = null;
-			ctx.error.data = undefined;
-		}
-
-		return ctx;
+		return context;
 	}
-	ctx.app.logger.warning('Error with no error key is throw. Error logic can not handle it.');
+	context.app.logger.warning('Error with no error key is throw. Error logic can not handle it.');
 
 	throw new GeneralError('server error');
+};
+
+const logResult = (context) => {
+	context.app.logger.info(context.result);
+	return context;
 };
 
 exports.before = {
@@ -70,10 +74,10 @@ exports.before = {
 	remove: [],
 };
 
-exports.after = {
+const after = {
 	// todo select is better but need more stable implementations
 	all: [iff(isProvider('external'),
-		filterOutResults('__v', 'createdAt', 'updatedAt', 'createdBy', 'updatedBy')),
+		filterOutResults('__v', 'createdAt', 'updatedAt')),
 	],
 	find: [],
 	get: [],
@@ -82,6 +86,10 @@ exports.after = {
 	patch: [],
 	remove: [],
 };
+if (!['test', 'production'].includes(process.env.NODE_ENV)) {
+	after.all.push(iff(isProvider('external'), logResult));
+}
+exports.after = after;
 
 exports.error = {
 	all: [errorHandler],

@@ -19,13 +19,19 @@ const filterOutResults = (...keys) => (context) => {
 	return context;
 };
 
+const returnSendedData = (context) => {
+	if (context.type === 'after' && context.data) {
+		context.result = context.data;
+	}
+	return context;
+};
 
 /**
  * Request Course service to get permissions
  *
- * @param {string} permission
+ * @param {String || ...Strings} allowedPermissions
  */
-const checkCoursePermission = permission => async (context) => {
+const checkCoursePermission = (...allowedPermissions) => async (context) => {
 	const {
 		params: {
 			user, route: { courseId }, authorization,
@@ -40,7 +46,7 @@ const checkCoursePermission = permission => async (context) => {
 		throw new BadRequest('Can not request server.', permissions);
 	}
 
-	if (!permissions.includes(permission)) {
+	if (!allowedPermissions.some(perm => permissions.includes(perm))) {
 		throw new Forbidden('Missing privileges');
 	}
 
@@ -84,6 +90,7 @@ const createChannel = (prefix, { from, prefixId }) => (context) => {
 };
 
 module.exports = {
+	returnSendedData,
 	filterOutResults,
 	checkCoursePermission,
 	joinChannel,

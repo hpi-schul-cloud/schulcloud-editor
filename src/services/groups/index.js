@@ -5,6 +5,7 @@ const hooks = require('./hooks/');
 
 // todo add additional services for extern groups with names,
 // or force that it can only add names over force event operation
+// TODO: beta
 module.exports = function setup() {
 	const app = this;
 	const option = {

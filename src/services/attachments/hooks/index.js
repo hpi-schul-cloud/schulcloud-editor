@@ -1,0 +1,1 @@
+exports.scopeFilter = require('./scopeFilter');

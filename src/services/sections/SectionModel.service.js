@@ -5,7 +5,7 @@ const { SectionModel } = require('./models/');
 
 const SectionModelServiceHooks = {};
 SectionModelServiceHooks.before = {
-	all: [],
+	all: [disallow('external')],
 	find: [],
 	get: [],
 	create: [],
@@ -22,6 +22,7 @@ const SectionModelService = (app) => {
 			default: 50,
 			max: 150,
 		},
+		whitelist: ['$elemMatch'],
 	};
 	const path = 'models/SectionModel';
 	app.use(path, service(option));
