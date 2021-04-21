@@ -47,3 +47,6 @@ uploads/*
 #config file
 config/*
 !config/default.example.json
+
+#secrets
+deploy/travis_rsa
