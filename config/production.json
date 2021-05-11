@@ -1,6 +1,7 @@
 {
 	"host": "localhost",
 	"port": "PORT",
+	"socketport": "SOCKETPORT",
 	"protocol": "http",
 	"mongodb": "MONGO_URI",
 	"routes": {

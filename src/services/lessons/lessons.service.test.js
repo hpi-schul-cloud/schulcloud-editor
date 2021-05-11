@@ -67,7 +67,7 @@ describe('lessons/lessons.service.js', () => {
 		});
 
 		const $syncGroups = await syncGroupsService.Model.find({ courseId });
-		const syncGroups = $syncGroups.map(doc => doc.toObject());
+		const syncGroups = $syncGroups.map((doc) => doc.toObject());
 
 		expect(status).to.equal(201);
 		expect(data).to.an('object');
@@ -84,8 +84,8 @@ describe('lessons/lessons.service.js', () => {
 
 		// send from server mock
 		expect(syncGroups).to.have.lengthOf(2);
-		expect(syncGroups.some(s => s.permission === 'read')).to.be.true;
-		expect(syncGroups.some(s => s.permission === 'write')).to.be.true;
+		expect(syncGroups.some((s) => s.permission === 'read')).to.be.true;
+		expect(syncGroups.some((s) => s.permission === 'write')).to.be.true;
 	});
 
 	it('create without permission should not work', async () => {
