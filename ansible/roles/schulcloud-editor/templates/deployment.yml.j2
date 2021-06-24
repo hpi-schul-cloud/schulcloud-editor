@@ -36,27 +36,6 @@ spec:
             name: editor-configmap
         - secretRef:
             name: editor-secret
-        readinessProbe:
-          httpGet:
-            path: /
-            port: 4101
-          timeoutSeconds: 4
-          failureThreshold: 3
-          periodSeconds: 10
-        livenessProbe:
-          httpGet:
-            path: /
-            port: 4101
-          timeoutSeconds: 4
-          failureThreshold: 3
-          periodSeconds: 15
-        startupProbe:
-          httpGet:
-            path: /
-            port: 4101
-          timeoutSeconds: 4
-          failureThreshold: 36
-          periodSeconds: 5
         resources:
           limits:
             cpu: "1000m"
