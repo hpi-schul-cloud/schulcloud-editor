@@ -22,6 +22,11 @@
       "position": {
         "$id": "#/properties/position",
         "type": "number"
+      },
+      "hash": {
+        "$id": "#/properties/hash",
+        "type": "string",
+        "pattern": "[a-f0-9]{24}"
       }
     },
     "additionalProperties": false

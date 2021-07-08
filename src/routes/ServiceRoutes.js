@@ -1,3 +1,5 @@
+/* eslint-disable max-classes-per-file */
+
 const axios = require('axios');
 const queryString = require('query-string');
 

@@ -12,6 +12,9 @@
 		"state": {
  			"type": "object"
 		},
+		"hash": {
+			"type": "string"
+		},
 		"createdBy": {
 			"type": "string",
 			"pattern": "[a-f0-9]{24}"

@@ -37,6 +37,7 @@ const sectionSchema = new Schema({
 	title: { type: String, default: '' },
 	state: { type: Object, default: {} },
 	permissions: [{ type: permissionSchema }],
+	hash: { type: String },
 	deletedAt: { type: Date, expires: (60 * 60 * 24 * 30) },
 	createdBy: { type: Schema.Types.ObjectId, immutable: true },
 	updatedBy: { type: Schema.Types.ObjectId },

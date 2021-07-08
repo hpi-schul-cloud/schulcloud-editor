@@ -17,6 +17,8 @@ const {
 } = require('../../utils');
 const {
 	diffToMongo,
+	filterManyByHashes,
+	filterStateByHash,
 } = require('./utils');
 const {
 	create: createSchema,
@@ -82,9 +84,9 @@ class SectionService {
 		const internParams = this.setScope(prepareParams(params));
 		const sections = await this.app.service(this.baseService)
 			.find(internParams);
-		const filtered = permissions.filterHasRead(sections.data, params.user);
-
-		filtered.map((section) => {
+		let filtered = permissions.filterHasRead(sections.data, params.user);
+		filtered = filterManyByHashes(filtered, params.query.hashes);
+		filtered.forEach((section) => {
 			section.visible = !permissions.couldAnyoneOnlyRead(section.permissions);
 			return section;
 		});
@@ -93,16 +95,16 @@ class SectionService {
 		return setUserScopePermissionForFindRequests(sections, params.user);
 	}
 
-	get(id, params) {
+	async get(id, params) {
 		const internParams = this.setScope(prepareParams(params));
-		return this.app.service(this.baseService)
-			.get(id, internParams)
-			.then((section) => {
-				if (!permissions.hasRead(section.permissions, params.user)) {
-					throw new Forbidden(this.err.noAccess);
-				}
-				return setUserScopePermission(section, section.permissions, params.user);
-			});
+		const section = await this.app.service(this.baseService).get(id, internParams);
+		if (!permissions.hasRead(section.permissions, params.user)) {
+			throw new Forbidden(this.err.noAccess);
+		}
+		section.timestamp = section.updatedAt;
+		const filteredSection = filterStateByHash(section, params.query.hash);
+		const result = await setUserScopePermission(filteredSection, filteredSection.permissions, params.user);
+		return result;
 	}
 
 	async remove(_id, params) {
