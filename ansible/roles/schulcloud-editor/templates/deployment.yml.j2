@@ -38,8 +38,8 @@ spec:
             name: editor-secret
         resources:
           limits:
-            cpu: "1000m"
-            memory: "1Gi"
+            cpu: {{ EDITOR_CPU_LIMITS|default("1000m", true) }}
+            memory: {{ EDITOR_MEMORY_LIMITS|default("1Gi", true) }}
           requests:
-            cpu: "100m"
-            memory: "1Gi"
+            cpu: {{ EDITOR_CPU_REQUESTS|default("100m", true) }}
+            memory: {{ EDITOR_MEMORY_REQUESTS|default("128Mi", true) }}
